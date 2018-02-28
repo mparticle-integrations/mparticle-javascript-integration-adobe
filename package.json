@@ -1,0 +1,19 @@
+{
+  "name": "mparticle-adobe",
+  "version": "1.0.0",
+  "description": "mParticle Adobe kit integration",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mparticle-integrations/mparticle-javascript-integration-adobe.git"
+  },
+  "scripts": {
+      "build": "cat src/AdobeVisitorApiAndAppMeasurement.js src/AdobeKit-dev.js > AdobeKit.js"
+  },
+  "author": "Robert Ing (ring@mparticle.com)",
+  "license": "Apache",
+  "devDependencies": {
+    "blanket": "^1.1.7",
+    "should": "^7.1.0",
+    "mocha": "^2.3.2"
+  }
+}
