@@ -199,8 +199,27 @@
         }
 
         function logEvent(event) {
-            //implement logEvent
-            window.console.log('implement logEvent,' + event);
+            try {
+                if (eventsMapping[event.EventName]) {
+                    s.events = eventsMapping[event.EventName];
+                    // linkTrackVars.push('events');
+                    // s.linkTrackEvents = eventsMapping[event.EventName];
+                    setEvars(event);
+                    setProps(event);
+                    setHiers(event);
+                    setContextData(event);
+                    s.pageName = window.document.title;
+                    s.t();
+                    s.clearVars();
+                    // s.tl(true, 'o', event.EventName);
+                } else {
+                    window.console.log('event name not mapped, aborting event logging');
+                }
+            }
+            catch (e) {
+                s.clearVars();
+                return {error: e};
+            }
         }
 
         function logPageView(event) {
@@ -212,11 +231,12 @@
                 setProps(event);
                 setHiers(event);
                 setContextData(event);
+                s.clearVars();
             }
             catch (e) {
+                s.clearVars();
                 return {error: e};
             }
-            window.console.log('log page view', event);
         }
 
         function setEvars(event) {

@@ -1,8 +1,3 @@
-///tests Navigation
-
-
-
-
 /* eslint-disable no-undef*/
 describe('AdobeEventForwarder Forwarder', function () {
     var expandCommerceEvent = function(event) {
@@ -194,6 +189,7 @@ describe('AdobeEventForwarder Forwarder', function () {
     });
 
     // Mappings
+    //TODO: mapping logic will change, will need to update tests
     // evarsmapping:
     // {color: "eVar1"}
     //
@@ -226,7 +222,6 @@ describe('AdobeEventForwarder Forwarder', function () {
         done();
     });
 
-    //TODO: mappings will change, tests will need to be updated
     it('should log page view', function(done) {
         mParticle.forwarder.process({
             EventDataType: MessageType.PageView,
@@ -240,6 +235,27 @@ describe('AdobeEventForwarder Forwarder', function () {
         });
         s.pageName.should.equal('log page view test');
         s.events.should.equal('log page view test');
+        s.eVar1.should.equal('green');
+        s.prop1.should.equal('female');
+        s.hier1.should.equal('test');
+        s.contextData.contextTestValue.should.equal('green');
+
+        done();
+    });
+
+    it('should log event', function(done) {
+        mParticle.forwarder.process({
+            EventDataType: MessageType.PageEvent,
+            EventName: '8546102375969542712',
+            EventAttributes: {
+                color: 'green',
+                gender: 'female',
+                //hier
+                '2361242877491637581': 'test'
+            }
+        });
+        s.pageName.should.equal('Mocha Tests');
+        s.events.should.equal('event1');
         s.eVar1.should.equal('green');
         s.prop1.should.equal('female');
         s.hier1.should.equal('test');
