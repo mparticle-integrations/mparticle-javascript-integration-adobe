@@ -9,8 +9,30 @@
 
     <script src="../node_modules/mocha/mocha.js"></script>
     <script src="../node_modules/should/should.js"></script>
-    <script src="../node_modules/blanket/dist/mocha/blanket_mocha.js"></script>
-    <script src="../mParticleJSKitTemplate.js"></script>
+    <script>
+        var mp = function () {
+            var self = this;
+
+            this.addForwarder = function (forwarder) {
+                self.forwarder = new forwarder.constructor();
+            };
+
+            this.getCurrentUser = function() {
+                return currentUser();
+            }
+        };
+
+        function currentUser() {
+            return {
+                getMPID: function() {
+                    return 123;
+                }
+            }
+        }
+
+        window.mParticle = new mp();
+    </script>
+    <script src="../src/AdobeKit.js"></script>
 
     <script>mocha.setup('bdd')</script>
 
