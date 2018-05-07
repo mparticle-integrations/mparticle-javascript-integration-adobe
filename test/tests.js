@@ -1,5 +1,5 @@
 /* eslint-disable no-undef*/
-describe('ClientSdk Forwarder', function () {
+describe('AdobeEventForwarder Forwarder', function () {
     var expandCommerceEvent = function(event) {
             return [{
                 EventName: event.EventName,
@@ -96,43 +96,60 @@ describe('ClientSdk Forwarder', function () {
         },
         reportService = new ReportingService(),
 
-        // This is the object that mocks your SDK. each method that is called from the SDK
-        // should be stubbed here. ie. clientSDK.logEvent(event) should be stubbed below as
-        //  MockClientSdk = function() {
-        //      var self = this;
-        //      this.logEventCalled = null;
-        //      this.eventLogged = null;
-        //      this.logEvent = function(event) {
-        //          self.logEventCalled = true;
-        //          self.eventLogged = event;
-        //      };
-        // }
-        // You can then test for values on  window.clientSdk.eventLogged and window.clientSdk.logEventCalled;
-        MockClientSdk = function() {
+        Visitor = {
+            AuthState: {
+                AUTHENTICATED: 1,
+                LOGGED_OUT: 2,
+                UNKNOWN: 0
+            }
+        },
+
+        MockAdobeForwarder = function() {
             var self = this;
 
+            this.products = null;
+            this.events = null;
+            this.contextData = {};
+
+            this.trackCustomEventCalled = false;
             this.logPurchaseEventCalled = false;
             this.initializeCalled = false;
 
-            this.eventLogged = null;
-            this.logEventCalled = null;
+            this.trackCustomName = null;
+            this.logPurchaseName = null;
+            this.apiKey = null;
+            this.appId = null;
+            this.userId = null;
+            this.userAttributes = {};
+            this.userIdField = null;
+
+            this.eventProperties = [];
+            this.purchaseEventProperties = [];
+
+            this.setUserId = function(id) {
+                self.userId = id;
+            };
+
+            this.visitor = {
+                setCustomerIDs: function(userIdObject) {
+                    self.userId = userIdObject;
+                }
+            };
+
+            this.setUserAttributes = function(attributeDict) {
+                for (var key in attributeDict) {
+                    if (attributeDict[key] === null) {
+                        delete self.userAttributes[key];
+                    }
+                    else {
+                        self.userAttributes[key] = attributeDict[key];
+                    }
+                }
+            };
         };
 
     before(function () {
-        var mp = function () {
-            var self = this;
-
-            this.addForwarder = function (forwarder) {
-                self.forwarder = new forwarder.constructor();
-            };
-
-            this.getCurrentUser = function() {
-                return currentUser();
-            };
-        };
-
-        window.mParticle = new mp();
-
+        window.Visitor = Visitor;
         mParticle.EventType = EventType;
         mParticle.ProductActionType = ProductActionType;
         mParticle.PromotionType = PromotionActionType;
@@ -143,60 +160,31 @@ describe('ClientSdk Forwarder', function () {
     });
 
     beforeEach(function() {
-        window.clientSdk = new MockSdk();
-        // your kit is initialized here
+        window.s = new MockAdobeForwarder();
         mParticle.forwarder.init({
-            clientKey: '123456',
-            appId: 'abcde'
+            reportSuiteID: '123456',
+            marketingCloudID: 'abcde',
+            trackingServerURL: 'customerId',
+            trackingServerURLSecure: 'customerId'
         }, reportService.cb, true, null, {
-            userAttr1: 'value1',
-            userAttr2: 'value2'
+            gender: 'm'
         }, [{
             Identity: 'customerId',
             Type: IdentityType.CustomerId
         }, {
-            Identity: 'email@emailco.com',
+            Identity: 'email',
             Type: IdentityType.Email
         }, {
-            Identity: 'facebookId',
+            Identity: 'facebook',
             Type: IdentityType.Facebook
         }], '1.1', 'My App');
     });
 
-    // Example log event testing
-    it('should log event', function(done) {
-        mParticle.forwarder.process({
-            EventDataType: MessageType.PageEvent,
-            EventName: 'Test Event',
-            EventAttributes: {
-                label: 'label',
-                value: 200,
-                category: 'category'
-            }
-        });
-        window.clientSdk.apiKey.should.equal('123456');
-        window.clientSdk.appId.should.equal('abcde');
-        window.clientSdk.eventProperties[0].category.should.equal('category');
-        window.clientSdk.eventProperties[0].label.should.equal('label');
-        window.clientSdk.eventProperties[0].value.should.equal(200);
+    it('should set the customerId', function(done) {
+        mParticle.forwarder.setUserIdentity('1234', IdentityType.CustomerId, window.s);
+        s.userId.userId.id.should.equal('1234');
+        s.userId.userId.authState.should.equal(0);
 
-        done();
-    });
-
-    // Remaining tests are below. Remove and add as needed
-    it('should log page view', function(done) {
-        done();
-    });
-
-    it('should log a product purchase commerce event', function(done) {
-        done();
-    });
-
-    it('should set user attributes', function(done) {
-        done();
-    });
-
-    it('should remove user attributes', function(done) {
         done();
     });
 });

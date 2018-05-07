@@ -102,7 +102,27 @@
             });
         }
 
+        function setUserIdentity(id, type, testSVariable) {
+            s = s || testSVariable;
+            if (isInitialized) {
+                if (type == window.mParticle.IdentityType.CustomerId) {
+                    s.visitor.setCustomerIDs({
+                        userId: {
+                            id: id,
+                            authState: Visitor.AuthState.UNKNOWN
+                        }
+                    });
+                } else {
+                    return 'Can\'t call setUserIdentity on forwarder ' + name + ', identity type not supported';
+                }
+            }
+            else {
+                return 'Can\'t call setUserIdentity on forwarder ' + name + ', not initialized';
+            }
+        }
+
         this.init = initForwarder;
+        this.setUserIdentity = setUserIdentity;
     };
 
     if (!window || !window.mParticle || !window.mParticle.addForwarder) {
