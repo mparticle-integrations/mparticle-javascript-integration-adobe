@@ -1,3 +1,8 @@
+///tests Navigation
+
+
+
+
 /* eslint-disable no-undef*/
 describe('AdobeEventForwarder Forwarder', function () {
     var expandCommerceEvent = function(event) {
@@ -162,6 +167,14 @@ describe('AdobeEventForwarder Forwarder', function () {
     beforeEach(function() {
         window.s = new MockAdobeForwarder();
         mParticle.forwarder.init({
+            productIncrementor:'[{&quot;maptype&quot;:&quot;ProductAttributeSelector.Name&quot;,&quot;value&quot;:&quot;event2&quot;,&quot;map&quot;:&quot;Name&quot;,&quot;jsmap&quot;:&quot;3373707&quot;}]',
+            commerceEventsAsTrackState:'[{&quot;maptype&quot;:&quot;EventClass.Id&quot;,&quot;value&quot;:&quot;8546102375969542712&quot;,&quot;map&quot;:null}]',
+            productMerchandising:'[{&quot;maptype&quot;:&quot;ProductAttributeSelector.Name&quot;,&quot;value&quot;:&quot;eVar2&quot;,&quot;map&quot;:&quot;Category&quot;,&quot;jsmap&quot;:&quot;50511102&quot;},{&quot;maptype&quot;:&quot;ProductAttributeSelector.Name&quot;,&quot;value&quot;:&quot;eVar3&quot;,&quot;map&quot;:&quot;Id&quot;,&quot;jsmap&quot;:&quot;3355&quot;}]',
+            hvars:'[{&quot;maptype&quot;:&quot;EventAttributeClassDetails.ScreenView.Id&quot;,&quot;value&quot;:&quot;hier1&quot;,&quot;map&quot;:&quot;2361242877491637581&quot;,&quot;jsmap&quot;:&quot;-1095764254&quot;}]',
+            evars:'[{&quot;maptype&quot;:&quot;EventAttributeClass.Name&quot;,&quot;value&quot;:&quot;eVar1&quot;,&quot;map&quot;:&quot;color&quot;}]',
+            props:'[{&quot;maptype&quot;:&quot;EventAttributeClass.Name&quot;,&quot;value&quot;:&quot;prop1&quot;,&quot;map&quot;:&quot;gender&quot;},{&quot;maptype&quot;:&quot;EventAttributeClass.Name&quot;,&quot;value&quot;:&quot;prop2&quot;,&quot;map&quot;:&quot;Navigation&quot;},{&quot;maptype&quot;:&quot;EventAttributeClass.Name&quot;,&quot;value&quot;:&quot;prop3&quot;,&quot;map&quot;:&quot;color&quot;},{&quot;maptype&quot;:&quot;EventAttributeClass.Name&quot;,&quot;value&quot;:&quot;prop4&quot;,&quot;map&quot;:&quot;button_number&quot;},{&quot;maptype&quot;:&quot;UserAttributeClass.Name&quot;,&quot;value&quot;:&quot;prop5&quot;,&quot;map&quot;:&quot;joetest&quot;}]',
+            events:'[{&quot;maptype&quot;:&quot;EventClass.Id&quot;,&quot;value&quot;:&quot;event1&quot;,&quot;map&quot;:&quot;8546102375969542712&quot;,&quot;jsmap&quot;:&quot;-472683102&quot;}]',
+            contextVariables:'[{&quot;maptype&quot;:&quot;EventAttributeClass.Name&quot;,&quot;value&quot;:&quot;contextTestValue&quot;,&quot;map&quot;:&quot;color&quot;}]',
             reportSuiteID: '123456',
             marketingCloudID: 'abcde',
             trackingServerURL: 'customerId',
@@ -180,10 +193,57 @@ describe('AdobeEventForwarder Forwarder', function () {
         }], '1.1', 'My App');
     });
 
+    // Mappings
+    // evarsmapping:
+    // {color: "eVar1"}
+    //
+    // propsMapping
+    // {gender: "prop1", Navigation: "prop2", color: "prop3", button_number: "prop4", joetest: "prop5"}
+    //
+    // trackStateMapping
+    // {null: "8546102375969542712"}
+    //
+    // productIncrementorMapping
+    // {Name: "event2"}
+    //
+    // productMerchandisingMapping
+    // {Category: "eVar2", Id: "eVar3"}
+    //
+    // contextVariableMapping
+    // {color: "contextTestValue"}
+    //
+    // eventsMapping
+    // {8546102375969542712: "event1"}
+    //
+    // hiersMapping
+    // {2361242877491637581: "hier1"}
+
     it('should set the customerId', function(done) {
         mParticle.forwarder.setUserIdentity('1234', IdentityType.CustomerId, window.s);
         s.userId.userId.id.should.equal('1234');
         s.userId.userId.authState.should.equal(0);
+
+        done();
+    });
+
+    //TODO: mappings will change, tests will need to be updated
+    it('should log page view', function(done) {
+        mParticle.forwarder.process({
+            EventDataType: MessageType.PageView,
+            EventName: 'log page view test',
+            EventAttributes: {
+                color: 'green',
+                gender: 'female',
+                //hier
+                '2361242877491637581': 'test'
+            }
+        });
+        s.pageName.should.equal('log page view test');
+        s.events.should.equal('log page view test');
+        s.eVar1.should.equal('green');
+        s.prop1.should.equal('female');
+        s.hier1.should.equal('test');
+        s.contextData.contextTestValue.should.equal('green');
 
         done();
     });

@@ -32,7 +32,15 @@
             settings,
             isInitialized = false,
             reportingService,
-            eventQueue = [];
+            eventQueue = [],
+            contextVariableMapping = {},
+            productIncrementorMapping = {},
+            productMerchandisingMapping = {},
+            eventsMapping = {},
+            propsMapping = {},
+            eVarsMapping = {},
+            hiersMapping = {},
+            trackStateMapping = {};
 
         self.name = name;
 
@@ -41,6 +49,7 @@
             reportingService = service;
 
             try {
+                loadMappings();
                 if (!testMode) {
                     loadVisitorAndAppMeasurementScripts();
                 } else {
@@ -53,6 +62,45 @@
                 window.console.log(e);
                 return 'Failed to initialize: ' + e;
             }
+        }
+
+
+        //TODO: mappings will change, tests will need to be updated
+        function loadMappings() {
+            var parsedEvars = JSON.parse(settings.evars.replace(/&quot;/g, '\"'));
+            var parsedProps = JSON.parse(settings.props.replace(/&quot;/g, '\"'));
+            var parsedProductIncrementor = JSON.parse(settings.productIncrementor.replace(/&quot;/g, '\"'));
+            var parsedProductMerchandising = JSON.parse(settings.productMerchandising.replace(/&quot;/g, '\"'));
+            var parsedCommerceEventsAsTrackState = JSON.parse(settings.commerceEventsAsTrackState.replace(/&quot;/g, '\"'));
+            var parsedHvars = JSON.parse(settings.hvars.replace(/&quot;/g, '\"'));
+            var parsedEvents = JSON.parse(settings.events.replace(/&quot;/g, '\"'));
+            var parsedContextVariables = JSON.parse(settings.contextVariables.replace(/&quot;/g, '\"'));
+
+            parsedEvars.forEach(function(evarPair) {
+                eVarsMapping[evarPair.map] = evarPair.value;
+            });
+            parsedProps.forEach(function(evarPair) {
+                propsMapping[evarPair.map] = evarPair.value;
+            });
+
+            parsedProductIncrementor.forEach(function(evarPair) {
+                productIncrementorMapping[evarPair.map] = evarPair.value;
+            });
+            parsedProductMerchandising.forEach(function(evarPair) {
+                productMerchandisingMapping[evarPair.map] = evarPair.value;
+            });
+            parsedCommerceEventsAsTrackState.forEach(function(evarPair) {
+                trackStateMapping[evarPair.map] = evarPair.value;
+            });
+            parsedHvars.forEach(function(evarPair) {
+                hiersMapping[evarPair.map] = evarPair.value;
+            });
+            parsedEvents.forEach(function(evarPair) {
+                eventsMapping[evarPair.map] = evarPair.value;
+            });
+            parsedContextVariables.forEach(function(evarPair) {
+                contextVariableMapping[evarPair.map] = evarPair.value;
+            });
         }
 
         function loadVisitorAndAppMeasurementScripts() {
@@ -102,6 +150,139 @@
             });
         }
 
+        function processEvent(event) {
+            var reportEvent = false;
+            var linkTrackVars = [];
+            //review if we should put these first
+            // setEvars(event.EventAttributes);
+            // setContextData(event.EventAttributes);
+            // setHiers(event.EventAttributes);
+            // setProps(event.EventAttributes);
+            // productimpression(event.EventAttributes);
+            if (isInitialized) {
+                try {
+                    if (event.EventDataType === MessageType.PageView) {
+                        reportEvent = logPageView(event);
+                    }
+                    else if (event.EventDataType === MessageType.Commerce) {
+                        processCommerceTransaction(event);
+                        reportEvent = true;
+
+                    }
+                    else if (event.EventDataType === MessageType.PageEvent) {
+                        reportEvent = logEvent(event, linkTrackVars);
+                    }
+
+                    // s.clearVars();
+                    if (reportEvent === true && reportingService) {
+                        reportingService(self, event);
+                        return 'Successfully sent to ' + name;
+                    }
+                    else {
+                        return 'Error logging event or event type not supported - ' + reportEvent.error;
+                    }
+                }
+                catch (e) {
+                    return 'Failed to send to: ' + name + ' ' + e;
+                }
+            }
+            else {
+                eventQueue.push(event);
+            }
+
+            return 'Can\'t send to forwarder ' + name + ', not initialized. Event added to queue.';
+        }
+
+        function processCommerceTransaction(event) {
+            //implement processCommerceTransaction
+            window.console.log('implement processCommerceTransaction,' + event);
+        }
+
+        function logEvent(event) {
+            //implement logEvent
+            window.console.log('implement logEvent,' + event);
+        }
+
+        function logPageView(event) {
+            try {
+                // TODO: Uncertain if `s.events` should be = `s.pageName`
+                s.events = event.EventName;
+                s.pageName = event.EventName;
+                setEvars(event);
+                setProps(event);
+                setHiers(event);
+                setContextData(event);
+            }
+            catch (e) {
+                return {error: e};
+            }
+            window.console.log('log page view', event);
+        }
+
+        function setEvars(event) {
+            var eventAttributes = event.EventAttributes;
+            for (var eventAttributeKey in eventAttributes) {
+                if (eventAttributes.hasOwnProperty(eventAttributeKey)) {
+                    for (var eVarsMappingKey in eVarsMapping) {
+                        if (eVarsMapping.hasOwnProperty(eVarsMappingKey)) {
+                            if (eventAttributeKey === eVarsMappingKey) {
+                                s[eVarsMapping[eVarsMappingKey]] = eventAttributes[eventAttributeKey];
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (eVarsMapping[event.EventName]) {
+                s[eVarsMapping[event.EventName]] = event.EventName;
+            }
+        }
+
+        function setProps(event) {
+            var eventAttributes = event.EventAttributes;
+            for (var eventAttributeKey in eventAttributes) {
+                if (eventAttributes.hasOwnProperty(eventAttributeKey)) {
+                    for (var propsMappingKey in propsMapping) {
+                        if (propsMapping.hasOwnProperty(propsMappingKey)) {
+                            if (eventAttributeKey === propsMappingKey) {
+                                s[propsMapping[propsMappingKey]] = eventAttributes[eventAttributeKey];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        function setHiers(event) {
+            var eventAttributes = event.EventAttributes;
+            for (var eventAttributeKey in eventAttributes) {
+                if (eventAttributes.hasOwnProperty(eventAttributeKey)) {
+                    for (var hiersMappingKey in hiersMapping) {
+                        if (hiersMapping.hasOwnProperty(hiersMappingKey)) {
+                            if (eventAttributeKey === hiersMappingKey) {
+                                s[hiersMapping[hiersMappingKey]] = eventAttributes[eventAttributeKey];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        function setContextData(event) {
+            var eventAttributes = event.EventAttributes;
+            for (var eventAttributeKey in eventAttributes) {
+                if (eventAttributes.hasOwnProperty(eventAttributeKey)) {
+                    for (var contextValueKey in contextVariableMapping) {
+                        if (contextVariableMapping.hasOwnProperty(contextValueKey)) {
+                            if (eventAttributeKey === contextValueKey) {
+                                s.contextData[contextVariableMapping[contextValueKey]] = eventAttributes[contextValueKey];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         function setUserIdentity(id, type, testSVariable) {
             s = s || testSVariable;
             if (isInitialized) {
@@ -121,8 +302,16 @@
             }
         }
 
+        function isObject(value) {
+            var objType = Object.prototype.toString.call(value);
+
+            return objType === '[object Object]'
+                || objType === '[object Error]';
+        }
+
         this.init = initForwarder;
         this.setUserIdentity = setUserIdentity;
+        this.process = processEvent;
     };
 
     if (!window || !window.mParticle || !window.mParticle.addForwarder) {
