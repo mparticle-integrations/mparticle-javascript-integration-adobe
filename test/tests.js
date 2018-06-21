@@ -299,6 +299,7 @@ describe('AdobeEventForwarder Forwarder', function () {
         (s.linkTrackVars.indexOf('contextData.contextTestValue') >= 0).should.equal(true);
         (s.linkTrackVars.indexOf('events') >= 0).should.equal(true);
         (s.linkTrackVars.indexOf('events') >= 0).should.equal(true);
+        (s.linkTrackVars.indexOf('pageName') >= 0).should.equal(true);
 
         done();
     });
@@ -342,6 +343,9 @@ describe('AdobeEventForwarder Forwarder', function () {
         (s.linkTrackVars.indexOf('prop2') >= 0).should.equal(true);
         (s.linkTrackVars.indexOf('prop3') >= 0).should.equal(true);
         (s.linkTrackVars.indexOf('eVar1') >= 0).should.equal(true);
+        (s.linkTrackVars.indexOf('transactionID') >= 0).should.equal(true);
+        (s.linkTrackVars.indexOf('purchaseID') >= 0).should.equal(true);
+        (s.linkTrackVars.indexOf('pageName') >= 0).should.equal(true);
 
         done();
     });

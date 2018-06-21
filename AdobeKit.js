@@ -139,7 +139,6 @@ function s_pgicq(){var r=window,a=r.s_giq,k,p,n;if(a)for(k=0;k<a.length;k++)p=a[
             timestampOption,
             isInitialized = false,
             reportingService,
-            eventQueue = [],
             contextVariableMapping,
             productIncrementorMapping,
             productMerchandisingMapping,
@@ -278,11 +277,8 @@ function s_pgicq(){var r=window,a=r.s_giq,k,p,n;if(a)for(k=0;k<a.length;k++)p=a[
                     return 'Failed to send to: ' + name + ' ' + e;
                 }
             }
-            else {
-                eventQueue.push(event);
-            }
 
-            return 'Can\'t send to forwarder ' + name + ', not initialized. Event added to queue.';
+            return 'Can\'t send to forwarder ' + name + ', not initialized.';
         }
 
         function setMappings(event, includeTrackVars, linkTrackVars) {
@@ -304,6 +300,7 @@ function s_pgicq(){var r=window,a=r.s_giq,k,p,n;if(a)for(k=0;k<a.length;k++)p=a[
                 s.events='purchase';
                 s.purchaseID = event.ProductAction.TransactionId;
                 s.transactionID = event.ProductAction.TransactionId;
+                linkTrackVars.push('purchaseID', 'transactionID');
             } else if (event.EventCategory === mParticle.CommerceEventType.ProductViewDetail) {
                 s.events='prodView';
             } else if (event.EventCategory === mParticle.CommerceEventType.ProductAddToCart) {
@@ -315,9 +312,11 @@ function s_pgicq(){var r=window,a=r.s_giq,k,p,n;if(a)for(k=0;k<a.length;k++)p=a[
             }
             s.linkTrackEvents = s.events || null;
             processProductsAndSetEvents(event, linkTrackVars);
-            linkTrackVars.push('products', 'events');
+            s.pageName = event.EventName || window.document.title;
+            linkTrackVars.push('products', 'events', 'pageName');
             s.linkTrackVars = linkTrackVars;
             s.tl(true, 'o', event.EventName);
+
             s.clearVars();
 
             return true;
@@ -389,7 +388,6 @@ function s_pgicq(){var r=window,a=r.s_giq,k,p,n;if(a)for(k=0;k<a.length;k++)p=a[
 
         function logPageView(event) {
             try {
-                s.events = event.EventName;
                 s.pageName = event.EventName || undefined;
                 s.t();
                 s.clearVars();
@@ -412,14 +410,14 @@ function s_pgicq(){var r=window,a=r.s_giq,k,p,n;if(a)for(k=0;k<a.length;k++)p=a[
                         }
                     });
                     s.linkTrackEvents = s.events;
-                    if (linkTrackVars) {
-                        linkTrackVars.push('events');
-                    }
-                    s.linkTrackVars = linkTrackVars;
                     s.pageName = event.EventName || window.document.title;
+                    linkTrackVars.push('events', 'pageName');
+                    s.linkTrackVars = linkTrackVars;
                     s.tl(true, 'o', event.EventName);
                     s.clearVars();
+                    return true;
                 } else {
+                    s.clearVars();
                     window.console.log('event name not mapped, aborting event logging');
                 }
             }
@@ -504,9 +502,9 @@ function s_pgicq(){var r=window,a=r.s_giq,k,p,n;if(a)for(k=0;k<a.length;k++)p=a[
             }
         }
 
-        function onUserIdentified(user) {
+        function onUserIdentified(mpUserObject) {
             if (isInitialized) {
-                var userIdentities = user.getUserIdentities().userIdentities;
+                var userIdentities = mpUserObject.getUserIdentities().userIdentities;
 
                 var identitiesToSet = {};
                 if (Object.keys(userIdentities).length) {
@@ -521,7 +519,6 @@ function s_pgicq(){var r=window,a=r.s_giq,k,p,n;if(a)for(k=0;k<a.length;k++)p=a[
                     for (var currentIdentityKey in currentAdobeCustomerIds) {
                         identitiesToSet[currentIdentityKey] = null;
                     }
-                    console.log(identitiesToSet);
                 }
 
                 try {

@@ -196,6 +196,7 @@
                 s.events='purchase';
                 s.purchaseID = event.ProductAction.TransactionId;
                 s.transactionID = event.ProductAction.TransactionId;
+                linkTrackVars.push('purchaseID', 'transactionID');
             } else if (event.EventCategory === mParticle.CommerceEventType.ProductViewDetail) {
                 s.events='prodView';
             } else if (event.EventCategory === mParticle.CommerceEventType.ProductAddToCart) {
@@ -207,9 +208,11 @@
             }
             s.linkTrackEvents = s.events || null;
             processProductsAndSetEvents(event, linkTrackVars);
-            linkTrackVars.push('products', 'events');
+            s.pageName = event.EventName || window.document.title;
+            linkTrackVars.push('products', 'events', 'pageName');
             s.linkTrackVars = linkTrackVars;
             s.tl(true, 'o', event.EventName);
+
             s.clearVars();
 
             return true;
@@ -281,7 +284,6 @@
 
         function logPageView(event) {
             try {
-                s.events = event.EventName;
                 s.pageName = event.EventName || undefined;
                 s.t();
                 s.clearVars();
@@ -304,14 +306,14 @@
                         }
                     });
                     s.linkTrackEvents = s.events;
-                    if (linkTrackVars) {
-                        linkTrackVars.push('events');
-                    }
-                    s.linkTrackVars = linkTrackVars;
                     s.pageName = event.EventName || window.document.title;
+                    linkTrackVars.push('events', 'pageName');
+                    s.linkTrackVars = linkTrackVars;
                     s.tl(true, 'o', event.EventName);
                     s.clearVars();
+                    return true;
                 } else {
+                    s.clearVars();
                     window.console.log('event name not mapped, aborting event logging');
                 }
             }
