@@ -27,7 +27,9 @@
             CrashReport: 5,
             OptOut: 6,
             Commerce: 16
-        };
+        },
+        EVENT_ATTRIBUTE_CLASS_NAME = 'EventAttributeClass.Name',
+        USER_ATTRIBUTE_CLASS_NAME = 'UserAttributeClass.Name';
 
     var constructor = function () {
         var self = this,
@@ -35,11 +37,11 @@
             timestampOption,
             isInitialized = false,
             reportingService,
-            contextVariableMapping,
+            contextVariableMapping = {},
             productIncrementorMapping,
             productMerchandisingMapping,
-            propsMapping,
-            eVarsMapping,
+            propsMapping = {},
+            eVarsMapping = {},
             hiersMapping,
             eventsMapping;
 
@@ -61,13 +63,30 @@
         }
 
         function loadMappings() {
-            eVarsMapping = settings.evars ? JSON.parse(settings.evars.replace(/&quot;/g, '\"')) : [];
-            propsMapping = settings.props ? JSON.parse(settings.props.replace(/&quot;/g, '\"')) : [];
+            function loadEventAndAttributeMappings(mappingObject, variableType) {
+                if (variableType) {
+                    mappingObject[EVENT_ATTRIBUTE_CLASS_NAME] = [];
+                    mappingObject[USER_ATTRIBUTE_CLASS_NAME] = [];
+
+                    JSON.parse(variableType.replace(/&quot;/g, '\"')).forEach(function(variable) {
+                        if (variable.maptype === EVENT_ATTRIBUTE_CLASS_NAME) {
+                            mappingObject[EVENT_ATTRIBUTE_CLASS_NAME].push({value: variable.value, map: variable.map});
+                        } else if (variable.maptype === USER_ATTRIBUTE_CLASS_NAME) {
+                            mappingObject[USER_ATTRIBUTE_CLASS_NAME].push({value: variable.value, map: variable.map});
+                        }
+                    });
+                }
+
+                return mappingObject;
+            }
+
+            eVarsMapping = loadEventAndAttributeMappings(eVarsMapping, settings.evars) || {};
+            propsMapping = loadEventAndAttributeMappings(propsMapping, settings.props) || {};
+            contextVariableMapping = loadEventAndAttributeMappings(contextVariableMapping, settings.contextVariables) || {};
             productIncrementorMapping = settings.productIncrementor ? JSON.parse(settings.productIncrementor.replace(/&quot;/g, '\"')) : [];
             productMerchandisingMapping = settings.productMerchandising ? JSON.parse(settings.productMerchandising.replace(/&quot;/g, '\"')) : [];
             hiersMapping = settings.hvars ? JSON.parse(settings.hvars.replace(/&quot;/g, '\"')) : [];
             eventsMapping = settings.events ? JSON.parse(settings.events.replace(/&quot;/g, '\"')) : [];
-            contextVariableMapping = settings.contextVariables ? JSON.parse(settings.contextVariables.replace(/&quot;/g, '\"')) : [];
         }
 
         function finishAdobeInitialization() {
@@ -96,7 +115,7 @@
         // Get the mapped value for custom events
         function getEventMappingValue(event) {
             var jsHash = calculateJSHash(event.EventDataType, event.EventCategory, event.EventName);
-            return findValueInMapping(jsHash, eventsMapping);
+            return findHashValueInMapping(jsHash, eventsMapping);
         }
 
         function calculateJSHash(eventDataType, eventCategory, name) {
@@ -108,16 +127,12 @@
             return mParticle.generateHash(preHash);
         }
 
-        function findValueInMapping(jsHash, mapping) {
+        function findHashValueInMapping(jsHash, mapping) {
             if (mapping) {
                 var filteredArray = mapping.filter(function(mappingEntry) {
                     if (mappingEntry.jsmap && mappingEntry.maptype && mappingEntry.value) {
                         return mappingEntry.jsmap === jsHash.toString();
                     }
-
-                    return {
-                        result: false
-                    };
                 });
 
                 if (filteredArray && filteredArray.length > 0) {
@@ -125,9 +140,26 @@
                         result: true,
                         matches: filteredArray
                     };
+                } else {
+                    return null;
                 }
             }
-            return null;
+        }
+
+        function findStringValueInMapping(string, mapping) {
+            if (mapping) {
+                var filteredArray = mapping.filter(function(mappingEntry) {
+                    if (mappingEntry.map && mappingEntry.value) {
+                        return mappingEntry.map === string;
+                    }
+                });
+
+                if (filteredArray && filteredArray.length > 0) {
+                    return filteredArray[0];
+                } else {
+                    return null;
+                }
+            }
         }
 
         // for each type of event, we run setMappings which sets the eVars, props, hvars, and contextData values
@@ -237,7 +269,7 @@
                         for (var eventAttributeKey in expandedEvt.EventAttributes) {
                             if (expandedEvt.EventAttributes.hasOwnProperty(eventAttributeKey)) {
                                 var jsHash = calculateJSHash(event.EventDataType, event.EventCategory, eventAttributeKey);
-                                var mapping = findValueInMapping(jsHash, eventsMapping);
+                                var mapping = findHashValueInMapping(jsHash, eventsMapping);
                                 if (mapping && mapping.result && mapping.matches) {
                                     mapping.matches.forEach(function(mapping) {
                                         if (mapping.value) {
@@ -323,39 +355,96 @@
             }
         }
 
-        // .map is the attribute passed through, .value is the eVar value
         function setEvars(event, linkTrackVars) {
-            var eventAttributes = event.EventAttributes;
+            var foundEvarMapping,
+                eventAttributes = event.EventAttributes,
+                userAttributes = event.UserAttributes;
+
             for (var eventAttributeKey in eventAttributes) {
                 if (eventAttributes.hasOwnProperty(eventAttributeKey)) {
-                    eVarsMapping.forEach(function(eVarMap) {
-                        if (eVarMap.map === eventAttributeKey) {
-                            s[eVarMap.value] = eventAttributes[eventAttributeKey];
-                            if (linkTrackVars) {
-                                linkTrackVars.push(eVarMap.value);
-                            }
+                    foundEvarMapping = findStringValueInMapping(eventAttributeKey, eVarsMapping[EVENT_ATTRIBUTE_CLASS_NAME]);
+                    if (foundEvarMapping) {
+                        s[foundEvarMapping.value] = eventAttributes[eventAttributeKey];
+                        if (linkTrackVars) {
+                            linkTrackVars.push(foundEvarMapping.value);
                         }
-                        if (event.EventName === eVarMap.map) {
-                            s[eVarMap.value] = event.EventName;
+
+                    }
+                }
+            }
+
+            for (var userAttributeKey in userAttributes) {
+                if (userAttributes.hasOwnProperty(userAttributeKey)) {
+                    foundEvarMapping = findStringValueInMapping(userAttributeKey, eVarsMapping[USER_ATTRIBUTE_CLASS_NAME]);
+                    if (foundEvarMapping) {
+                        s[foundEvarMapping.value] = userAttributes[userAttributeKey];
+                        if (linkTrackVars) {
+                            linkTrackVars.push(foundEvarMapping.value);
                         }
-                    });
+
+                    }
                 }
             }
         }
 
-        // .map is the attribute passed through, .value is the prop value
         function setProps(event, linkTrackVars) {
-            var eventAttributes = event.EventAttributes;
+            var foundPropsMapping,
+                eventAttributes = event.EventAttributes,
+                userAttributes = event.UserAttributes;
+
             for (var eventAttributeKey in eventAttributes) {
                 if (eventAttributes.hasOwnProperty(eventAttributeKey)) {
-                    propsMapping.forEach(function(propMap) {
-                        if (propMap.map === eventAttributeKey) {
-                            s[propMap.value] = eventAttributes[eventAttributeKey];
-                            if (linkTrackVars) {
-                                linkTrackVars.push(propMap.value);
-                            }
+                    foundPropsMapping = findStringValueInMapping(eventAttributeKey, propsMapping[EVENT_ATTRIBUTE_CLASS_NAME]);
+                    if (foundPropsMapping) {
+                        s[foundPropsMapping.value] = eventAttributes[eventAttributeKey];
+                        if (linkTrackVars) {
+                            linkTrackVars.push(foundPropsMapping.value);
                         }
-                    });
+
+                    }
+                }
+            }
+
+            for (var userAttributeKey in userAttributes) {
+                if (userAttributes.hasOwnProperty(userAttributeKey)) {
+                    foundPropsMapping = findStringValueInMapping(userAttributeKey, propsMapping[USER_ATTRIBUTE_CLASS_NAME]);
+                    if (foundPropsMapping) {
+                        s[foundPropsMapping.value] = userAttributes[userAttributeKey];
+                        if (linkTrackVars) {
+                            linkTrackVars.push(foundPropsMapping.value);
+                        }
+                    }
+                }
+            }
+        }
+
+        // .map is the attribute passed through, .value is the contextData value
+        function setContextData(event, linkTrackVars) {
+            var foundContextVariableMapping,
+                eventAttributes = event.EventAttributes,
+                userAttributes = event.UserAttributes;
+
+            for (var eventAttributeKey in eventAttributes) {
+                if (eventAttributes.hasOwnProperty(eventAttributeKey)) {
+                    foundContextVariableMapping = findStringValueInMapping(eventAttributeKey, contextVariableMapping[EVENT_ATTRIBUTE_CLASS_NAME]);
+                    if (foundContextVariableMapping) {
+                        s.contextData[foundContextVariableMapping.value] = eventAttributes[eventAttributeKey];
+                        if (linkTrackVars) {
+                            linkTrackVars.push('contextData.' + foundContextVariableMapping.value);
+                        }
+                    }
+                }
+            }
+
+            for (var userAttributeKey in userAttributes) {
+                if (userAttributes.hasOwnProperty(userAttributeKey)) {
+                    foundContextVariableMapping = findStringValueInMapping(userAttributeKey, contextVariableMapping[USER_ATTRIBUTE_CLASS_NAME]);
+                    if (foundContextVariableMapping) {
+                        s.contextData[foundContextVariableMapping.value] = userAttributes[userAttributeKey];
+                        if (linkTrackVars) {
+                            linkTrackVars.push('contextData.' + foundContextVariableMapping.value);
+                        }
+                    }
                 }
             }
         }
@@ -366,7 +455,7 @@
             for (var eventAttributeKey in eventAttributes) {
                 if (eventAttributes.hasOwnProperty(eventAttributeKey)) {
                     var jsHash = calculateJSHash(event.EventDataType, event.EventCategory, eventAttributeKey);
-                    var mapping = findValueInMapping(jsHash, hiersMapping);
+                    var mapping = findHashValueInMapping(jsHash, hiersMapping);
                     if (mapping && mapping.result && mapping.matches) {
                         mapping.matches.forEach(function(mapping) {
                             if (mapping.value) {
@@ -377,23 +466,6 @@
                             }
                         });
                     }
-                }
-            }
-        }
-
-        // .map is the attribute passed through, .value is the contextData value
-        function setContextData(event, linkTrackVars) {
-            var eventAttributes = event.EventAttributes;
-            for (var eventAttributeKey in eventAttributes) {
-                if (eventAttributes.hasOwnProperty(eventAttributeKey)) {
-                    contextVariableMapping.forEach(function(contextVariableMap) {
-                        if (contextVariableMap.map === eventAttributeKey) {
-                            s.contextData[contextVariableMap.value] = eventAttributes[eventAttributeKey];
-                            if (linkTrackVars) {
-                                linkTrackVars.push('contextData.' + contextVariableMap.value);
-                            }
-                        }
-                    });
                 }
             }
         }
