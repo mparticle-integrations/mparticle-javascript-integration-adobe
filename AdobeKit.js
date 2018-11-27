@@ -190,7 +190,6 @@ function s_pgicq(){var r=window,a=r.s_giq,k,p,n;if(a)for(k=0;k<a.length;k++)p=a[
                 s.linkTrackVars = 'None';
                 s.linkTrackEvents = 'None';
                 s.visitorNamespace = '';
-                s.prop1 = (typeof(Visitor) !== 'undefined' ? 'VisitorAPI Present' : 'VisitorAPI Missing');
                 return true;
             } catch(e) {
                 return 'error initializing adobe: ' + e;
