@@ -215,9 +215,7 @@
             processProductsAndSetEvents(event, linkTrackVars);
             appMeasurement.pageName = event.EventName || window.document.title;
             linkTrackVars.push('products', 'events');
-            if (settings.enablePageName) {
-                linkTrackVars.push('pageName');
-            }
+            setPageName(linkTrackVars);
             appMeasurement.linkTrackVars = linkTrackVars;
             appMeasurement.tl(true, 'o', event.EventName);
 
@@ -316,9 +314,8 @@
                     appMeasurement.linkTrackEvents = appMeasurement.events;
                     appMeasurement.pageName = event.EventName || window.document.title;
                     linkTrackVars.push('events');
-                    if (settings.enablePageName) {
-                        linkTrackVars.push('pageName');
-                    }
+                    setPageName(linkTrackVars);
+
                     appMeasurement.linkTrackVars = linkTrackVars;
                     appMeasurement.tl(true, 'o', event.EventName);
                     appMeasurement.clearVars();
@@ -436,6 +433,12 @@
             }
             else {
                 return 'Can\'t call setUserIdentity on forwarder ' + name + ', not initialized';
+            }
+        }
+
+        function setPageName(linkTrackVars) {
+            if (settings.enablePageName === 'True') {
+                linkTrackVars.push('pageName');
             }
         }
 
