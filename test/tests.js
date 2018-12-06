@@ -268,7 +268,6 @@ describe('AdobeEventForwarder Forwarder', function () {
         mParticle.logPageView('log page view test', {color: 'green', gender: 'female', c1: 'c1testValue', linkName: 'test'});
 
         s.pageName.should.equal('log page view test');
-        s.events.should.equal('log page view test');
         s.eVar1.should.equal('green');
         s.prop2.should.equal('female');
         s.hier1.should.equal('test');

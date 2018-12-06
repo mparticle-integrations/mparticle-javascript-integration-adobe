@@ -86,7 +86,6 @@
                 s.linkTrackVars = 'None';
                 s.linkTrackEvents = 'None';
                 s.visitorNamespace = '';
-                s.prop1 = (typeof(Visitor) !== 'undefined' ? 'VisitorAPI Present' : 'VisitorAPI Missing');
                 return true;
             } catch(e) {
                 return 'error initializing adobe: ' + e;
