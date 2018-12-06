@@ -306,7 +306,10 @@ function s_pgicq(){var r=window,a=r.s_giq,k,p,n;if(a)for(k=0;k<a.length;k++)p=a[
             appMeasurement.linkTrackEvents = appMeasurement.events || null;
             processProductsAndSetEvents(event, linkTrackVars);
             appMeasurement.pageName = event.EventName || window.document.title;
-            linkTrackVars.push('products', 'events', 'pageName');
+            linkTrackVars.push('products', 'events');
+            if (settings.enablePageName) {
+                linkTrackVars.push('pageName');
+            }
             appMeasurement.linkTrackVars = linkTrackVars;
             appMeasurement.tl(true, 'o', event.EventName);
 
@@ -404,7 +407,10 @@ function s_pgicq(){var r=window,a=r.s_giq,k,p,n;if(a)for(k=0;k<a.length;k++)p=a[
                     });
                     appMeasurement.linkTrackEvents = appMeasurement.events;
                     appMeasurement.pageName = event.EventName || window.document.title;
-                    linkTrackVars.push('events', 'pageName');
+                    linkTrackVars.push('events');
+                    if (settings.enablePageName) {
+                        linkTrackVars.push('pageName');
+                    }
                     appMeasurement.linkTrackVars = linkTrackVars;
                     appMeasurement.tl(true, 'o', event.EventName);
                     appMeasurement.clearVars();
