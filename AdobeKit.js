@@ -313,9 +313,7 @@ function s_pgicq(){var r=window,a=r.s_giq,k,p,n;if(a)for(k=0;k<a.length;k++)p=a[
             processProductsAndSetEvents(event, linkTrackVars);
             s.pageName = event.EventName || window.document.title;
             linkTrackVars.push('products', 'events');
-            if (settings.enablePageName) {
-                linkTrackVars.push('pageName');
-            }
+            setPageName(linkTrackVars);
             s.linkTrackVars = linkTrackVars;
             s.tl(true, 'o', event.EventName);
 
@@ -414,9 +412,7 @@ function s_pgicq(){var r=window,a=r.s_giq,k,p,n;if(a)for(k=0;k<a.length;k++)p=a[
                     s.linkTrackEvents = s.events;
                     s.pageName = event.EventName || window.document.title;
                     linkTrackVars.push('events');
-                    if (settings.enablePageName) {
-                        linkTrackVars.push('pageName');
-                    }
+                    setPageName(linkTrackVars);
                     s.linkTrackVars = linkTrackVars;
                     s.tl(true, 'o', event.EventName);
                     s.clearVars();
@@ -534,6 +530,12 @@ function s_pgicq(){var r=window,a=r.s_giq,k,p,n;if(a)for(k=0;k<a.length;k++)p=a[
             }
             else {
                 return 'Can\'t call setUserIdentity on forwarder ' + name + ', not initialized';
+            }
+        }
+
+        function setPageName(linkTrackVars) {
+            if (settings.enablePageName === 'True') {
+                linkTrackVars.push('pageName');
             }
         }
 

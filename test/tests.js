@@ -302,8 +302,8 @@ describe('AdobeEventForwarder Forwarder', function () {
         done();
     });
 
-    it('should log an event with pageName when enabledPageName is true', function(done) {
-        configureAdobeForwarderAndReInit('optional', true);
+    it('should log an event with pageName when enabledPageName is True', function(done) {
+        configureAdobeForwarderAndReInit('optional', 'True');
         mParticle.logPageView('Find Ticket', {color: 'green', gender: 'female', c1: 'c1testValue', linkName: 'test'});
 
         (s.linkTrackVars.indexOf('pageName') >= 0).should.equal(true);
@@ -356,8 +356,8 @@ describe('AdobeEventForwarder Forwarder', function () {
         done();
     });
 
-    it('should log a product purchase wih pageName when enabledPageName is true', function(done) {
-        configureAdobeForwarderAndReInit('optional', true);
+    it('should log a product purchase wih pageName when enabledPageName is True', function(done) {
+        configureAdobeForwarderAndReInit('optional', 'True');
 
         var product1 = mParticle.eCommerce.createProduct('nokia', '1234', 123, 1, null, null, null, null, null, {PI1: 'bob', PI2: 'tim', PM1: 'sneakers', PM2: 'shirt'});
         var product2 = mParticle.eCommerce.createProduct('apple', '2345', 234, 2, null, null, null, null, null, {PI1: 'Jones', PM2: 'abc', availability: true});
