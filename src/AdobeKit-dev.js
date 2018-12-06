@@ -208,7 +208,10 @@
             s.linkTrackEvents = s.events || null;
             processProductsAndSetEvents(event, linkTrackVars);
             s.pageName = event.EventName || window.document.title;
-            linkTrackVars.push('products', 'events', 'pageName');
+            linkTrackVars.push('products', 'events');
+            if (settings.enablePageName) {
+                linkTrackVars.push('pageName');
+            }
             s.linkTrackVars = linkTrackVars;
             s.tl(true, 'o', event.EventName);
 
@@ -306,7 +309,10 @@
                     });
                     s.linkTrackEvents = s.events;
                     s.pageName = event.EventName || window.document.title;
-                    linkTrackVars.push('events', 'pageName');
+                    linkTrackVars.push('events');
+                    if (settings.enablePageName) {
+                        linkTrackVars.push('pageName');
+                    }
                     s.linkTrackVars = linkTrackVars;
                     s.tl(true, 'o', event.EventName);
                     s.clearVars();
