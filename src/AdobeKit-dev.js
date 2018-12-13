@@ -74,7 +74,11 @@
 
         function finishAdobeInitialization() {
             try {
+
                 appMeasurement=s_gi(settings.reportSuiteIDs);
+                if (settings.setGlobalObject == 'True') {
+                    s = appMeasurement;
+                }
                 appMeasurement.visitor = Visitor.getInstance(settings.organizationID);
 
                 appMeasurement.trackingServer = settings.trackingServerURL;

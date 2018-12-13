@@ -125,7 +125,7 @@ describe('AdobeEventForwarder Forwarder', function () {
             };
         };
 
-    function configureAdobeForwarderAndReInit(timestampOption) {
+    function configureAdobeForwarderAndReInit(timestampOption, setGlobalObject) {
         mParticle.configureForwarder({
             name: 'Adobe',
             settings: {
@@ -141,7 +141,9 @@ describe('AdobeEventForwarder Forwarder', function () {
                 trackingServerURL: 'customerId',
                 trackingServerURLSecure: 'customerId',
                 timestampOption: timestampOption,
-                reportSuiteIDs: 'testReportSuiteId'
+                reportSuiteIDs: 'testReportSuiteId',
+                setGlobalObject: setGlobalObject
+
             },
             eventNameFilters: [],
             eventTypeFilters: [],
@@ -227,6 +229,15 @@ describe('AdobeEventForwarder Forwarder', function () {
         s_gi('testReportSuiteId').should.be.ok();
         s_gi('testReportSuiteId').visitor.should.be.ok();
         s_gi('testReportSuiteId').visitor.orgId.should.equal('abcde');
+        
+        Should(window.s).not.be.ok();
+
+        configureAdobeForwarderAndReInit('notallowed', 'True');
+        s_gi('testReportSuiteId').should.be.ok();
+        s_gi('testReportSuiteId').visitor.should.be.ok();
+        s_gi('testReportSuiteId').visitor.orgId.should.equal('abcde');
+        
+        Should(window.s).be.ok();
 
         done();
     });
