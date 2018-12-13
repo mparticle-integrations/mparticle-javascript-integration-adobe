@@ -231,6 +231,7 @@ describe('AdobeEventForwarder Forwarder', function () {
         s_gi('testReportSuiteId').visitor.orgId.should.equal('abcde');
         
         Should(window.s).not.be.ok();
+        Should(window.appMeasurement).not.be.ok();
 
         configureAdobeForwarderAndReInit('notallowed', 'True');
         s_gi('testReportSuiteId').should.be.ok();

@@ -76,8 +76,8 @@
             try {
 
                 appMeasurement=s_gi(settings.reportSuiteIDs);
-                if (settings.setGlobalObject == 'True') {
-                    s = appMeasurement;
+                if (settings.setGlobalObject === 'True') {
+                    window.s = appMeasurement;
                 }
                 appMeasurement.visitor = Visitor.getInstance(settings.organizationID);
 

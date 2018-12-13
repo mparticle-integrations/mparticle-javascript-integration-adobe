@@ -180,8 +180,8 @@ function s_pgicq(){var r=window,a=r.s_giq,k,p,n;if(a)for(k=0;k<a.length;k++)p=a[
             try {
 
                 appMeasurement=s_gi(settings.reportSuiteIDs);
-                if (settings.setGlobalObject == 'True') {
-                    s = appMeasurement;
+                if (settings.setGlobalObject === 'True') {
+                    window.s = appMeasurement;
                 }
                 appMeasurement.visitor = Visitor.getInstance(settings.organizationID);
 
