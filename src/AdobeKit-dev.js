@@ -31,6 +31,8 @@
 
     var constructor = function () {
         var self = this,
+            //one or more instances of AppMeasurement retured from s_gi()
+            appMeasurement,
             settings,
             timestampOption,
             isInitialized = false,
@@ -72,20 +74,24 @@
 
         function finishAdobeInitialization() {
             try {
-                s=s_gi(settings.reportSuiteIDs);
-                s.visitor = Visitor.getInstance(settings.organizationID);
 
-                s.trackingServer = settings.trackingServerURL;
-                s.trackingServerSecure = settings.trackingServerURLSecure;
-                s.trackDownloadLinks = true;
-                s.trackExternalLinks = true;
-                s.trackInlineStats = true;
-                s.linkDownloadFileTypes = 'exe,zip,wav,mp3,mov,mpg,avi,wmv,pdf,doc,docx,xls,xlsx,ppt,pptx';
-                s.linkInternalFilters = 'javascript:';
-                s.linkLeaveQueryString = false;
-                s.linkTrackVars = 'None';
-                s.linkTrackEvents = 'None';
-                s.visitorNamespace = '';
+                appMeasurement=s_gi(settings.reportSuiteIDs);
+                if (settings.setGlobalObject === 'True') {
+                    window.s = appMeasurement;
+                }
+                appMeasurement.visitor = Visitor.getInstance(settings.organizationID);
+
+                appMeasurement.trackingServer = settings.trackingServerURL;
+                appMeasurement.trackingServerSecure = settings.trackingServerURLSecure;
+                appMeasurement.trackDownloadLinks = true;
+                appMeasurement.trackExternalLinks = true;
+                appMeasurement.trackInlineStats = true;
+                appMeasurement.linkDownloadFileTypes = 'exe,zip,wav,mp3,mov,mpg,avi,wmv,pdf,doc,docx,xls,xlsx,ppt,pptx';
+                appMeasurement.linkInternalFilters = 'javascript:';
+                appMeasurement.linkLeaveQueryString = false;
+                appMeasurement.linkTrackVars = 'None';
+                appMeasurement.linkTrackEvents = 'None';
+                appMeasurement.visitorNamespace = '';
                 return true;
             } catch(e) {
                 return 'error initializing adobe: ' + e;
@@ -130,13 +136,13 @@
         }
 
         // for each type of event, we run setMappings which sets the eVars, props, hvars, and contextData values
-        // after each event is sent to the server (either using s.t() for pageViews or s.tl() for non-pageview events), s.clearVars() is run to wipe out
+        // after each event is sent to the server (either using t() for pageViews or tl() for non-pageview events), clearVars() is run to wipe out
         // any eVars, props, and hvars
         function processEvent(event) {
             var reportEvent = false;
             var linkTrackVars = [];
-            s.timestamp = timestampOption ? Math.floor((new Date).getTime()/1000) : null;
-            s.events = '';
+            appMeasurement.timestamp = timestampOption ? Math.floor((new Date).getTime()/1000) : null;
+            appMeasurement.events = '';
 
             if (isInitialized) {
                 try {
@@ -192,27 +198,27 @@
 
         function processCommerceTransaction(event, linkTrackVars) {
             if (event.EventCategory === mParticle.CommerceEventType.ProductPurchase) {
-                s.events='purchase';
-                s.purchaseID = event.ProductAction.TransactionId;
-                s.transactionID = event.ProductAction.TransactionId;
+                appMeasurement.events='purchase';
+                appMeasurement.purchaseID = event.ProductAction.TransactionId;
+                appMeasurement.transactionID = event.ProductAction.TransactionId;
                 linkTrackVars.push('purchaseID', 'transactionID');
             } else if (event.EventCategory === mParticle.CommerceEventType.ProductViewDetail) {
-                s.events='prodView';
+                appMeasurement.events='prodView';
             } else if (event.EventCategory === mParticle.CommerceEventType.ProductAddToCart) {
-                s.events='scAdd';
+                appMeasurement.events='scAdd';
             } else if (event.EventCategory === mParticle.CommerceEventType.ProductRemoveFromCart) {
-                s.events='scRemove';
+                appMeasurement.events='scRemove';
             } else if (event.EventCategory === mParticle.CommerceEventType.ProductCheckout) {
-                s.events='scCheckout';
+                appMeasurement.events='scCheckout';
             }
-            s.linkTrackEvents = s.events || null;
+            appMeasurement.linkTrackEvents = appMeasurement.events || null;
             processProductsAndSetEvents(event, linkTrackVars);
-            s.pageName = event.EventName || window.document.title;
+            appMeasurement.pageName = event.EventName || window.document.title;
             linkTrackVars.push('products', 'events', 'pageName');
-            s.linkTrackVars = linkTrackVars;
-            s.tl(true, 'o', event.EventName);
+            appMeasurement.linkTrackVars = linkTrackVars;
+            appMeasurement.tl(true, 'o', event.EventName);
 
-            s.clearVars();
+            appMeasurement.clearVars();
 
             return true;
         }
@@ -240,8 +246,8 @@
                                 if (mapping && mapping.result && mapping.matches) {
                                     mapping.matches.forEach(function(mapping) {
                                         if (mapping.value) {
-                                            if (s.events.indexOf(mapping.value) < 0) {
-                                                s.events += ',' + mapping.value + '=' + expandedEvt.EventAttributes[eventAttributeKey];
+                                            if (appMeasurement.events.indexOf(mapping.value) < 0) {
+                                                appMeasurement.events += ',' + mapping.value + '=' + expandedEvt.EventAttributes[eventAttributeKey];
                                             }
                                         }
                                     });
@@ -256,8 +262,8 @@
                                 productIncrementorMapping.forEach(function(productIncrementorMap) {
                                     if (productIncrementorMap.map === productAttributeKey) {
                                         incrementor.push(productIncrementorMap.value + '='+ productAttributes[productAttributeKey]);
-                                        if (s.events.indexOf(productIncrementorMap.value) < 0) {
-                                            s.events += ',' + productIncrementorMap.value;
+                                        if (appMeasurement.events.indexOf(productIncrementorMap.value) < 0) {
+                                            appMeasurement.events += ',' + productIncrementorMap.value;
                                         }
                                     }
                                 });
@@ -274,7 +280,7 @@
                     }
                 });
 
-                s.products = allProducts.join(',');
+                appMeasurement.products = allProducts.join(',');
             } catch (e) {
                 window.console.log(e);
             }
@@ -283,13 +289,13 @@
 
         function logPageView(event) {
             try {
-                s.pageName = event.EventName || undefined;
-                s.t();
-                s.clearVars();
+                appMeasurement.pageName = event.EventName || undefined;
+                appMeasurement.t();
+                appMeasurement.clearVars();
                 return true;
             }
             catch (e) {
-                s.clearVars();
+                appMeasurement.clearVars();
                 return {error: 'logPageView not called, error ' + e};
             }
         }
@@ -298,26 +304,26 @@
             try {
                 if (mappingMatches) {
                     mappingMatches.forEach(function(match) {
-                        if (s.events.length === 0) {
-                            s.events += match.value;
+                        if (appMeasurement.events.length === 0) {
+                            appMeasurement.events += match.value;
                         } else {
-                            s.events += ',' + match.value;
+                            appMeasurement.events += ',' + match.value;
                         }
                     });
-                    s.linkTrackEvents = s.events;
-                    s.pageName = event.EventName || window.document.title;
+                    appMeasurement.linkTrackEvents = appMeasurement.events;
+                    appMeasurement.pageName = event.EventName || window.document.title;
                     linkTrackVars.push('events', 'pageName');
-                    s.linkTrackVars = linkTrackVars;
-                    s.tl(true, 'o', event.EventName);
-                    s.clearVars();
+                    appMeasurement.linkTrackVars = linkTrackVars;
+                    appMeasurement.tl(true, 'o', event.EventName);
+                    appMeasurement.clearVars();
                     return true;
                 } else {
-                    s.clearVars();
+                    appMeasurement.clearVars();
                     window.console.log('event name not mapped, aborting event logging');
                 }
             }
             catch (e) {
-                s.clearVars();
+                appMeasurement.clearVars();
                 return {error: e};
             }
         }
@@ -329,13 +335,13 @@
                 if (eventAttributes.hasOwnProperty(eventAttributeKey)) {
                     eVarsMapping.forEach(function(eVarMap) {
                         if (eVarMap.map === eventAttributeKey) {
-                            s[eVarMap.value] = eventAttributes[eventAttributeKey];
+                            appMeasurement[eVarMap.value] = eventAttributes[eventAttributeKey];
                             if (linkTrackVars) {
                                 linkTrackVars.push(eVarMap.value);
                             }
                         }
                         if (event.EventName === eVarMap.map) {
-                            s[eVarMap.value] = event.EventName;
+                            appMeasurement[eVarMap.value] = event.EventName;
                         }
                     });
                 }
@@ -349,7 +355,7 @@
                 if (eventAttributes.hasOwnProperty(eventAttributeKey)) {
                     propsMapping.forEach(function(propMap) {
                         if (propMap.map === eventAttributeKey) {
-                            s[propMap.value] = eventAttributes[eventAttributeKey];
+                            appMeasurement[propMap.value] = eventAttributes[eventAttributeKey];
                             if (linkTrackVars) {
                                 linkTrackVars.push(propMap.value);
                             }
@@ -369,7 +375,7 @@
                     if (mapping && mapping.result && mapping.matches) {
                         mapping.matches.forEach(function(mapping) {
                             if (mapping.value) {
-                                s[mapping.value] = eventAttributes[eventAttributeKey];
+                                appMeasurement[mapping.value] = eventAttributes[eventAttributeKey];
                                 if (linkTrackVars) {
                                     linkTrackVars.push(mapping.value);
                                 }
@@ -387,7 +393,7 @@
                 if (eventAttributes.hasOwnProperty(eventAttributeKey)) {
                     contextVariableMapping.forEach(function(contextVariableMap) {
                         if (contextVariableMap.map === eventAttributeKey) {
-                            s.contextData[contextVariableMap.value] = eventAttributes[eventAttributeKey];
+                            appMeasurement.contextData[contextVariableMap.value] = eventAttributes[eventAttributeKey];
                             if (linkTrackVars) {
                                 linkTrackVars.push('contextData.' + contextVariableMap.value);
                             }
@@ -410,14 +416,14 @@
                     }
                 } else {
                     // no user identities means there was a logout, so set all current customer ids to null
-                    var currentAdobeCustomerIds = s.visitor.getCustomerIDs();
+                    var currentAdobeCustomerIds = appMeasurement.visitor.getCustomerIDs();
                     for (var currentIdentityKey in currentAdobeCustomerIds) {
                         identitiesToSet[currentIdentityKey] = null;
                     }
                 }
 
                 try {
-                    s.visitor.setCustomerIDs(identitiesToSet);
+                    appMeasurement.visitor.setCustomerIDs(identitiesToSet);
                 } catch (e) {
                     return 'Error calling setCustomerIDs on adobe';
                 }
