@@ -19,17 +19,18 @@
 
 (function (window) {
     var name = 'Adobe',
-        MARKETINGCLOUDIDKEY = 'mid';
+        MARKETINGCLOUDIDKEY = 'mid',
+        ADOBEMODULENUMBER = 124;
 
     var constructor = function () {
         var self = this;
         self.name = name;
 
         function initForwarder(forwarderSettings) {
-            mParticle._setIntegrationDelay(124, true);
+            mParticle._setIntegrationDelay(ADOBEMODULENUMBER, true);
             try {
                 var mcID = Visitor.getInstance(forwarderSettings.organizationID).getMarketingCloudVisitorID(setMarketingCloudId);
-                if (mcID) {
+                if (mcID && mcID.length > 0) {
                     setMCIDOnIntegrationAttributes(mcID);
                 }
                 return 'Adobe Server Side Integration Ready';
@@ -47,8 +48,8 @@
     function setMCIDOnIntegrationAttributes(mcid) {
         var adobeIntegrationAttributes = {};
         adobeIntegrationAttributes[MARKETINGCLOUDIDKEY] = mcid;
-        mParticle.setIntegrationAttribute(124, adobeIntegrationAttributes);
-        mParticle._setIntegrationDelay(124, false);
+        mParticle.setIntegrationAttribute(ADOBEMODULENUMBER, adobeIntegrationAttributes);
+        mParticle._setIntegrationDelay(ADOBEMODULENUMBER, false);
     }
 
     if (!window || !window.mParticle || !window.mParticle.addForwarder) {
