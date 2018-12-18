@@ -238,7 +238,7 @@
                     incrementor = [];
                     merchandising = [];
 
-                    if (expandedEvt.EventName === 'eCommerce - Purchase - Total') {
+                    if (expandedEvt.EventName === 'eCommerce - purchase - Total') {
                         for (var eventAttributeKey in expandedEvt.EventAttributes) {
                             if (expandedEvt.EventAttributes.hasOwnProperty(eventAttributeKey)) {
                                 var jsHash = calculateJSHash(event.EventDataType, event.EventCategory, eventAttributeKey);
