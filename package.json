@@ -7,7 +7,8 @@
     "url": "https://github.com/mparticle-integrations/mparticle-javascript-integration-adobe.git"
   },
   "scripts": {
-      "build": "cat src/AdobeVisitorApiAndAppMeasurement.js src/AdobeKit-dev.js > AdobeKit.js"
+      "buildMain": "cat src/AdobeVisitorApiAndAppMeasurement.js src/AdobeKit-dev.js > AdobeKit.js",
+      "buildServer": "cat src/AdobeVisitorAPI.js src/AdobeServerSideKit-dev.js > AdobeServerSideKit.js"
   },
   "author": "Robert Ing (ring@mparticle.com)",
   "license": "Apache",
