@@ -84,7 +84,7 @@
                 appMeasurement.trackingServer = settings.trackingServerURL;
                 appMeasurement.trackingServerSecure = settings.trackingServerURLSecure;
                 appMeasurement.trackDownloadLinks = true;
-                appMeasurement.trackExternalLinks = true;
+                appMeasurement.trackExternalLinks = settings.trackExternalLinks === 'True';
                 appMeasurement.trackInlineStats = true;
                 appMeasurement.linkDownloadFileTypes = 'exe,zip,wav,mp3,mov,mpg,avi,wmv,pdf,doc,docx,xls,xlsx,ppt,pptx';
                 appMeasurement.linkInternalFilters = 'javascript:';
