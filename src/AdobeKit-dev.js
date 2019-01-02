@@ -94,6 +94,8 @@
                 appMeasurement.linkTrackEvents = 'None';
                 appMeasurement.visitorNamespace = '';
 
+                // On first load, adobe will call the callback correctly if no MCID exists
+                // On subsequent loads, it does not, so we need to manually call setMCIDOnIntegrationAttributes
                 var mcID = Visitor.getInstance(settings.organizationID).getMarketingCloudVisitorID(setMarketingCloudId);
                 if (mcID && mcID.length > 0) {
                     setMCIDOnIntegrationAttributes(mcID);
