@@ -19,6 +19,8 @@
 
 (function (window) {
     var name = 'Adobe',
+        ADOBEMODULENUMBER = 124,
+        MARKETINGCLOUDIDKEY = 'mid',
         MessageType = {
             SessionStart: 1,
             SessionEnd: 2,
@@ -74,7 +76,6 @@
 
         function finishAdobeInitialization() {
             try {
-
                 appMeasurement=s_gi(settings.reportSuiteIDs);
                 if (settings.setGlobalObject === 'True') {
                     window.s = appMeasurement;
@@ -92,10 +93,29 @@
                 appMeasurement.linkTrackVars = 'None';
                 appMeasurement.linkTrackEvents = 'None';
                 appMeasurement.visitorNamespace = '';
+
+                // On first load, adobe will call the callback correctly if no MCID exists
+                // On subsequent loads, it does not, so we need to manually call setMCIDOnIntegrationAttributes
+                var mcID = Visitor.getInstance(settings.organizationID).getMarketingCloudVisitorID(setMarketingCloudId);
+                if (mcID && mcID.length > 0) {
+                    setMCIDOnIntegrationAttributes(mcID);
+                }
+
                 return true;
             } catch(e) {
                 return 'error initializing adobe: ' + e;
             }
+        }
+
+        function setMarketingCloudId(mcid) {
+            setMCIDOnIntegrationAttributes(mcid);
+        }
+
+        function setMCIDOnIntegrationAttributes(mcid) {
+            var adobeIntegrationAttributes = {};
+            adobeIntegrationAttributes[MARKETINGCLOUDIDKEY] = mcid;
+            mParticle.setIntegrationAttribute(ADOBEMODULENUMBER, adobeIntegrationAttributes);
+            mParticle._setIntegrationDelay(ADOBEMODULENUMBER, false);
         }
 
         // Get the mapped value for custom events

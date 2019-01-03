@@ -83,9 +83,12 @@ describe('AdobeEventForwarder Forwarder', function () {
 
         Visitor = {
             getInstance: function(orgId) {
-                var instance = new MockVisitorInstance
+                var instance = new MockVisitorInstance;
                 instance.orgId = orgId;
                 instance.getInstanceCalled = true;
+                instance.getMarketingCloudVisitorID = function(cb) {
+                    cb('MCID test');
+                };
                 return instance;
             },
             AuthState: {
@@ -229,7 +232,7 @@ describe('AdobeEventForwarder Forwarder', function () {
         s_gi('testReportSuiteId').should.be.ok();
         s_gi('testReportSuiteId').visitor.should.be.ok();
         s_gi('testReportSuiteId').visitor.orgId.should.equal('abcde');
-        
+
         Should(window.s).not.be.ok();
         Should(window.appMeasurement).not.be.ok();
 
@@ -237,7 +240,7 @@ describe('AdobeEventForwarder Forwarder', function () {
         s_gi('testReportSuiteId').should.be.ok();
         s_gi('testReportSuiteId').visitor.should.be.ok();
         s_gi('testReportSuiteId').visitor.orgId.should.equal('abcde');
-        
+
         Should(window.s).be.ok();
 
         done();
@@ -458,6 +461,13 @@ describe('AdobeEventForwarder Forwarder', function () {
         (appMeasurementInstance.linkTrackVars.indexOf('prop2') >= 0).should.equal(true);
         (appMeasurementInstance.linkTrackVars.indexOf('prop3') >= 0).should.equal(true);
         (appMeasurementInstance.linkTrackVars.indexOf('eVar1') >= 0).should.equal(true);
+
+        done();
+    });
+
+    it('should call setIntegrationAttribute properly', function(done) {
+        mParticle.getIntegrationAttributes(124).mid.should.equal('MCID test');
+        mParticle._getIntegrationDelays()[124].should.equal(false);
 
         done();
     });

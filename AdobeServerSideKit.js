@@ -36,6 +36,8 @@ var e=function(){"use strict";function e(){return{callbacks:{},add:function(e,t)
         function initForwarder(forwarderSettings) {
             mParticle._setIntegrationDelay(ADOBEMODULENUMBER, true);
             try {
+                // On first load, adobe will call the callback correctly if no MCID exists
+                // On subsequent loads, it does not, so we need to manually call setMCIDOnIntegrationAttributes
                 var mcID = Visitor.getInstance(forwarderSettings.organizationID).getMarketingCloudVisitorID(setMarketingCloudId);
                 if (mcID && mcID.length > 0) {
                     setMCIDOnIntegrationAttributes(mcID);
