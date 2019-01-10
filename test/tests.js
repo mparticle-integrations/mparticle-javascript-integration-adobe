@@ -128,7 +128,7 @@ describe('AdobeEventForwarder Forwarder', function () {
             };
         };
 
-    function configureAdobeForwarderAndReInit(timestampOption, setGlobalObject) {
+    function configureAdobeForwarderAndReInit(timestampOption, setGlobalObject, enablePageNameBoolean) {
         mParticle.configureForwarder({
             name: 'Adobe',
             settings: {
@@ -145,7 +145,8 @@ describe('AdobeEventForwarder Forwarder', function () {
                 trackingServerURLSecure: 'customerId',
                 timestampOption: timestampOption,
                 reportSuiteIDs: 'testReportSuiteId',
-                setGlobalObject: setGlobalObject
+                setGlobalObject: setGlobalObject,
+                enablePageName: enablePageNameBoolean || false
 
             },
             eventNameFilters: [],
@@ -329,6 +330,16 @@ describe('AdobeEventForwarder Forwarder', function () {
         (appMeasurementInstance.linkTrackVars.indexOf('contextData.contextTestValue') >= 0).should.equal(true);
         (appMeasurementInstance.linkTrackVars.indexOf('events') >= 0).should.equal(true);
         (appMeasurementInstance.linkTrackVars.indexOf('events') >= 0).should.equal(true);
+
+        done();
+    });
+
+    it('should log an event with pageName when enabledPageName is True', function(done) {
+        configureAdobeForwarderAndReInit('optional', 'False', 'True');
+        mParticle.logPageView('Find Ticket', {color: 'green', gender: 'female', c1: 'c1testValue', linkName: 'test'});
+
+        var appMeasurementInstance = s_gi('testReportSuiteId');
+
         (appMeasurementInstance.linkTrackVars.indexOf('pageName') >= 0).should.equal(true);
 
         done();
@@ -377,6 +388,20 @@ describe('AdobeEventForwarder Forwarder', function () {
         (appMeasurementInstance.linkTrackVars.indexOf('eVar1') >= 0).should.equal(true);
         (appMeasurementInstance.linkTrackVars.indexOf('transactionID') >= 0).should.equal(true);
         (appMeasurementInstance.linkTrackVars.indexOf('purchaseID') >= 0).should.equal(true);
+
+        done();
+    });
+
+    it('should log a product purchase wih pageName when enabledPageName is True', function(done) {
+        configureAdobeForwarderAndReInit('optional', 'True', 'True');
+
+        var product1 = mParticle.eCommerce.createProduct('nokia', '1234', 123, 1, null, null, null, null, null, {PI1: 'bob', PI2: 'tim', PM1: 'sneakers', PM2: 'shirt'});
+        var product2 = mParticle.eCommerce.createProduct('apple', '2345', 234, 2, null, null, null, null, null, {PI1: 'Jones', PM2: 'abc', availability: true});
+        var ta = mParticle.eCommerce.createTransactionAttributes('tID123', 'aff1', 'coupon', 456, 10, 5);
+
+        mParticle.eCommerce.logPurchase(ta, [product1, product2], true, {gender: 'male', color: 'blue', discount: 20});
+
+        var appMeasurementInstance = s_gi('testReportSuiteId');
         (appMeasurementInstance.linkTrackVars.indexOf('pageName') >= 0).should.equal(true);
 
         done();
