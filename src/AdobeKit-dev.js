@@ -82,7 +82,7 @@
                 }
                 appMeasurement.visitor = Visitor.getInstance(settings.organizationID);
 
-                appMeasurement.trackingServer = settings.trackingServerURL;
+                appMeasurement.trackingServer = settings.trackingServer;
                 appMeasurement.trackingServerSecure = settings.trackingServerURLSecure;
                 appMeasurement.trackDownloadLinks = true;
                 appMeasurement.trackExternalLinks = settings.trackExternalLinks === 'True';

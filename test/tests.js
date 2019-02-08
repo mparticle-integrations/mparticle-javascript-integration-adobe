@@ -141,8 +141,8 @@ describe('AdobeEventForwarder Forwarder', function () {
                 events:'[{&quot;maptype&quot;:&quot;EventClassDetails.Id&quot;,&quot;value&quot;:&quot;event1&quot;,&quot;map&quot;:&quot;1821516884252957430&quot;,&quot;jsmap&quot;:&quot;750057686&quot;},{&quot;maptype&quot;:&quot;EventClass.Id&quot;,&quot;value&quot;:&quot;event2&quot;,&quot;map&quot;:&quot;-3234618101041058100&quot;,&quot;jsmap&quot;:&quot;-1107730368&quot;},{&quot;maptype&quot;:&quot;EventClassDetails.Id&quot;,&quot;value&quot;:&quot;event3&quot;,&quot;map&quot;:&quot;-5153013487206524777&quot;,&quot;jsmap&quot;:&quot;564473837&quot;},{&quot;maptype&quot;:&quot;EventClass.Id&quot;,&quot;value&quot;:&quot;event7&quot;,&quot;map&quot;:&quot;discount&quot;,&quot;jsmap&quot;:&quot;-100343221&quot;}]',
                 contextVariables:'[{&quot;maptype&quot;:&quot;EventAttributeClass.Name&quot;,&quot;value&quot;:&quot;contextTestValue&quot;,&quot;map&quot;:&quot;c1&quot;}]',
                 organizationID: 'abcde',
-                trackingServerURL: 'customerId',
-                trackingServerURLSecure: 'customerId',
+                trackingServer: 'trackingServer.com',
+                trackingServerURLSecure: 'trackingServers.com',
                 timestampOption: timestampOption,
                 reportSuiteIDs: 'testReportSuiteId',
                 setGlobalObject: setGlobalObject,
@@ -233,6 +233,7 @@ describe('AdobeEventForwarder Forwarder', function () {
         s_gi('testReportSuiteId').should.be.ok();
         s_gi('testReportSuiteId').visitor.should.be.ok();
         s_gi('testReportSuiteId').visitor.orgId.should.equal('abcde');
+        s_gi('testReportSuiteId').trackingServer.should.equal('trackingServer.com');
 
         Should(window.s).not.be.ok();
         Should(window.appMeasurement).not.be.ok();
