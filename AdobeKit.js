@@ -174,7 +174,7 @@ function s_pgicq(){var r=window,a=r.s_giq,k,p,n;if(a)for(k=0;k<a.length;k++)p=a[
                 }
                 appMeasurement.visitor = Visitor.getInstance(settings.organizationID);
 
-                appMeasurement.trackingServer = settings.trackingServerURL;
+                appMeasurement.trackingServer = settings.trackingServer;
                 appMeasurement.trackingServerSecure = settings.trackingServerURLSecure;
                 appMeasurement.trackDownloadLinks = true;
                 appMeasurement.trackExternalLinks = settings.trackExternalLinks === 'True';
