@@ -7,14 +7,28 @@
     "url": "https://github.com/mparticle-integrations/mparticle-javascript-integration-adobe.git"
   },
   "scripts": {
-      "buildClient": "cat src/Adobe-SDKs/VisitorAPI.js src/Adobe-SDKs/AppMeasurement.js src/AdobeKit-dev.js > AdobeKit.js",
-      "buildServer": "cat src/Adobe-SDKs/VisitorAPI.js src/AdobeServerSideKit-dev.js > AdobeServerSideKit.js"
+    "buildClient": "cat src/Adobe-SDKs/VisitorAPI.js src/Adobe-SDKs/AppMeasurement.js src/AdobeKit-dev.js > AdobeKit.js",
+    "buildServer": "cat src/Adobe-SDKs/VisitorAPI.js src/AdobeServerSideKit-dev.js > AdobeServerSideKit.js",
+    "test": "npm run testClient && npm run testServer",
+    "testClient": "jest --config test/jest.client.config.js test/test.js",
+    "testServer": "jest --config test/jest.server.config.js test/server.test.js"
   },
   "author": "Robert Ing (ring@mparticle.com)",
   "license": "Apache",
   "devDependencies": {
+    "@mparticle/web-sdk": "^2.9.9-rc.1",
     "blanket": "^1.1.7",
+    "browserify": "^16.5.0",
+    "jest": "^24.9.0",
+    "karma": "^4.2.0",
+    "karma-browserify": "^6.1.0",
+    "karma-chrome-launcher": "^3.1.0",
+    "karma-firefox-launcher": "^1.2.0",
+    "karma-junit-reporter": "^1.2.0",
+    "karma-mocha": "^1.3.0",
+    "karma-should": "^1.0.0",
+    "mocha": "^2.3.2",
     "should": "^7.1.0",
-    "mocha": "^2.3.2"
+    "sinon": "^7.4.1"
   }
 }
