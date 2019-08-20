@@ -13,6 +13,7 @@
   "author": "Robert Ing (ring@mparticle.com)",
   "license": "Apache",
   "devDependencies": {
+    "@mparticle/web-sdk": "^2.9.9-rc.1",
     "blanket": "^1.1.7",
     "should": "^7.1.0",
     "mocha": "^2.3.2"
