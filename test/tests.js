@@ -1,5 +1,3 @@
-var mParticle = require('@mparticle/web-sdk');
-
 /* eslint-disable no-undef*/
 describe('AdobeEventForwarder Forwarder', function () {
     var server = new MockHttpServer(),
@@ -228,8 +226,8 @@ describe('AdobeEventForwarder Forwarder', function () {
         window.mParticle.isIOS = null;
         window.mParticle.useCookieStorage = false;
         mParticle.isDevelopmentMode = false;
-        mParticle.eCommerce.Cart.clear();
         configureAdobeForwarderAndReInit('optional');
+        mParticle.eCommerce.Cart.clear();
     });
 
     it('should initialize properly', function(done) {

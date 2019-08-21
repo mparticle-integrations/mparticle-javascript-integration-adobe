@@ -6,15 +6,15 @@
 </head>
 <body>
     <div id="mocha"></div>
-    <script src="http://jssdkcdns.mparticle.com/js/v2/mparticle.js"></script>
+    <script src="../../../mparticle-sdk-javascript-private/build/mParticle-dev.js"></script>
     <script src="../node_modules/mocha/mocha.js"></script>
     <script src="../node_modules/should/should.js"></script>
     <script src="mockhttprequest.js"></script>
 
     <script>mocha.setup('bdd')</script>
 
-    <script src="tests.js"></script>
     <script src="../src/AdobeKit-dev.js"></script>
+    <script src="tests.js"></script>
     <script>
         mocha.run();
     </script>
