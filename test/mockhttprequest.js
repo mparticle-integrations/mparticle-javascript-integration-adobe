@@ -1,5 +1,4 @@
 /* eslint-disable no-undef*/
-
 /*
  * Mock XMLHttpRequest (see http://www.w3.org/TR/XMLHttpRequest)
  *
@@ -470,3 +469,5 @@ MockHttpServer.prototype = {
         // Instances should override this.
     }
 };
+
+global.MockHttpServer = MockHttpServer;

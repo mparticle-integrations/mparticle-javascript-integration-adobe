@@ -562,7 +562,7 @@ function s_pgicq(){var r=window,a=r.s_giq,k,p,n;if(a)for(k=0;k<a.length;k++)p=a[
     if (!window || !window.mParticle || !window.mParticle.addForwarder) {
         return;
     }
-
+    debugger
     window.mParticle.addForwarder({
         name: name,
         constructor: constructor

@@ -1,4 +1,6 @@
 /* eslint-disable no-undef*/
+var server = new MockHttpServer;
+
 describe('AdobeEventForwarder Forwarder', function () {
     var EventType = {
             Unknown: 0,
@@ -122,20 +124,12 @@ describe('AdobeEventForwarder Forwarder', function () {
                     self.clearVarsCalled = true;
                 }
             };
-        },
-        mockXHR = {
-            open: jest.fn(),
-            send: jest.fn(),
-            setRequestHeader: jest.fn(),
-            readyState: 4,
-            responseText: JSON.stringify(
-                []
-            )
         };
 
     function configureAdobeForwarderAndReInit(timestampOption, setGlobalObject, enablePageNameBoolean) {
         mParticle.config = {
             requestConfig: false,
+            logLevel: 'none',
             workspaceToken: 'testworkspacetoken',
             kitConfigs: [
                 {
@@ -156,7 +150,6 @@ describe('AdobeEventForwarder Forwarder', function () {
                         reportSuiteIDs: 'testReportSuiteId',
                         setGlobalObject: setGlobalObject,
                         enablePageName: enablePageNameBoolean || false
-
                     },
                     eventNameFilters: [],
                     eventTypeFilters: [],
@@ -183,16 +176,15 @@ describe('AdobeEventForwarder Forwarder', function () {
     };
 
     beforeAll(function () {
-        // server.start();
-        // server.requests = [];
-        // server.handle = function(request) {
-        //     request.setResponseHeader('Content-Type', 'application/json');
-        //     request.receive(200, JSON.stringify({
-        //         Store: {},
-        //         mpid: 'testMPID'
-        //     }));
-        // };
-
+        server.start();
+        server.requests = [];
+        server.handle = function(request) {
+            request.setResponseHeader('Content-Type', 'application/json');
+            request.receive(200, JSON.stringify({
+                Store: {},
+                mpid: 'testMPID'
+            }));
+        };
         window.Visitor = Visitor;
         mParticle.EventType = EventType;
         mParticle.ProductActionType = ProductActionType;
@@ -230,45 +222,40 @@ describe('AdobeEventForwarder Forwarder', function () {
     beforeEach(function() {
         window.s = null;
         window.mockInstances = {};
-        // server.requests = [];
+        server.requests = [];
         window.mParticleAndroid = null;
         window.mParticle.isIOS = null;
         window.mParticle.useCookieStorage = false;
         mParticle.isDevelopmentMode = false;
-        window.XMLHttpRequest = jest.fn(function () {
-            return mockXHR;
-        });
-
         configureAdobeForwarderAndReInit('optional');
-        // mParticle.eCommerce.Cart.clear();
+        mParticle.eCommerce.Cart.clear();
     });
 
-    it('should initialize properly', function(done) {
-        debugger
+    test('should initialize properly', function(done) {
         configureAdobeForwarderAndReInit('notallowed');
-        expect(s_gi('testReportSuiteId')).be.ok();
-        expect(s_gi('testReportSuiteId').visitor).be.ok();
+        expect(s_gi('testReportSuiteId')).toBeDefined()
+        expect(s_gi('testReportSuiteId').visitor).toBeDefined()
         expect(s_gi('testReportSuiteId').visitor.orgId).toBe('abcde');
         expect(s_gi('testReportSuiteId').trackingServer).toBe('trackingServer.com');
-
-        Should(window.s).not.be.ok();
-        Should(window.appMeasurement).not.be.ok();
+        
+        expect(window.s).toBeFalsy();
+        expect(window.appMeasurement).toBeFalsy();
 
         configureAdobeForwarderAndReInit('notallowed', 'True');
-        expect(s_gi('testReportSuiteId')).be.ok();
-        expect(s_gi('testReportSuiteId').visitor).be.ok();
+        expect(s_gi('testReportSuiteId')).toBeDefined();
+        expect(s_gi('testReportSuiteId').visitor).toBeDefined();
         expect(s_gi('testReportSuiteId').visitor.orgId).toBe('abcde');
 
-        Should(window.s).be.ok();
+        expect(window.s).toBeDefined();
 
         done();
     });
 
-    it('should set the customerId properly', function(done) {
+    test('should set the customerId properly', function(done) {
         var appMeasurementInstance = s_gi('testReportSuiteId');
-        mParticle.Identity.login({userIdentities: {customerid: '123'}});
+        mParticle.Identity.login({ userIdentities: { customerid: '123' } }, function(result) {console.log(result)});
         expect(appMeasurementInstance.visitor.userId.customerid.id).toBe('123');
-
+        
         mParticle.Identity.modify({userIdentities: {customerid: '234', email: 'test@gmail.com'}});
         expect(appMeasurementInstance.visitor.userId.customerid.id).toBe('234');
         expect(appMeasurementInstance.visitor.userId.email.id).toBe('test@gmail.com');
@@ -282,36 +269,34 @@ describe('AdobeEventForwarder Forwarder', function () {
         };
 
         mParticle.Identity.logout();
-        Should(appMeasurementInstance.visitor.userId.customerid).not.be.ok();
-        Should(appMeasurementInstance.visitor.userId.email).not.be.ok();
+        expect(appMeasurementInstance.visitor.userId.customerid).toBeFalsy();
+        expect(appMeasurementInstance.visitor.userId.email).toBeFalsy();
 
         done();
     });
 
-    it('should set the timestamp when timestamp === \'optional\' or \'required\' and not set it when it is \'notallowed\'', function(done) {
+    test('should set the timestamp when timestamp === \'optional\' or \'required\' and not set it when it is \'notallowed\'', function(done) {
         configureAdobeForwarderAndReInit('optional');
         var appMeasurementInstance = s_gi('testReportSuiteId');
         mParticle.logEvent('Button 1', EventType.Navigation);
-
-        Should(appMeasurementInstance.timestamp).be.ok();
+        expect(appMeasurementInstance.timestamp).toBeDefined();
 
         appMeasurementInstance.timestamp = null;
 
         configureAdobeForwarderAndReInit('notallowed');
 
         mParticle.logEvent('Button 1', EventType.Navigation);
-        Should(appMeasurementInstance.timestamp).not.be.ok();
+        expect(appMeasurementInstance.timestamp).toBeFalsy();
 
         configureAdobeForwarderAndReInit('required');
 
         mParticle.logEvent('Button 1', EventType.Navigation);
-
-        Should(appMeasurementInstance.timestamp).be.ok();
+        expect(appMeasurementInstance.timestamp).toBeDefined();
 
         done();
     });
 
-    it('should log page view', function(done) {
+    test('should log page view', function(done) {
         mParticle.logPageView('log page view test', {color: 'green', gender: 'female', c1: 'c1testValue', linkName: 'test'});
 
         var appMeasurementInstance = s_gi('testReportSuiteId');
@@ -327,7 +312,7 @@ describe('AdobeEventForwarder Forwarder', function () {
         done();
     });
 
-    it('should log an event when trying to log a mapped page view value', function(done) {
+    test('should log an event when trying to log a mapped page view value', function(done) {
         mParticle.logPageView('Find Ticket', {color: 'green', gender: 'female', c1: 'c1testValue', linkName: 'test'});
 
         var appMeasurementInstance = s_gi('testReportSuiteId');
@@ -353,7 +338,7 @@ describe('AdobeEventForwarder Forwarder', function () {
         done();
     });
 
-    it('should log an event with pageName when enabledPageName is True', function(done) {
+    test('should log an event with pageName when enabledPageName is True', function(done) {
         configureAdobeForwarderAndReInit('optional', 'False', 'True');
         mParticle.logPageView('Find Ticket', {color: 'green', gender: 'female', c1: 'c1testValue', linkName: 'test'});
 
@@ -364,17 +349,17 @@ describe('AdobeEventForwarder Forwarder', function () {
         done();
     });
 
-    it('should not log event that is not mapped', function(done) {
+    test('should not log event that is not mapped', function(done) {
         mParticle.logEvent('blah', mParticle.EventType.Unknown, {color: 'green', gender: 'female', c1: 'c1testValue', linkName: 'test'});
 
         var appMeasurementInstance = s_gi('testReportSuiteId');
         expect(appMeasurementInstance.tlCalled).toBe(false);
         expect(appMeasurementInstance.tCalled).toBe(false);
-        Should(appMeasurementInstance.pageName).not.be.ok();
-        Should(appMeasurementInstance.events).not.be.ok();
-        Should(appMeasurementInstance.eVar1).not.be.ok();
-        Should(appMeasurementInstance.prop2).not.be.ok();
-        Should(appMeasurementInstance.hier1).not.be.ok();
+        expect(appMeasurementInstance.pageName).toBeFalsy();
+        expect(appMeasurementInstance.events).toBeFalsy();
+        expect(appMeasurementInstance.eVar1).toBeFalsy();
+        expect(appMeasurementInstance.prop2).toBeFalsy();
+        expect(appMeasurementInstance.hier1).toBeFalsy();
         expect(Object.keys(appMeasurementInstance.contextData).length).toBe(0);
         expect(appMeasurementInstance.clearVarsCalled).toBe(false);
 
@@ -383,7 +368,7 @@ describe('AdobeEventForwarder Forwarder', function () {
         done();
     });
 
-    it('should log a product purchase with proper events, product merchandising events, and produdt incrementor events', function(done) {
+    test('should log a product purchase with proper events, product merchandising events, and produdt incrementor events', function(done) {
         var product1 = mParticle.eCommerce.createProduct('nokia', '1234', 123, 1, null, null, null, null, null, {PI1: 'bob', PI2: 'tim', PM1: 'sneakers', PM2: 'shirt'});
         var product2 = mParticle.eCommerce.createProduct('apple', '2345', 234, 2, null, null, null, null, null, {PI1: 'Jones', PM2: 'abc', availability: true});
         var ta = mParticle.eCommerce.createTransactionAttributes('tID123', 'aff1', 'coupon', 456, 10, 5);
@@ -413,7 +398,7 @@ describe('AdobeEventForwarder Forwarder', function () {
         done();
     });
 
-    it('should log a product purchase wih pageName when enabledPageName is True', function(done) {
+    test('should log a product purchase wih pageName when enabledPageName is True', function(done) {
         configureAdobeForwarderAndReInit('optional', 'True', 'True');
 
         var product1 = mParticle.eCommerce.createProduct('nokia', '1234', 123, 1, null, null, null, null, null, {PI1: 'bob', PI2: 'tim', PM1: 'sneakers', PM2: 'shirt'});
@@ -428,7 +413,7 @@ describe('AdobeEventForwarder Forwarder', function () {
         done();
     });
 
-    it('should log a product add to cart', function(done) {
+    test('should log a product add to cart', function(done) {
         var product1 = mParticle.eCommerce.createProduct('nokia', '1234', 123, 1, null, null, null, null, null, {PI1: 'bob', PI2: 'tim', PM1: 'sneakers', PM2: 'shirt'});
         var product2 = mParticle.eCommerce.createProduct('apple', '2345', 234, 2, null, null, null, null, null, {PI1: 'Jones', PM2: 'abc', availability: true});
         mParticle.eCommerce.Cart.add([product1, product2], true);
@@ -447,7 +432,7 @@ describe('AdobeEventForwarder Forwarder', function () {
         done();
     });
 
-    it('should log a product remove from cart', function(done) {
+    test('should log a product remove from cart', function(done) {
         var product1 = mParticle.eCommerce.createProduct('nokia', '1234', 123, 1, null, null, null, null, null, {PI1: 'bob', PI2: 'tim', PM1: 'sneakers', PM2: 'shirt'});
         var product2 = mParticle.eCommerce.createProduct('apple', '2345', 234, 2, null, null, null, null, null, {PI1: 'Jones', PM2: 'abc', availability: true});
         mParticle.eCommerce.Cart.add([product1, product2], true);
@@ -466,7 +451,7 @@ describe('AdobeEventForwarder Forwarder', function () {
         done();
     });
 
-    it('should log a product view', function(done) {
+    test('should log a product view', function(done) {
         var product1 = mParticle.eCommerce.createProduct('nokia', '1234', 123, 1, null, null, null, null, null, {PI1: 'bob', PI2: 'tim', PM1: 'sneakers', PM2: 'shirt'});
         mParticle.eCommerce.logProductAction(ProductActionType.ViewDetail, product1, {gender: 'male', color: 'blue'});
 
@@ -488,7 +473,7 @@ describe('AdobeEventForwarder Forwarder', function () {
         done();
     });
 
-    it('should log a product checkout', function(done) {
+    test('should log a product checkout', function(done) {
         var product1 = mParticle.eCommerce.createProduct('nokia', '1234', 123, 1, null, null, null, null, null, {PI1: 'bob', PI2: 'tim', PM1: 'sneakers', PM2: 'shirt'});
         var product2 = mParticle.eCommerce.createProduct('apple', '2345', 234, 2, null, null, null, null, null, {PI1: 'Jones', PM2: 'abc', availability: true});
         mParticle.eCommerce.Cart.add([product1, product2]);
@@ -515,7 +500,7 @@ describe('AdobeEventForwarder Forwarder', function () {
         done();
     });
 
-    it('should call setIntegrationAttribute properly', function(done) {
+    test('should call setIntegrationAttribute properly', function(done) {
         expect(mParticle.getIntegrationAttributes(124).mid).toBe('MCID test');
         expect(mParticle._getIntegrationDelays()[124]).toBe(false);
 

@@ -27,7 +27,7 @@ describe('AdobeServerSide Forwarder', function () {
         }
     },
 
-    before(function () {
+    beforeAll(function () {
         window.Visitor = Visitor;
         server.start();
     });
@@ -39,7 +39,6 @@ describe('AdobeServerSide Forwarder', function () {
         window.mParticle.isIOS = null;
         window.mParticle.useCookieStorage = false;
         mParticle.isDevelopmentMode = false;
-        // mParticle.eCommerce.Cart.clear();
         mParticle.config = {
             requestConfig: false,
             workspaceToken: 'testworkspacetoken',
@@ -79,7 +78,7 @@ describe('AdobeServerSide Forwarder', function () {
         mParticle.init('apikey', mParticle.config);
     });
 
-    it('should call setIntegrationAttribute properly', function(done) {
+    test('should call setIntegrationAttribute properly', function(done) {
         expect(mParticle.getIntegrationAttributes(124).mid).toBe('MCID test');
         expect(mParticle._getIntegrationDelays()[124]).toBe(false);
 
