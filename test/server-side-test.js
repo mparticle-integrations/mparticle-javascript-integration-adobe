@@ -80,8 +80,8 @@ describe('AdobeServerSide Forwarder', function () {
     });
 
     it('should call setIntegrationAttribute properly', function(done) {
-        mParticle.getIntegrationAttributes(124).mid.should.equal('MCID test');
-        mParticle._getIntegrationDelays()[124].should.equal(false);
+        expect(mParticle.getIntegrationAttributes(124).mid).toBe('MCID test');
+        expect(mParticle._getIntegrationDelays()[124]).toBe(false);
 
         done();
     });

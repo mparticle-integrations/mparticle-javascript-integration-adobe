@@ -1,7 +1,6 @@
 /* eslint-disable no-undef*/
 describe('AdobeEventForwarder Forwarder', function () {
-    var server = new MockHttpServer(),
-        EventType = {
+    var EventType = {
             Unknown: 0,
             Navigation: 1,
             Location: 2,
@@ -123,10 +122,20 @@ describe('AdobeEventForwarder Forwarder', function () {
                     self.clearVarsCalled = true;
                 }
             };
+        },
+        mockXHR = {
+            open: jest.fn(),
+            send: jest.fn(),
+            setRequestHeader: jest.fn(),
+            readyState: 4,
+            responseText: JSON.stringify(
+                []
+            )
         };
 
     function configureAdobeForwarderAndReInit(timestampOption, setGlobalObject, enablePageNameBoolean) {
         mParticle.config = {
+            requestConfig: false,
             workspaceToken: 'testworkspacetoken',
             kitConfigs: [
                 {
@@ -173,16 +182,16 @@ describe('AdobeEventForwarder Forwarder', function () {
         return window.mockInstances[reportSuiteID];
     };
 
-    before(function () {
-        server.start();
-        server.requests = [];
-        server.handle = function(request) {
-            request.setResponseHeader('Content-Type', 'application/json');
-            request.receive(200, JSON.stringify({
-                Store: {},
-                mpid: 'testMPID'
-            }));
-        };
+    beforeAll(function () {
+        // server.start();
+        // server.requests = [];
+        // server.handle = function(request) {
+        //     request.setResponseHeader('Content-Type', 'application/json');
+        //     request.receive(200, JSON.stringify({
+        //         Store: {},
+        //         mpid: 'testMPID'
+        //     }));
+        // };
 
         window.Visitor = Visitor;
         mParticle.EventType = EventType;
@@ -221,29 +230,34 @@ describe('AdobeEventForwarder Forwarder', function () {
     beforeEach(function() {
         window.s = null;
         window.mockInstances = {};
-        server.requests = [];
+        // server.requests = [];
         window.mParticleAndroid = null;
         window.mParticle.isIOS = null;
         window.mParticle.useCookieStorage = false;
         mParticle.isDevelopmentMode = false;
+        window.XMLHttpRequest = jest.fn(function () {
+            return mockXHR;
+        });
+
         configureAdobeForwarderAndReInit('optional');
-        mParticle.eCommerce.Cart.clear();
+        // mParticle.eCommerce.Cart.clear();
     });
 
     it('should initialize properly', function(done) {
+        debugger
         configureAdobeForwarderAndReInit('notallowed');
-        s_gi('testReportSuiteId').should.be.ok();
-        s_gi('testReportSuiteId').visitor.should.be.ok();
-        s_gi('testReportSuiteId').visitor.orgId.should.equal('abcde');
-        s_gi('testReportSuiteId').trackingServer.should.equal('trackingServer.com');
+        expect(s_gi('testReportSuiteId')).be.ok();
+        expect(s_gi('testReportSuiteId').visitor).be.ok();
+        expect(s_gi('testReportSuiteId').visitor.orgId).toBe('abcde');
+        expect(s_gi('testReportSuiteId').trackingServer).toBe('trackingServer.com');
 
         Should(window.s).not.be.ok();
         Should(window.appMeasurement).not.be.ok();
 
         configureAdobeForwarderAndReInit('notallowed', 'True');
-        s_gi('testReportSuiteId').should.be.ok();
-        s_gi('testReportSuiteId').visitor.should.be.ok();
-        s_gi('testReportSuiteId').visitor.orgId.should.equal('abcde');
+        expect(s_gi('testReportSuiteId')).be.ok();
+        expect(s_gi('testReportSuiteId').visitor).be.ok();
+        expect(s_gi('testReportSuiteId').visitor.orgId).toBe('abcde');
 
         Should(window.s).be.ok();
 
@@ -253,11 +267,11 @@ describe('AdobeEventForwarder Forwarder', function () {
     it('should set the customerId properly', function(done) {
         var appMeasurementInstance = s_gi('testReportSuiteId');
         mParticle.Identity.login({userIdentities: {customerid: '123'}});
-        appMeasurementInstance.visitor.userId.customerid.id.should.equal('123');
+        expect(appMeasurementInstance.visitor.userId.customerid.id).toBe('123');
 
         mParticle.Identity.modify({userIdentities: {customerid: '234', email: 'test@gmail.com'}});
-        appMeasurementInstance.visitor.userId.customerid.id.should.equal('234');
-        appMeasurementInstance.visitor.userId.email.id.should.equal('test@gmail.com');
+        expect(appMeasurementInstance.visitor.userId.customerid.id).toBe('234');
+        expect(appMeasurementInstance.visitor.userId.email.id).toBe('test@gmail.com');
 
         server.handle = function(request) {
             request.setResponseHeader('Content-Type', 'application/json');
@@ -301,14 +315,14 @@ describe('AdobeEventForwarder Forwarder', function () {
         mParticle.logPageView('log page view test', {color: 'green', gender: 'female', c1: 'c1testValue', linkName: 'test'});
 
         var appMeasurementInstance = s_gi('testReportSuiteId');
-        appMeasurementInstance.pageName.should.equal('log page view test');
-        appMeasurementInstance.eVar1.should.equal('green');
-        appMeasurementInstance.prop2.should.equal('female');
-        appMeasurementInstance.hier1.should.equal('test');
-        appMeasurementInstance.contextData.contextTestValue.should.equal('c1testValue');
-        appMeasurementInstance.tCalled.should.equal(true);
-        appMeasurementInstance.tlCalled.should.equal(false);
-        appMeasurementInstance.clearVarsCalled.should.equal(true);
+        expect(appMeasurementInstance.pageName).toBe('log page view test');
+        expect(appMeasurementInstance.eVar1).toBe('green');
+        expect(appMeasurementInstance.prop2).toBe('female');
+        expect(appMeasurementInstance.hier1).toBe('test');
+        expect(appMeasurementInstance.contextData.contextTestValue).toBe('c1testValue');
+        expect(appMeasurementInstance.tCalled).toBe(true);
+        expect(appMeasurementInstance.tlCalled).toBe(false);
+        expect(appMeasurementInstance.clearVarsCalled).toBe(true);
 
         done();
     });
@@ -317,22 +331,24 @@ describe('AdobeEventForwarder Forwarder', function () {
         mParticle.logPageView('Find Ticket', {color: 'green', gender: 'female', c1: 'c1testValue', linkName: 'test'});
 
         var appMeasurementInstance = s_gi('testReportSuiteId');
-        appMeasurementInstance.pageName.should.equal('Find Ticket');
-        appMeasurementInstance.events.should.equal('event1');
-        appMeasurementInstance.eVar1.should.equal('green');
-        appMeasurementInstance.prop2.should.equal('female');
-        appMeasurementInstance.hier1.should.equal('test');
-        appMeasurementInstance.contextData.contextTestValue.should.equal('c1testValue');
-        appMeasurementInstance.tlCalled.should.equal(true);
-        appMeasurementInstance.tCalled.should.equal(false);
-        appMeasurementInstance.clearVarsCalled.should.equal(true);
-        (appMeasurementInstance.linkTrackVars.indexOf('eVar1') >= 0).should.equal(true);
-        (appMeasurementInstance.linkTrackVars.indexOf('prop2') >= 0).should.equal(true);
-        (appMeasurementInstance.linkTrackVars.indexOf('prop3') >= 0).should.equal(true);
-        (appMeasurementInstance.linkTrackVars.indexOf('hier1') >= 0).should.equal(true);
-        (appMeasurementInstance.linkTrackVars.indexOf('contextData.contextTestValue') >= 0).should.equal(true);
-        (appMeasurementInstance.linkTrackVars.indexOf('events') >= 0).should.equal(true);
-        (appMeasurementInstance.linkTrackVars.indexOf('events') >= 0).should.equal(true);
+        expect(appMeasurementInstance.pageName).toBe('Find Ticket');
+        expect(appMeasurementInstance.events).toBe('event1');
+        expect(appMeasurementInstance.eVar1).toBe('green');
+        expect(appMeasurementInstance.prop2).toBe('female');
+        expect(appMeasurementInstance.hier1).toBe('test');
+        expect(appMeasurementInstance.contextData.contextTestValue).toBe('c1testValue');
+        expect(appMeasurementInstance.tlCalled).toBe(true);
+        expect(appMeasurementInstance.tCalled).toBe(false);
+        expect(appMeasurementInstance.clearVarsCalled).toBe(true);
+        expect(appMeasurementInstance.linkTrackVars.indexOf('eVar1') >= 0).toBe(true);
+        expect(appMeasurementInstance.linkTrackVars.indexOf('prop2') >= 0).toBe(true);
+        expect(appMeasurementInstance.linkTrackVars.indexOf('prop3') >= 0).toBe(true);
+        expect(appMeasurementInstance.linkTrackVars.indexOf('hier1') >= 0).toBe(true);
+        expect(
+            appMeasurementInstance.linkTrackVars.indexOf('contextData.contextTestValue') >= 0
+        ).toBe(true);
+        expect(appMeasurementInstance.linkTrackVars.indexOf('events') >= 0).toBe(true);
+        expect(appMeasurementInstance.linkTrackVars.indexOf('events') >= 0).toBe(true);
 
         done();
     });
@@ -343,7 +359,7 @@ describe('AdobeEventForwarder Forwarder', function () {
 
         var appMeasurementInstance = s_gi('testReportSuiteId');
 
-        (appMeasurementInstance.linkTrackVars.indexOf('pageName') >= 0).should.equal(true);
+        expect(appMeasurementInstance.linkTrackVars.indexOf('pageName') >= 0).toBe(true);
 
         done();
     });
@@ -352,17 +368,17 @@ describe('AdobeEventForwarder Forwarder', function () {
         mParticle.logEvent('blah', mParticle.EventType.Unknown, {color: 'green', gender: 'female', c1: 'c1testValue', linkName: 'test'});
 
         var appMeasurementInstance = s_gi('testReportSuiteId');
-        appMeasurementInstance.tlCalled.should.equal(false);
-        appMeasurementInstance.tCalled.should.equal(false);
+        expect(appMeasurementInstance.tlCalled).toBe(false);
+        expect(appMeasurementInstance.tCalled).toBe(false);
         Should(appMeasurementInstance.pageName).not.be.ok();
         Should(appMeasurementInstance.events).not.be.ok();
         Should(appMeasurementInstance.eVar1).not.be.ok();
         Should(appMeasurementInstance.prop2).not.be.ok();
         Should(appMeasurementInstance.hier1).not.be.ok();
-        Object.keys(appMeasurementInstance.contextData).length.should.equal(0);
-        appMeasurementInstance.clearVarsCalled.should.equal(false );
+        expect(Object.keys(appMeasurementInstance.contextData).length).toBe(0);
+        expect(appMeasurementInstance.clearVarsCalled).toBe(false);
 
-        appMeasurementInstance.linkTrackVars.should.equal('None');
+        expect(appMeasurementInstance.linkTrackVars).toBe('None');
 
         done();
     });
@@ -375,22 +391,24 @@ describe('AdobeEventForwarder Forwarder', function () {
         mParticle.eCommerce.logPurchase(ta, [product1, product2], true, {gender: 'male', color: 'blue', discount: 20});
 
         var appMeasurementInstance = s_gi('testReportSuiteId');
-        appMeasurementInstance.products.should.equal(';nokia;1234;1;123;event2=bob|event6=tim;eVar2=sneakers|eVar3=shirt,;apple;2345;2;234;event2=Jones;eVar3=abc');
-        appMeasurementInstance.events.should.equal('purchase,event7=20,event2,event6');
-        appMeasurementInstance.purchaseID.should.equal('tID123');
-        appMeasurementInstance.prop2.should.equal('male');
-        appMeasurementInstance.prop3.should.equal('blue');
-        appMeasurementInstance.eVar1.should.equal('blue');
-        appMeasurementInstance.tlCalled.should.equal(true);
-        appMeasurementInstance.tCalled.should.equal(false);
-        appMeasurementInstance.clearVarsCalled.should.equal(true);
-        (appMeasurementInstance.linkTrackVars.indexOf('events') >= 0).should.equal(true);
-        (appMeasurementInstance.linkTrackVars.indexOf('products') >= 0).should.equal(true);
-        (appMeasurementInstance.linkTrackVars.indexOf('prop2') >= 0).should.equal(true);
-        (appMeasurementInstance.linkTrackVars.indexOf('prop3') >= 0).should.equal(true);
-        (appMeasurementInstance.linkTrackVars.indexOf('eVar1') >= 0).should.equal(true);
-        (appMeasurementInstance.linkTrackVars.indexOf('transactionID') >= 0).should.equal(true);
-        (appMeasurementInstance.linkTrackVars.indexOf('purchaseID') >= 0).should.equal(true);
+        expect(appMeasurementInstance.products).toBe(
+            ';nokia;1234;1;123;event2=bob|event6=tim;eVar2=sneakers|eVar3=shirt,;apple;2345;2;234;event2=Jones;eVar3=abc'
+        );
+        expect(appMeasurementInstance.events).toBe('purchase,event7=20,event2,event6');
+        expect(appMeasurementInstance.purchaseID).toBe('tID123');
+        expect(appMeasurementInstance.prop2).toBe('male');
+        expect(appMeasurementInstance.prop3).toBe('blue');
+        expect(appMeasurementInstance.eVar1).toBe('blue');
+        expect(appMeasurementInstance.tlCalled).toBe(true);
+        expect(appMeasurementInstance.tCalled).toBe(false);
+        expect(appMeasurementInstance.clearVarsCalled).toBe(true);
+        expect(appMeasurementInstance.linkTrackVars.indexOf('events') >= 0).toBe(true);
+        expect(appMeasurementInstance.linkTrackVars.indexOf('products') >= 0).toBe(true);
+        expect(appMeasurementInstance.linkTrackVars.indexOf('prop2') >= 0).toBe(true);
+        expect(appMeasurementInstance.linkTrackVars.indexOf('prop3') >= 0).toBe(true);
+        expect(appMeasurementInstance.linkTrackVars.indexOf('eVar1') >= 0).toBe(true);
+        expect(appMeasurementInstance.linkTrackVars.indexOf('transactionID') >= 0).toBe(true);
+        expect(appMeasurementInstance.linkTrackVars.indexOf('purchaseID') >= 0).toBe(true);
 
         done();
     });
@@ -405,7 +423,7 @@ describe('AdobeEventForwarder Forwarder', function () {
         mParticle.eCommerce.logPurchase(ta, [product1, product2], true, {gender: 'male', color: 'blue', discount: 20});
 
         var appMeasurementInstance = s_gi('testReportSuiteId');
-        (appMeasurementInstance.linkTrackVars.indexOf('pageName') >= 0).should.equal(true);
+        expect(appMeasurementInstance.linkTrackVars.indexOf('pageName') >= 0).toBe(true);
 
         done();
     });
@@ -416,13 +434,15 @@ describe('AdobeEventForwarder Forwarder', function () {
         mParticle.eCommerce.Cart.add([product1, product2], true);
 
         var appMeasurementInstance = s_gi('testReportSuiteId');
-        appMeasurementInstance.products.should.equal(';nokia;1234;1;123;event2=bob|event6=tim;eVar2=sneakers|eVar3=shirt,;apple;2345;2;234;event2=Jones;eVar3=abc');
-        appMeasurementInstance.events.should.equal('scAdd,event2,event6');
-        appMeasurementInstance.tlCalled.should.equal(true);
-        appMeasurementInstance.tCalled.should.equal(false);
-        appMeasurementInstance.clearVarsCalled.should.equal(true);
-        (appMeasurementInstance.linkTrackVars.indexOf('events') >= 0).should.equal(true);
-        (appMeasurementInstance.linkTrackVars.indexOf('products') >= 0).should.equal(true);
+        expect(appMeasurementInstance.products).toBe(
+            ';nokia;1234;1;123;event2=bob|event6=tim;eVar2=sneakers|eVar3=shirt,;apple;2345;2;234;event2=Jones;eVar3=abc'
+        );
+        expect(appMeasurementInstance.events).toBe('scAdd,event2,event6');
+        expect(appMeasurementInstance.tlCalled).toBe(true);
+        expect(appMeasurementInstance.tCalled).toBe(false);
+        expect(appMeasurementInstance.clearVarsCalled).toBe(true);
+        expect(appMeasurementInstance.linkTrackVars.indexOf('events') >= 0).toBe(true);
+        expect(appMeasurementInstance.linkTrackVars.indexOf('products') >= 0).toBe(true);
 
         done();
     });
@@ -435,13 +455,13 @@ describe('AdobeEventForwarder Forwarder', function () {
         mParticle.eCommerce.Cart.remove(product1, true);
 
         var appMeasurementInstance = s_gi('testReportSuiteId');
-        appMeasurementInstance.products.should.equal(';nokia;1234;1;123;event2=bob|event6=tim;eVar2=sneakers|eVar3=shirt');
-        appMeasurementInstance.events.should.equal('scRemove,event2,event6');
-        appMeasurementInstance.tlCalled.should.equal(true);
-        appMeasurementInstance.tCalled.should.equal(false);
-        appMeasurementInstance.clearVarsCalled.should.equal(true);
-        (appMeasurementInstance.linkTrackVars.indexOf('events') >= 0).should.equal(true);
-        (appMeasurementInstance.linkTrackVars.indexOf('products') >= 0).should.equal(true);
+        expect(appMeasurementInstance.products).toBe(';nokia;1234;1;123;event2=bob|event6=tim;eVar2=sneakers|eVar3=shirt');
+        expect(appMeasurementInstance.events).toBe('scRemove,event2,event6');
+        expect(appMeasurementInstance.tlCalled).toBe(true);
+        expect(appMeasurementInstance.tCalled).toBe(false);
+        expect(appMeasurementInstance.clearVarsCalled).toBe(true);
+        expect(appMeasurementInstance.linkTrackVars.indexOf('events') >= 0).toBe(true);
+        expect(appMeasurementInstance.linkTrackVars.indexOf('products') >= 0).toBe(true);
 
         done();
     });
@@ -451,19 +471,19 @@ describe('AdobeEventForwarder Forwarder', function () {
         mParticle.eCommerce.logProductAction(ProductActionType.ViewDetail, product1, {gender: 'male', color: 'blue'});
 
         var appMeasurementInstance = s_gi('testReportSuiteId');
-        appMeasurementInstance.products.should.equal(';nokia;1234;1;123;event2=bob|event6=tim;eVar2=sneakers|eVar3=shirt');
-        appMeasurementInstance.events.should.equal('prodView,event2,event6');
-        appMeasurementInstance.prop2.should.equal('male');
-        appMeasurementInstance.prop3.should.equal('blue');
-        appMeasurementInstance.eVar1.should.equal('blue');
-        appMeasurementInstance.tlCalled.should.equal(true);
-        appMeasurementInstance.tCalled.should.equal(false);
-        appMeasurementInstance.clearVarsCalled.should.equal(true);
-        (appMeasurementInstance.linkTrackVars.indexOf('events') >= 0).should.equal(true);
-        (appMeasurementInstance.linkTrackVars.indexOf('products') >= 0).should.equal(true);
-        (appMeasurementInstance.linkTrackVars.indexOf('prop2') >= 0).should.equal(true);
-        (appMeasurementInstance.linkTrackVars.indexOf('prop3') >= 0).should.equal(true);
-        (appMeasurementInstance.linkTrackVars.indexOf('eVar1') >= 0).should.equal(true);
+        expect(appMeasurementInstance.products).toBe(';nokia;1234;1;123;event2=bob|event6=tim;eVar2=sneakers|eVar3=shirt');
+        expect(appMeasurementInstance.events).toBe('prodView,event2,event6');
+        expect(appMeasurementInstance.prop2).toBe('male');
+        expect(appMeasurementInstance.prop3).toBe('blue');
+        expect(appMeasurementInstance.eVar1).toBe('blue');
+        expect(appMeasurementInstance.tlCalled).toBe(true);
+        expect(appMeasurementInstance.tCalled).toBe(false);
+        expect(appMeasurementInstance.clearVarsCalled).toBe(true);
+        expect(appMeasurementInstance.linkTrackVars.indexOf('events') >= 0).toBe(true);
+        expect(appMeasurementInstance.linkTrackVars.indexOf('products') >= 0).toBe(true);
+        expect(appMeasurementInstance.linkTrackVars.indexOf('prop2') >= 0).toBe(true);
+        expect(appMeasurementInstance.linkTrackVars.indexOf('prop3') >= 0).toBe(true);
+        expect(appMeasurementInstance.linkTrackVars.indexOf('eVar1') >= 0).toBe(true);
 
         done();
     });
@@ -476,26 +496,28 @@ describe('AdobeEventForwarder Forwarder', function () {
         mParticle.eCommerce.logCheckout(1, {}, {gender: 'male', color: 'blue'});
 
         var appMeasurementInstance = s_gi('testReportSuiteId');
-        appMeasurementInstance.products.should.equal(';nokia;1234;1;123;event2=bob|event6=tim;eVar2=sneakers|eVar3=shirt,;apple;2345;2;234;event2=Jones;eVar3=abc');
-        appMeasurementInstance.events.should.equal('scCheckout,event2,event6');
-        appMeasurementInstance.prop2.should.equal('male');
-        appMeasurementInstance.prop3.should.equal('blue');
-        appMeasurementInstance.eVar1.should.equal('blue');
-        appMeasurementInstance.tlCalled.should.equal(true);
-        appMeasurementInstance.tCalled.should.equal(false);
-        appMeasurementInstance.clearVarsCalled.should.equal(true);
-        (appMeasurementInstance.linkTrackVars.indexOf('events') >= 0).should.equal(true);
-        (appMeasurementInstance.linkTrackVars.indexOf('products') >= 0).should.equal(true);
-        (appMeasurementInstance.linkTrackVars.indexOf('prop2') >= 0).should.equal(true);
-        (appMeasurementInstance.linkTrackVars.indexOf('prop3') >= 0).should.equal(true);
-        (appMeasurementInstance.linkTrackVars.indexOf('eVar1') >= 0).should.equal(true);
+        expect(appMeasurementInstance.products).toBe(
+            ';nokia;1234;1;123;event2=bob|event6=tim;eVar2=sneakers|eVar3=shirt,;apple;2345;2;234;event2=Jones;eVar3=abc'
+        );
+        expect(appMeasurementInstance.events).toBe('scCheckout,event2,event6');
+        expect(appMeasurementInstance.prop2).toBe('male');
+        expect(appMeasurementInstance.prop3).toBe('blue');
+        expect(appMeasurementInstance.eVar1).toBe('blue');
+        expect(appMeasurementInstance.tlCalled).toBe(true);
+        expect(appMeasurementInstance.tCalled).toBe(false);
+        expect(appMeasurementInstance.clearVarsCalled).toBe(true);
+        expect(appMeasurementInstance.linkTrackVars.indexOf('events') >= 0).toBe(true);
+        expect(appMeasurementInstance.linkTrackVars.indexOf('products') >= 0).toBe(true);
+        expect(appMeasurementInstance.linkTrackVars.indexOf('prop2') >= 0).toBe(true);
+        expect(appMeasurementInstance.linkTrackVars.indexOf('prop3') >= 0).toBe(true);
+        expect(appMeasurementInstance.linkTrackVars.indexOf('eVar1') >= 0).toBe(true);
 
         done();
     });
 
     it('should call setIntegrationAttribute properly', function(done) {
-        mParticle.getIntegrationAttributes(124).mid.should.equal('MCID test');
-        mParticle._getIntegrationDelays()[124].should.equal(false);
+        expect(mParticle.getIntegrationAttributes(124).mid).toBe('MCID test');
+        expect(mParticle._getIntegrationDelays()[124]).toBe(false);
 
         done();
     });
