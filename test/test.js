@@ -233,8 +233,8 @@ describe('AdobeEventForwarder Forwarder', function () {
 
     test('should initialize properly', function(done) {
         configureAdobeForwarderAndReInit('notallowed');
-        expect(s_gi('testReportSuiteId')).toBeDefined()
-        expect(s_gi('testReportSuiteId').visitor).toBeDefined()
+        expect(s_gi('testReportSuiteId')).toBeDefined();
+        expect(s_gi('testReportSuiteId').visitor).toBeDefined();
         expect(s_gi('testReportSuiteId').visitor.orgId).toBe('abcde');
         expect(s_gi('testReportSuiteId').trackingServer).toBe('trackingServer.com');
         
@@ -253,7 +253,7 @@ describe('AdobeEventForwarder Forwarder', function () {
 
     test('should set the customerId properly', function(done) {
         var appMeasurementInstance = s_gi('testReportSuiteId');
-        mParticle.Identity.login({ userIdentities: { customerid: '123' } }, function(result) {console.log(result)});
+        mParticle.Identity.login({ userIdentities: { customerid: '123' } }, function() { return; });
         expect(appMeasurementInstance.visitor.userId.customerid.id).toBe('123');
         
         mParticle.Identity.modify({userIdentities: {customerid: '234', email: 'test@gmail.com'}});
