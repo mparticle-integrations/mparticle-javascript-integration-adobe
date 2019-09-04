@@ -1,14 +1,15 @@
 {
-  "name": "mparticle-adobe",
-  "version": "1.0.0",
+  "name": "integration-adobe-client",
+  "version": "2.0.0-rc.4",
   "description": "mParticle Adobe kit integration",
+  "browser": "dist/AdobeClientSideKit.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/mparticle-integrations/mparticle-javascript-integration-adobe.git"
   },
   "scripts": {
-    "buildClient": "cat src/Adobe-SDKs/VisitorAPI.js src/Adobe-SDKs/AppMeasurement.js src/AdobeKit-dev.js > AdobeKit.js",
-    "buildServer": "cat src/Adobe-SDKs/VisitorAPI.js src/AdobeServerSideKit-dev.js > AdobeServerSideKit.js",
+    "buildClient": "rollup --config rollup.client.config.js; cat src/Adobe-SDKs/VisitorAPI.js src/Adobe-SDKs/AppMeasurement.js src/AdobeClientSideKit-temp.js > AdobeKit.js; cp AdobeKit.js dist/AdobeClientSideKit.js; rm src/AdobeClientSideKit-temp.js",
+    "buildServer": "rollup --config rollup.server.config.js; cat src/Adobe-SDKs/VisitorAPI.js src/AdobeServerSideKit-temp.js > AdobeServerSideKit.js; cp AdobeServerSideKit.js dist/AdobeServerSideKit.js; rm src/AdobeServerSideKit-temp.js",
     "test": "npm run testClient && npm run testServer",
     "testClient": "jest --config test/jest.client.config.js test/test.js",
     "testServer": "jest --config test/jest.server.config.js test/server.test.js"
@@ -28,6 +29,9 @@
     "karma-mocha": "^1.3.0",
     "karma-should": "^1.0.0",
     "mocha": "^2.3.2",
+    "rollup": "^1.20.3",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
     "should": "^7.1.0",
     "sinon": "^7.4.1"
   }
