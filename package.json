@@ -9,8 +9,9 @@
   "scripts": {
     "buildClient": "cat src/Adobe-SDKs/VisitorAPI.js src/Adobe-SDKs/AppMeasurement.js src/AdobeKit-dev.js > AdobeKit.js",
     "buildServer": "cat src/Adobe-SDKs/VisitorAPI.js src/AdobeServerSideKit-dev.js > AdobeServerSideKit.js",
-    "testClient": "jest --config test/jest.client.config.js",
-    "testServer": "jest --config test/jest.server.config.js"
+    "test": "npm run testClient && npm run testServer",
+    "testClient": "jest --config test/jest.client.config.js test/test.js",
+    "testServer": "jest --config test/jest.server.config.js test/server.test.js"
   },
   "author": "Robert Ing (ring@mparticle.com)",
   "license": "Apache",
@@ -29,12 +30,5 @@
     "mocha": "^2.3.2",
     "should": "^7.1.0",
     "sinon": "^7.4.1"
-  },
-  "jest": {
-    "setupFiles": [
-      "test/setup/mParticle.js",
-      "test/mockhttprequest.js",
-      "src/AdobeKit-dev.js"
-    ]
   }
 }
