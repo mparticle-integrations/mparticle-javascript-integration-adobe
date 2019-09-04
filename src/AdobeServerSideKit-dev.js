@@ -17,7 +17,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-(function (window) {
+import isobject from 'isobject';
+
     var name = 'Adobe',
         MARKETINGCLOUDIDKEY = 'mid',
         ADOBEMODULENUMBER = 124;
@@ -54,12 +55,42 @@
         mParticle._setIntegrationDelay(ADOBEMODULENUMBER, false);
     }
 
-    if (!window || !window.mParticle || !window.mParticle.addForwarder) {
-        return;
+    function getId() {
+        return moduleId;
     }
 
-    window.mParticle.addForwarder({
-        name: name,
-        constructor: constructor
-    });
-})(window);
+    if (window && window.mParticle && window.mParticle.addForwarder) {
+        window.mParticle.addForwarder({
+            name: name,
+            constructor: constructor,
+            getId: getId
+        });
+    }
+
+    function register(config) {
+        if (!config) {
+            window.console.log('You must pass a config object to register the kit ' + name);
+            return;
+        }
+        // server
+        if (!isobject(config)) {
+            window.console.log('\'config\' must be an object. You passed in a ' + typeof config);
+            return;
+        }
+
+        if (isobject(config.kits)) {
+            config.kits[name] = {
+                constructor: constructor
+            };
+        } else {
+            config.kits = {};
+            config.kits[name] = {
+                constructor: constructor
+            };
+        }
+        window.console.log('Successfully registered ' + name + ' to your mParticle configuration');
+    }
+
+    export default {
+        register: register
+    };
