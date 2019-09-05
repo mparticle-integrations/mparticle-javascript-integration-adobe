@@ -3,34 +3,30 @@ import commonjs from 'rollup-plugin-commonjs';
 
 export default [
     {
-        input: 'src/AdobeKit-dev.js',
+        input: 'src/AdobeNPM-dev.js',
         output: {
-            file: 'src/AdobeClientSideKit.iife.temp.js',
-            format: 'iife',
+            file: 'dist/Adobe.npm.common.js',
+            format: 'cjs',
             exports: 'named',
-            name: 'mpAdobeClientKit',
+            name: 'mpAdobeKitNPM',
             strict: false
         },
         plugins: [
-            resolve({
-                browser: true
-            }),
+            resolve(),
             commonjs()
         ]
     },
     {
-        input: 'src/AdobeKit-dev.js',
+        input: 'src/AdobeNPM-dev.js',
         output: {
-            file: 'src/AdobeClientSideKit.esm.temp.js',
+            file: 'dist/Adobe.npm.esm.js',
             format: 'esm',
             exports: 'named',
-            name: 'mpAdobeClientKit',
+            name: 'mpAdobeKitNPM',
             strict: false
         },
         plugins: [
-            resolve({
-                browser: true
-            }),
+            resolve(),
             commonjs()
         ]
     }

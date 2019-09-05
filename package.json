@@ -1,15 +1,27 @@
 {
-  "name": "integration-adobe-client",
+  "name": "@mparticle/web-adobe-kit",
   "version": "2.0.0-rc.4",
   "description": "mParticle Adobe kit integration",
-  "browser": "dist/AdobeClientSideKit.js",
+  "main": "dist/Adobe.npm.common.js",
+  "module": "dist/Adobe.npm.esm.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/mparticle-integrations/mparticle-javascript-integration-adobe.git"
   },
   "scripts": {
-    "buildClient": "rollup --config rollup.client.config.js; cat src/Adobe-SDKs/VisitorAPI.js src/Adobe-SDKs/AppMeasurement.js src/AdobeClientSideKit-temp.js > AdobeKit.js; cp AdobeKit.js dist/AdobeClientSideKit.js; rm src/AdobeClientSideKit-temp.js",
-    "buildServer": "rollup --config rollup.server.config.js; cat src/Adobe-SDKs/VisitorAPI.js src/AdobeServerSideKit-temp.js > AdobeServerSideKit.js; cp AdobeServerSideKit.js dist/AdobeServerSideKit.js; rm src/AdobeServerSideKit-temp.js",
+    "build": "npm run build:client && npm run build:server && npm run build:npm",
+    "build:client": "npm run build:tempClientFiles && npm run build:clientIIFE && npm run build:clientESM && npm run removeClientTempFiles",
+    "build:server": "npm run build:tempServerFiles && npm run build:serverIIFE && npm run build:serverESM && npm run removeServerTempFiles",
+    "build:tempClientFiles": "rollup --config rollup.client.config.js",
+    "build:tempServerFiles": "rollup --config rollup.server.config.js",
+    "build:clientIIFE": "cat src/Self-host-files/AppMeasurementWindow.js src/Adobe-SDKs/VisitorAPI.js src/Adobe-SDKs/AppMeasurement.js src/AdobeClientSideKit.iife.temp.js > AdobeKit.js; cp AdobeKit.js dist/AdobeClientSideKit.iife.js",
+    "build:serverIIFE": "cat src/Self-host-files/AppMeasurementWindow.js src/Adobe-SDKs/VisitorAPI.js src/AdobeServerSideKit.iife.temp.js > AdobeServerSideKit.js; cp AdobeServerSideKit.js dist/AdobeServerSideKit.iife.js",
+    "build:clientESM": "cat src/Self-host-files/AppMeasurementWindow.js src/Adobe-SDKs/VisitorAPI.js src/Adobe-SDKs/AppMeasurement.js src/AdobeClientSideKit.esm.temp.js > AdobeKit.js; cp AdobeKit.js dist/AdobeClientSideKit.esm.js",
+    "build:serverESM": "cat src/Self-host-files/AppMeasurementWindow.js src/Adobe-SDKs/VisitorAPI.js src/AdobeServerSideKit.esm.temp.js > AdobeServerSideKit.js; cp AdobeServerSideKit.js dist/AdobeServerSideKit.esm.js",
+    "build123": "cat src/Self-host-files/AppMeasurementWindow.js src/Adobe-SDKs/AppMeasurement.js src/Adobe-SDKs/VisitorAPI.js > src/AdobeNPM.temp.js",
+    "build:npm": "rollup --config rollup.npm.config.js",
+    "removeClientTempFiles": "rm src/AdobeClientSideKit.iife.temp.js src/AdobeClientSideKit.esm.temp.js",
+    "removeServerTempFiles": "rm src/AdobeServerSideKit.iife.temp.js src/AdobeServerSideKit.esm.temp.js",
     "test": "npm run testClient && npm run testServer",
     "testClient": "jest --config test/jest.client.config.js test/test.js",
     "testServer": "jest --config test/jest.server.config.js test/server.test.js"
@@ -34,5 +46,8 @@
     "rollup-plugin-node-resolve": "^5.2.0",
     "should": "^7.1.0",
     "sinon": "^7.4.1"
+  },
+  "dependencies": {
+    "isobject": "^4.0.0"
   }
 }
