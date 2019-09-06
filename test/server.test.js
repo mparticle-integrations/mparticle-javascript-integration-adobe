@@ -75,6 +75,7 @@ describe('AdobeServerSide Forwarder', function () {
                 }
             ]
         };
+        debugger;
         mParticle.init('apikey', mParticle.config);
     });
 

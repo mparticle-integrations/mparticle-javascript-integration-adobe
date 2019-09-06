@@ -1,5 +1,6 @@
 /* eslint-disable no-undef*/
 var server = new MockHttpServer;
+var mParticle = require('@mparticle/web-sdk');
 
 describe('AdobeEventForwarder Forwarder', function () {
     var EventType = {

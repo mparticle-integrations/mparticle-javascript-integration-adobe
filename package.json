@@ -9,19 +9,13 @@
     "url": "https://github.com/mparticle-integrations/mparticle-javascript-integration-adobe.git"
   },
   "scripts": {
-    "build": "npm run build:client && npm run build:server && npm run build:npm",
-    "build:client": "npm run build:tempClientFiles && npm run build:clientIIFE && npm run build:clientESM && npm run removeClientTempFiles",
-    "build:server": "npm run build:tempServerFiles && npm run build:serverIIFE && npm run build:serverESM && npm run removeServerTempFiles",
-    "build:tempClientFiles": "rollup --config rollup.client.config.js",
+    "build": "npm run build:client && npm run build:server && npm run build:npm && npm run removeServerTempFiles",
+    "build:client": "cat src/Adobe-SDKs/VisitorAPI.js src/Adobe-SDKs/AppMeasurement.js src/AdobeKit-dev.js > AdobeKit.js && cp AdobeKit.js dist/AdobeClientSideKit.iife.js",
+    "build:server": "npm run build:tempServerFiles && npm run build:serverIIFE",
     "build:tempServerFiles": "rollup --config rollup.server.config.js",
-    "build:clientIIFE": "cat src/Self-host-files/AppMeasurementWindow.js src/Adobe-SDKs/VisitorAPI.js src/Adobe-SDKs/AppMeasurement.js src/AdobeClientSideKit.iife.temp.js > AdobeKit.js; cp AdobeKit.js dist/AdobeClientSideKit.iife.js",
-    "build:serverIIFE": "cat src/Self-host-files/AppMeasurementWindow.js src/Adobe-SDKs/VisitorAPI.js src/AdobeServerSideKit.iife.temp.js > AdobeServerSideKit.js; cp AdobeServerSideKit.js dist/AdobeServerSideKit.iife.js",
-    "build:clientESM": "cat src/Self-host-files/AppMeasurementWindow.js src/Adobe-SDKs/VisitorAPI.js src/Adobe-SDKs/AppMeasurement.js src/AdobeClientSideKit.esm.temp.js > AdobeKit.js; cp AdobeKit.js dist/AdobeClientSideKit.esm.js",
-    "build:serverESM": "cat src/Self-host-files/AppMeasurementWindow.js src/Adobe-SDKs/VisitorAPI.js src/AdobeServerSideKit.esm.temp.js > AdobeServerSideKit.js; cp AdobeServerSideKit.js dist/AdobeServerSideKit.esm.js",
-    "build123": "cat src/Self-host-files/AppMeasurementWindow.js src/Adobe-SDKs/AppMeasurement.js src/Adobe-SDKs/VisitorAPI.js > src/AdobeNPM.temp.js",
+    "build:serverIIFE": "cat src/Adobe-SDKs/VisitorAPI.js src/AdobeServerSideKit.iife.temp.js > AdobeServerSideKit.js; cp AdobeServerSideKit.js dist/AdobeServerSideKit.iife.js",
     "build:npm": "cat src/Adobe-SDKs/VisitorAPI.js src/AdobeServerSideKit-dev.js > src/AdobeNPM.temp.js && rollup --config rollup.npm.config.js && rm src/AdobeNPM.temp.js",
-    "removeClientTempFiles": "rm src/AdobeClientSideKit.iife.temp.js src/AdobeClientSideKit.esm.temp.js",
-    "removeServerTempFiles": "rm src/AdobeServerSideKit.iife.temp.js src/AdobeServerSideKit.esm.temp.js",
+    "removeServerTempFiles": "rm src/AdobeServerSideKit.iife.temp.js",
     "test": "npm run testClient && npm run testServer",
     "testClient": "jest --config test/jest.client.config.js test/test.js",
     "testServer": "jest --config test/jest.server.config.js test/server.test.js"
@@ -31,24 +25,12 @@
   "devDependencies": {
     "@babel/core": "^7.5.5",
     "@babel/preset-env": "^7.5.5",
-    "@mparticle/web-sdk": "^2.9.9-rc.1",
+    "@mparticle/web-sdk": "^2.9.10-rc.1",
     "babel-jest": "^24.9.0",
-    "blanket": "^1.1.7",
-    "browserify": "^16.5.0",
     "jest": "^24.9.0",
-    "karma": "^4.2.0",
-    "karma-browserify": "^6.1.0",
-    "karma-chrome-launcher": "^3.1.0",
-    "karma-firefox-launcher": "^1.2.0",
-    "karma-junit-reporter": "^1.2.0",
-    "karma-mocha": "^1.3.0",
-    "karma-should": "^1.0.0",
-    "mocha": "^2.3.2",
     "rollup": "^1.20.3",
     "rollup-plugin-commonjs": "^10.1.0",
-    "rollup-plugin-node-resolve": "^5.2.0",
-    "should": "^7.1.0",
-    "sinon": "^7.4.1"
+    "rollup-plugin-node-resolve": "^5.2.0"
   },
   "dependencies": {
     "isobject": "^4.0.0"

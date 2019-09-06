@@ -7,8 +7,6 @@ export default [
         output: {
             file: 'dist/Adobe.npm.common.js',
             format: 'cjs',
-            // exports: 'named',
-            // name: 'mpAdobeKitNPM',
             strict: false
         },
         plugins: [

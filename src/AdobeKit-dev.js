@@ -17,8 +17,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-import isobject from 'isobject';
-
+(function (window) {
     var name = 'Adobe',
         ADOBEMODULENUMBER = 124,
         MARKETINGCLOUDIDKEY = 'mid',
@@ -34,7 +33,7 @@ import isobject from 'isobject';
 
     var constructor = function () {
         var self = this,
-            //one or more instances of AppMeasurement retured from s_gi()
+            //one or more instances of AppMeasurement returned from s_gi()
             appMeasurement,
             settings,
             timestampOption,
@@ -469,42 +468,12 @@ import isobject from 'isobject';
         this.process = processEvent;
     };
 
-    function getId() {
-        return moduleId;
+    if (!window || !window.mParticle || !window.mParticle.addForwarder) {
+        return;
     }
 
-    if (window && window.mParticle && window.mParticle.addForwarder) {
-        window.mParticle.addForwarder({
-            name: name,
-            constructor: constructor,
-            getId: getId
-        });
-    }
-
-    function register(config) {
-        if (!config) {
-            window.console.log('You must pass a config object to register the kit ' + name);
-            return;
-        }
-        // client
-        if (!isobject(config)) {
-            window.console.log('\'config\' must be an object. You passed in a ' + typeof config);
-            return;
-        }
-
-        if (isobject(config.kits)) {
-            config.kits[name] = {
-                constructor: constructor
-            };
-        } else {
-            config.kits = {};
-            config.kits[name] = {
-                constructor: constructor
-            };
-        }
-        window.console.log('Successfully registered ' + name + ' to your mParticle configuration');
-    }
-
-    export default {
-        register: register
-    };
+    window.mParticle.addForwarder({
+        name: name,
+        constructor: constructor
+    });
+})(window);

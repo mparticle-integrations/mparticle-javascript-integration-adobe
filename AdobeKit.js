@@ -1,12 +1,4 @@
-/* 
-We set window.AppMeasurement so that self hosting does not break. 
-AppMeasurement.js references a window.AppMeasurement in its code
-which only exists when AppMeasurement is in a script tag.
-
-This ensures that accessing window.AppMeasurement does not throw
-an error in a self-hosted environment.
-*/
-window.AppMeasurement = AppMeasurement;/**
+/**
  * @license
  * Adobe Visitor API for JavaScript version: 3.3.0
  * Copyright 2018 Adobe, Inc. All Rights Reserved
@@ -98,19 +90,26 @@ new k.MouseEvent}if(b){try{b.initMouseEvent("click",c.bubbles,c.cancelable,c.vie
 a.d.createEvent||0<=navigator.userAgent.indexOf("Firefox/2")&&k.MouseEvent)&&(a.xa=1,a.useForcedLinkTracking=1,a.b.addEventListener("click",a.u,!0)),a.b.addEventListener("click",a.u,!1))):setTimeout(a.Na,30)};a.rb();a.Rb||(r?a.setAccount(r):a.D("Error, missing Report Suite ID in AppMeasurement initialization"),a.Na(),a.loadModule("ActivityMap"))}
 function s_gi(r){var a,k=window.s_c_il,p,n,m=r.split(","),s,u,t=0;if(k)for(p=0;!t&&p<k.length;){a=k[p];if("s_c"==a._c&&(a.account||a.oun))if(a.account&&a.account==r)t=1;else for(n=a.account?a.account:a.oun,n=a.allAccounts?a.allAccounts:n.split(","),s=0;s<m.length;s++)for(u=0;u<n.length;u++)m[s]==n[u]&&(t=1);p++}t?a.setAccount&&a.setAccount(r):a=new AppMeasurement(r);return a}AppMeasurement.getInstance=s_gi;window.s_objectID||(window.s_objectID=0);
 function s_pgicq(){var r=window,a=r.s_giq,k,p,n;if(a)for(k=0;k<a.length;k++)p=a[k],n=s_gi(p.oun),n.setAccount(p.un),n.setTagContainer(p.tagContainerName);r.s_giq=0}s_pgicq();
-/*!
- * isobject <https://github.com/jonschlinkert/isobject>
- *
- * Copyright (c) 2014-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-function isObject(val) {
-  return val != null && typeof val === 'object' && Array.isArray(val) === false;
-}
-
 // START OF ADOBE MPARTICLE JS INTEGRATION
 
+/* eslint-disable no-undef */
+
+//
+//  Copyright 2018 mParticle, Inc.
+//
+//  Licensed under the Apache License, Version 2.0 (the 'License');
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an 'AS IS' BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+
+(function (window) {
     var name = 'Adobe',
         ADOBEMODULENUMBER = 124,
         MARKETINGCLOUDIDKEY = 'mid',
@@ -126,7 +125,7 @@ function isObject(val) {
 
     var constructor = function () {
         var self = this,
-            //one or more instances of AppMeasurement retured from s_gi()
+            //one or more instances of AppMeasurement returned from s_gi()
             appMeasurement,
             settings,
             timestampOption,
@@ -325,7 +324,7 @@ function isObject(val) {
                 appMeasurement.events='scCheckout';
             }
             appMeasurement.linkTrackEvents = appMeasurement.events || null;
-            processProductsAndSetEvents(event);
+            processProductsAndSetEvents(event, linkTrackVars);
             appMeasurement.pageName = event.EventName || window.document.title;
             linkTrackVars.push('products', 'events');
             setPageName(linkTrackVars);
@@ -343,6 +342,7 @@ function isObject(val) {
                     incrementor,
                     merchandising,
                     productBuilder,
+                    product,
                     allProducts = [];
 
                 var expandedEvents = mParticle.eCommerce.expandCommerceEvent(event);
@@ -560,44 +560,12 @@ function isObject(val) {
         this.process = processEvent;
     };
 
-    function getId() {
-        return moduleId;
+    if (!window || !window.mParticle || !window.mParticle.addForwarder) {
+        return;
     }
 
-    if (window && window.mParticle && window.mParticle.addForwarder) {
-        window.mParticle.addForwarder({
-            name: name,
-            constructor: constructor,
-            getId: getId
-        });
-    }
-
-    function register(config) {
-        if (!config) {
-            window.console.log('You must pass a config object to register the kit ' + name);
-            return;
-        }
-        // client
-        if (!isObject(config)) {
-            window.console.log('\'config\' must be an object. You passed in a ' + typeof config);
-            return;
-        }
-
-        if (isObject(config.kits)) {
-            config.kits[name] = {
-                constructor: constructor
-            };
-        } else {
-            config.kits = {};
-            config.kits[name] = {
-                constructor: constructor
-            };
-        }
-        window.console.log('Successfully registered ' + name + ' to your mParticle configuration');
-    }
-
-    var AdobeKitDev = {
-        register: register
-    };
-
-export default AdobeKitDev;
+    window.mParticle.addForwarder({
+        name: name,
+        constructor: constructor
+    });
+})(window);
