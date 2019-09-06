@@ -251,6 +251,7 @@ import isobject from 'isobject';
                     incrementor,
                     merchandising,
                     productBuilder,
+                    product,
                     allProducts = [];
 
                 var expandedEvents = mParticle.eCommerce.expandCommerceEvent(event);

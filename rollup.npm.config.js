@@ -3,12 +3,12 @@ import commonjs from 'rollup-plugin-commonjs';
 
 export default [
     {
-        input: 'src/AdobeNPM-dev.js',
+        input: 'src/AdobeNPM.temp.js',
         output: {
             file: 'dist/Adobe.npm.common.js',
             format: 'cjs',
-            exports: 'named',
-            name: 'mpAdobeKitNPM',
+            // exports: 'named',
+            // name: 'mpAdobeKitNPM',
             strict: false
         },
         plugins: [
@@ -17,7 +17,7 @@ export default [
         ]
     },
     {
-        input: 'src/AdobeNPM-dev.js',
+        input: 'src/AdobeNPM.temp.js',
         output: {
             file: 'dist/Adobe.npm.esm.js',
             format: 'esm',

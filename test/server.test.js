@@ -13,19 +13,19 @@ describe('AdobeServerSide Forwarder', function () {
             this.getCustomerIDs = function() {
                 return this.userId;
             };
-        };
+        },
 
-    Visitor = {
-        getInstance: function(orgId) {
-            var instance = new MockVisitorInstance;
-            instance.orgId = orgId;
-            instance.getInstanceCalled = true;
-            instance.getMarketingCloudVisitorID = function(cb) {
-                cb('MCID test');
-            };
-            return instance;
-        }
-    },
+        Visitor = {
+            getInstance: function(orgId) {
+                var instance = new MockVisitorInstance;
+                instance.orgId = orgId;
+                instance.getInstanceCalled = true;
+                instance.getMarketingCloudVisitorID = function(cb) {
+                    cb('MCID test');
+                };
+                return instance;
+            }
+        };
 
     beforeAll(function () {
         window.Visitor = Visitor;
