@@ -18,16 +18,19 @@
 //  limitations under the License.
 
 import isobject from 'isobject';
+import { AdobeHbkConstructor } from '../AdobeHeartbeatKit.esm.js';
 
     var name = 'Adobe',
         MARKETINGCLOUDIDKEY = 'mid',
         ADOBEMODULENUMBER = 124;
 
     var constructor = function () {
-        var self = this;
+        var self = this,
+            isInitialized;
         self.name = name;
+        self.adobeMediaSDK = new AdobeHbkConstructor();
 
-        function initForwarder(forwarderSettings) {
+        function initForwarder(forwarderSettings, service, testMode) {
             mParticle._setIntegrationDelay(ADOBEMODULENUMBER, true);
             try {
                 // On first load, adobe will call the callback correctly if no MCID exists
@@ -36,16 +39,42 @@ import isobject from 'isobject';
                 if (mcID && mcID.length > 0) {
                     setMCIDOnIntegrationAttributes(mcID);
                 }
+
+                if (forwarderSettings.mediaTrackingServer) {
+
+                    self.adobeMediaSDK.init(forwarderSettings, service, testMode);
+                }
+                isInitialized = true;
                 return 'Adobe Server Side Integration Ready';
             } catch (e) {
                 return 'Failed to initialize: ' + e;
             }
         }
+
         function setMarketingCloudId(mcid) {
             setMCIDOnIntegrationAttributes(mcid);
         }
 
+        function processEvent(event) {
+            if (isInitialized) {
+                try {
+                    if (event.EventDataType === 20) { //TODO: fix this
+                        self.adobeMediaSDK.process(event);
+                    }
+                    else {
+                        return 'Error logging event to: ' + name + 'or event type not supported';
+                    }
+                }
+                catch (e) {
+                    return 'Failed to send to: ' + name + ' ' + e;
+                }
+            }
+
+            return 'Can\'t send to forwarder ' + name + ', not initialized.';
+        }
+
         this.init = initForwarder;
+        this.process = processEvent;
     };
 
     function setMCIDOnIntegrationAttributes(mcid) {
@@ -72,7 +101,7 @@ import isobject from 'isobject';
             window.console.log('You must pass a config object to register the kit ' + name);
             return;
         }
-        // server
+
         if (!isobject(config)) {
             window.console.log('\'config\' must be an object. You passed in a ' + typeof config);
             return;

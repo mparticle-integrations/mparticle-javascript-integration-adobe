@@ -16,15 +16,17 @@
     "build:server:iife": "cat src/Adobe-SDKs/VisitorAPI.js src/AdobeServerSideKit-dev.js > dist/AdobeServerSideKit.esm.js; BUILD=server_iife rollup --config rollup.config.js; rm dist/AdobeServerSideKit.esm.js; cp dist/AdobeServerSideKit.iife.js AdobeServerSideKit.js",
     "build:server:cjs": "cat src/Adobe-SDKs/VisitorAPI.js src/AdobeServerSideKit-dev.js > dist/AdobeServerSideKit.esm.js; BUILD=server_cjs rollup --config rollup.config.js; rm dist/AdobeServerSideKit.esm.js",
     "test": "npm run test:client && npm run test:server",
-    "test:client": "MODULE=client jest --config test/jest.server.config.js test/test.js",
-    "test:server": "MODULE=server jest --config test/jest.server.config.js test/server.test.js"
+    "test:client": "MODULE=client jest --config test/jest.config.js test/test.js",
+    "test:server": "MODULE=server jest --config test/jest.config.js test/server.test.js",
+    "test:client:debug": "MODULE=client node --inspect-brk ./node_modules/jest/bin/jest.js --runInBand --config test/jest.config.js test/test.js",
+    "test:server:debug": "MODULE=server node --inspect-brk ./node_modules/jest/bin/jest.js --runInBand --config test/jest.config.js test/server.test.js"
   },
   "author": "Robert Ing (ring@mparticle.com)",
   "license": "Apache",
   "devDependencies": {
     "@babel/core": "^7.5.5",
     "@babel/preset-env": "^7.5.5",
-    "@mparticle/web-sdk": "^2.9.10-rc.1",
+    "@mparticle/web-sdk": "file:../../mparticle-sdk-javascript-private",
     "babel-jest": "^24.9.0",
     "jest": "^24.9.0",
     "rollup": "^1.20.3",

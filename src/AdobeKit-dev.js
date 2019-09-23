@@ -18,6 +18,7 @@
 //  limitations under the License.
 
 import isobject from 'isobject';
+import { AdobeHbkConstructor } from '../AdobeHeartbeatKit.esm.js';
 
     var name = 'Adobe',
         ADOBEMODULENUMBER = 124,
@@ -29,12 +30,13 @@ import isobject from 'isobject';
             PageEvent: 4,
             CrashReport: 5,
             OptOut: 6,
-            Commerce: 16
+            Commerce: 16,
+            Media: 20
         };
-
+        
     var constructor = function () {
         var self = this,
-            //one or more instances of AppMeasurement returned from s_gi()
+        //one or more instances of AppMeasurement returned from s_gi()
             appMeasurement,
             settings,
             timestampOption,
@@ -47,16 +49,20 @@ import isobject from 'isobject';
             eVarsMapping,
             hiersMapping,
             eventsMapping;
-
+        
+        self.adobeMediaSDK = new AdobeHbkConstructor(),
         self.name = name;
-
-        function initForwarder(forwarderSettings, service) {
+        
+        function initForwarder(forwarderSettings, service, testMode) {
             settings = forwarderSettings;
             reportingService = service;
             try {
                 loadMappings();
                 timestampOption = (settings.timestampOption === 'optional' || settings.timestampOption === 'required');
                 finishAdobeInitialization();
+                if (settings.mediaTrackingServer) {
+                    self.adobeMediaSDK.init(forwarderSettings, service, testMode);
+                }
                 isInitialized = true;
 
                 return 'ClientSDK successfully loaded';
@@ -183,11 +189,14 @@ import isobject from 'isobject';
                         setMappings(event, true, linkTrackVars);
                         reportEvent = processCommerceTransaction(event, linkTrackVars);
                     }
+                    else if (event.EventDataType === MessageType.Media) {
+                        self.adobeMediaSDK.process(event);
+                    }
                     else {
                         return 'event name not mapped, aborting event logging';
                     }
 
-                    if (reportEvent === true && reportingService) {
+                    if (reportEvent === true && reportingService && event.EventDataType !== MessageType.Media ) {
                         reportingService(self, event);
                         return 'Successfully sent to ' + name;
                     }
