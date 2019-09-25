@@ -17,7 +17,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-import { AdobeHbkConstructor } from '../AdobeHeartbeatKit.esm.js';
+import { AdobeHbkConstructor } from '../../../HeartbeatKit/dist/AdobeHBKit.esm.js';
 
     var name = 'Adobe',
         ADOBEMODULENUMBER = 124,
