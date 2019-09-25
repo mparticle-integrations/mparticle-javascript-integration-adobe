@@ -29,6 +29,7 @@
     "@mparticle/web-sdk": "file:../../mparticle-sdk-javascript-private",
     "babel-jest": "^24.9.0",
     "jest": "^24.9.0",
+    "lerna": "^3.16.4",
     "rollup": "^1.20.3",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-resolve": "^5.2.0"
