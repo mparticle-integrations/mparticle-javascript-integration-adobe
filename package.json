@@ -1,20 +1,36 @@
 {
-  "name": "mparticle-adobe",
-  "version": "1.0.0",
+  "name": "@mparticle/web-adobe-kit",
+  "version": "2.0.0-rc.4",
   "description": "mParticle Adobe kit integration",
+  "main": "dist/AdobeClientSideKit.common.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/mparticle-integrations/mparticle-javascript-integration-adobe.git"
   },
   "scripts": {
-      "buildClient": "cat src/Adobe-SDKs/VisitorAPI.js src/Adobe-SDKs/AppMeasurement.js src/AdobeKit-dev.js > AdobeKit.js",
-      "buildServer": "cat src/Adobe-SDKs/VisitorAPI.js src/AdobeServerSideKit-dev.js > AdobeServerSideKit.js"
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "npm run build:client:iife && npm run build:client:cjs",
+    "build:client:iife": "cat src/Adobe-SDKs/VisitorAPI.js src/Adobe-SDKs/AppMeasurement.js src/AdobeKit-dev.js > dist/AdobeClientSideKit.esm.js; BUILD=client_iife rollup --config rollup.config.js; rm dist/AdobeClientSideKit.esm.js; cp dist/AdobeClientSideKit.iife.js AdobeKit.js",
+    "build:client:cjs": "cat src/Adobe-SDKs/VisitorAPI.js src/Adobe-SDKs/AppMeasurement.js src/AdobeKit-dev.js > dist/AdobeClientSideKit.esm.js; BUILD=client_cjs rollup --config rollup.config.js; rm dist/AdobeClientSideKit.esm.js",
+    "build:server": "npm run build:server:iife && npm run build:server:cjs",
+    "build:server:iife": "cat src/Adobe-SDKs/VisitorAPI.js src/AdobeServerSideKit-dev.js > dist/AdobeServerSideKit.esm.js; BUILD=server_iife rollup --config rollup.config.js; rm dist/AdobeServerSideKit.esm.js; cp dist/AdobeServerSideKit.iife.js AdobeServerSideKit.js",
+    "build:server:cjs": "cat src/Adobe-SDKs/VisitorAPI.js src/AdobeServerSideKit-dev.js > dist/AdobeServerSideKit.esm.js; BUILD=server_cjs rollup --config rollup.config.js; rm dist/AdobeServerSideKit.esm.js",
+    "test": "npm run test:client && npm run test:server",
+    "test:client": "MODULE=client jest --config test/jest.config.js test/test.js",
+    "test:server": "MODULE=server jest --config test/jest.config.js test/server.test.js",
+    "test:client:debug": "MODULE=client node --inspect-brk ./node_modules/jest/bin/jest.js --runInBand --config test/jest.config.js test/test.js",
+    "test:server:debug": "MODULE=server node --inspect-brk ./node_modules/jest/bin/jest.js --runInBand --config test/jest.config.js test/server.test.js"
   },
   "author": "Robert Ing (ring@mparticle.com)",
   "license": "Apache",
   "devDependencies": {
-    "blanket": "^1.1.7",
-    "should": "^7.1.0",
-    "mocha": "^2.3.2"
+    "@babel/core": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "@mparticle/web-sdk": "file:../../mparticle-sdk-javascript-private",
+    "babel-jest": "^24.9.0",
+    "jest": "^24.9.0",
+    "rollup": "^1.20.3",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0"
   }
 }

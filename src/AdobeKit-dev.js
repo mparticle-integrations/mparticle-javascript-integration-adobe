@@ -17,7 +17,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-(function (window) {
+import { AdobeHbkConstructor } from '../AdobeHeartbeatKit.esm.js';
+
     var name = 'Adobe',
         ADOBEMODULENUMBER = 124,
         MARKETINGCLOUDIDKEY = 'mid',
@@ -28,12 +29,13 @@
             PageEvent: 4,
             CrashReport: 5,
             OptOut: 6,
-            Commerce: 16
+            Commerce: 16,
+            Media: 20
         };
 
     var constructor = function () {
         var self = this,
-            //one or more instances of AppMeasurement retured from s_gi()
+        //one or more instances of AppMeasurement returned from s_gi()
             appMeasurement,
             settings,
             timestampOption,
@@ -46,16 +48,20 @@
             eVarsMapping,
             hiersMapping,
             eventsMapping;
-
+        
+        self.adobeMediaSDK = new AdobeHbkConstructor(),
         self.name = name;
 
-        function initForwarder(forwarderSettings, service) {
+        function initForwarder(forwarderSettings, service, testMode) {
             settings = forwarderSettings;
             reportingService = service;
             try {
                 loadMappings();
                 timestampOption = (settings.timestampOption === 'optional' || settings.timestampOption === 'required');
                 finishAdobeInitialization();
+                if (settings.mediaTrackingServer) {
+                    self.adobeMediaSDK.init(forwarderSettings, service, testMode);
+                }
                 isInitialized = true;
 
                 return 'ClientSDK successfully loaded';
@@ -182,11 +188,14 @@
                         setMappings(event, true, linkTrackVars);
                         reportEvent = processCommerceTransaction(event, linkTrackVars);
                     }
+                    else if (event.EventDataType === MessageType.Media) {
+                        self.adobeMediaSDK.process(event);
+                    }
                     else {
                         return 'event name not mapped, aborting event logging';
                     }
 
-                    if (reportEvent === true && reportingService) {
+                    if (reportEvent === true && reportingService && event.EventDataType) {
                         reportingService(self, event);
                         return 'Successfully sent to ' + name;
                     }
@@ -250,6 +259,7 @@
                     incrementor,
                     merchandising,
                     productBuilder,
+                    product,
                     allProducts = [];
 
                 var expandedEvents = mParticle.eCommerce.expandCommerceEvent(event);
@@ -467,12 +477,46 @@
         this.process = processEvent;
     };
 
-    if (!window || !window.mParticle || !window.mParticle.addForwarder) {
-        return;
+    function getId() {
+        return moduleId;
     }
 
-    window.mParticle.addForwarder({
-        name: name,
-        constructor: constructor
-    });
-})(window);
+    if (window && window.mParticle && window.mParticle.addForwarder) {
+        window.mParticle.addForwarder({
+            name: name,
+            constructor: constructor,
+            getId: getId
+        });
+    }
+
+    function register(config) {
+        if (!config) {
+            window.console.log('You must pass a config object to register the kit ' + name);
+            return;
+        }
+
+        if (!isObject(config)) {
+            window.console.log('\'config\' must be an object. You passed in a ' + typeof config);
+            return;
+        }
+
+        if (isObject(config.kits)) {
+            config.kits[name] = {
+                constructor: constructor
+            };
+        } else {
+            config.kits = {};
+            config.kits[name] = {
+                constructor: constructor
+            };
+        }
+        window.console.log('Successfully registered ' + name + ' to your mParticle configuration');
+    }
+
+    function isObject(val) {
+        return val != null && typeof val === 'object' && Array.isArray(val) === false;
+    }
+
+    export default {
+        register: register
+    };

@@ -1,3 +1,4 @@
+window.AppMeasurement = window.AppMeasurement || AppMeasurement;
 /*
  Start ActivityMap Module
 
