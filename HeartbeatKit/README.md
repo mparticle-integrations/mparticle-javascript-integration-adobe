@@ -1,10 +1,10 @@
-# Adobe Media Heartbeat Javascript Integration
+# Adobe Heartbeat Mapping
 
-This repository contains the [Adobe Media Heartbeat](https://docs.adobe.com/content/help/en/media-analytics/using/media-overview.html) integration for the mParticle Javascript SDK.
+This Adobe Heartbeat mapping is imported by both the Adobe Client and Adobe Server integrations located in the `packages/` directory. It is not a separate integration, but instead contains code to map an mParticle Media event that is sent to the Client or Server integrations.
 
-#License
+## License
 
-Copyright 2017 mParticle, Inc.
+Copyright 2019 mParticle, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

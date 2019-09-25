@@ -1,5 +1,7 @@
 /* eslint-disable no-undef*/
 describe('Adobe Heartbeat Forwarder', function() {
+    window.mParticle.isTestEnvironment = true;
+
     // -------------------DO NOT EDIT ANYTHING BELOW THIS LINE-----------------------
     var MessageTypes = {
             SessionStart: 1,

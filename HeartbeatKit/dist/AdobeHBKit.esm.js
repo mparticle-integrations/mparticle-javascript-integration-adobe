@@ -258,7 +258,7 @@ var Initialization = {
         isInitialized,
         common
     ) {
-        if (!testMode) {
+        if (!window.mParticle.isTestEnvironment) {
             /* Load your Web SDK here using a variant of your snippet from your readme that your customers would generally put into their <head> tags
                Generally, our integrations create script tags and append them to the <head>. Please follow the following format as a guide:
             */
@@ -467,11 +467,7 @@ function constructor() {
     this.process = processEvent;
 }
 
-if (window && window.mParticle && window.mParticle.addForwarder) {
-    window.mParticle.addForwarder({
-        constructor: constructor
-    });
-}
+window.mParticle.registerForwarder({constructor: constructor});
 
 var src = {
     AdobeHbkConstructor: constructor

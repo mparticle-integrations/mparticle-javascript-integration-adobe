@@ -22,17 +22,7 @@ const output = {
 };
 const plugins = [...base.plugins];
 
-// const rootFolderConfig = {
-//     input,
-//     output: {
-//         ...output,
-//         format: 'iife',
-//         file: 'AdobeHB.js'
-//     },
-//     plugins: [...plugins]
-// };
-
-const buildFolderConfig = {
+const iifeBuild = {
     input,
     output: {
         ...output,
@@ -42,17 +32,7 @@ const buildFolderConfig = {
     plugins: [...plugins]
 };
 
-const npmFolderConfig = {
-    input,
-    output: {
-        ...output,
-        format: 'cjs',
-        file: 'dist/AdobeHBKit.common.js'
-    },
-    plugins: [...plugins]
-};
-
-const esmFolderConfig = {
+const esmBuild = {
     input,
     output: {
         ...output,
@@ -62,5 +42,4 @@ const esmFolderConfig = {
     plugins: [...plugins]
 };
 
-// export default [rootFolderConfig, buildFolderConfig, npmFolderConfig, esmFolderConfig];
-export default [buildFolderConfig, npmFolderConfig, esmFolderConfig];
+export default [esmBuild, iifeBuild];
