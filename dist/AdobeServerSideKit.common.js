@@ -1,14 +1,3 @@
-/*!
- * isobject <https://github.com/jonschlinkert/isobject>
- *
- * Copyright (c) 2014-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-function isObject(val) {
-  return val != null && typeof val === 'object' && Array.isArray(val) === false;
-}
-
 function Common() {
     this.playheadPosition = 0;
     this.startupTime = 0;
@@ -269,7 +258,7 @@ var Initialization = {
         isInitialized,
         common
     ) {
-        if (!testMode) {
+        if (!window.mParticle.isTestEnvironment) {
             /* Load your Web SDK here using a variant of your snippet from your readme that your customers would generally put into their <head> tags
                Generally, our integrations create script tags and append them to the <head>. Please follow the following format as a guide:
             */
@@ -503,7 +492,6 @@ var e=function(){function e(){return {callbacks:{},add:function(e,t){this.callba
         self.adobeMediaSDK = new src_1();
 
         function initForwarder(forwarderSettings, service, testMode) {
-            debugger
             mParticle._setIntegrationDelay(ADOBEMODULENUMBER, true);
             try {
                 // On first load, adobe will call the callback correctly if no MCID exists
@@ -513,34 +501,29 @@ var e=function(){function e(){return {callbacks:{},add:function(e,t){this.callba
                     setMCIDOnIntegrationAttributes(mcID);
                 }
 
-                self.adobeMediaSDK.init(forwarderSettings, service, testMode);
+                if (forwarderSettings.mediaTrackingServer) {
+
+                    self.adobeMediaSDK.init(forwarderSettings, service, testMode);
+                }
                 isInitialized = true;
                 return 'Adobe Server Side Integration Ready';
             } catch (e) {
                 return 'Failed to initialize: ' + e;
             }
         }
+
         function setMarketingCloudId(mcid) {
             setMCIDOnIntegrationAttributes(mcid);
         }
 
         function processEvent(event) {
-            debugger;
-            var reportEvent = false;
-
             if (isInitialized) {
                 try {
                     if (event.EventDataType === 20) { //TODO: fix this
-                        // setMappings(event, true, linkTrackVars);
-                        reportEvent = self.adobeMediaSDK.process(event);
-                    }
-
-                    if (reportEvent === true && reportingService) {
-                        reportingService(self, event);
-                        return 'Successfully sent to ' + name$1;
+                        self.adobeMediaSDK.process(event);
                     }
                     else {
-                        return 'Error logging event or event type not supported - ' + reportEvent.error;
+                        return 'Error logging event to: ' + name$1 + 'or event type not supported';
                     }
                 }
                 catch (e) {
@@ -579,7 +562,7 @@ var e=function(){function e(){return {callbacks:{},add:function(e,t){this.callba
             window.console.log('You must pass a config object to register the kit ' + name$1);
             return;
         }
-        // server
+
         if (!isObject(config)) {
             window.console.log('\'config\' must be an object. You passed in a ' + typeof config);
             return;
@@ -596,6 +579,10 @@ var e=function(){function e(){return {callbacks:{},add:function(e,t){this.callba
             };
         }
         window.console.log('Successfully registered ' + name$1 + ' to your mParticle configuration');
+    }
+
+    function isObject(val) {
+        return val != null && typeof val === 'object' && Array.isArray(val) === false;
     }
 
     var AdobeServerSideKit_esm = {

@@ -17,9 +17,11 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-import isobject from 'isobject';
 import { AdobeHbkConstructor } from '../AdobeHeartbeatKit.esm.js';
 
+    var MessageType = {
+        Media: 20
+    };
     var name = 'Adobe',
         MARKETINGCLOUDIDKEY = 'mid',
         ADOBEMODULENUMBER = 124;
@@ -58,7 +60,7 @@ import { AdobeHbkConstructor } from '../AdobeHeartbeatKit.esm.js';
         function processEvent(event) {
             if (isInitialized) {
                 try {
-                    if (event.EventDataType === 20) { //TODO: fix this
+                    if (event.EventDataType === MessageType.Media) {
                         self.adobeMediaSDK.process(event);
                     }
                     else {
@@ -102,12 +104,12 @@ import { AdobeHbkConstructor } from '../AdobeHeartbeatKit.esm.js';
             return;
         }
 
-        if (!isobject(config)) {
+        if (!isObject(config)) {
             window.console.log('\'config\' must be an object. You passed in a ' + typeof config);
             return;
         }
 
-        if (isobject(config.kits)) {
+        if (isObject(config.kits)) {
             config.kits[name] = {
                 constructor: constructor
             };
@@ -118,6 +120,10 @@ import { AdobeHbkConstructor } from '../AdobeHeartbeatKit.esm.js';
             };
         }
         window.console.log('Successfully registered ' + name + ' to your mParticle configuration');
+    }
+
+    function isObject(val) {
+        return val != null && typeof val === 'object' && Array.isArray(val) === false;
     }
 
     export default {

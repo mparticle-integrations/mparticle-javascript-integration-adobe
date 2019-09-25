@@ -17,7 +17,6 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-import isobject from 'isobject';
 import { AdobeHbkConstructor } from '../AdobeHeartbeatKit.esm.js';
 
     var name = 'Adobe',
@@ -33,7 +32,7 @@ import { AdobeHbkConstructor } from '../AdobeHeartbeatKit.esm.js';
             Commerce: 16,
             Media: 20
         };
-        
+
     var constructor = function () {
         var self = this,
         //one or more instances of AppMeasurement returned from s_gi()
@@ -52,7 +51,7 @@ import { AdobeHbkConstructor } from '../AdobeHeartbeatKit.esm.js';
         
         self.adobeMediaSDK = new AdobeHbkConstructor(),
         self.name = name;
-        
+
         function initForwarder(forwarderSettings, service, testMode) {
             settings = forwarderSettings;
             reportingService = service;
@@ -196,7 +195,7 @@ import { AdobeHbkConstructor } from '../AdobeHeartbeatKit.esm.js';
                         return 'event name not mapped, aborting event logging';
                     }
 
-                    if (reportEvent === true && reportingService && event.EventDataType !== MessageType.Media ) {
+                    if (reportEvent === true && reportingService && event.EventDataType) {
                         reportingService(self, event);
                         return 'Successfully sent to ' + name;
                     }
@@ -495,13 +494,13 @@ import { AdobeHbkConstructor } from '../AdobeHeartbeatKit.esm.js';
             window.console.log('You must pass a config object to register the kit ' + name);
             return;
         }
-        // server
-        if (!isobject(config)) {
+
+        if (!isObject(config)) {
             window.console.log('\'config\' must be an object. You passed in a ' + typeof config);
             return;
         }
 
-        if (isobject(config.kits)) {
+        if (isObject(config.kits)) {
             config.kits[name] = {
                 constructor: constructor
             };
@@ -512,6 +511,10 @@ import { AdobeHbkConstructor } from '../AdobeHeartbeatKit.esm.js';
             };
         }
         window.console.log('Successfully registered ' + name + ' to your mParticle configuration');
+    }
+
+    function isObject(val) {
+        return val != null && typeof val === 'object' && Array.isArray(val) === false;
     }
 
     export default {

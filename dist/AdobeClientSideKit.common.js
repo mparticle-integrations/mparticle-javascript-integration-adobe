@@ -1,14 +1,3 @@
-/*!
- * isobject <https://github.com/jonschlinkert/isobject>
- *
- * Copyright (c) 2014-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-function isObject(val) {
-  return val != null && typeof val === 'object' && Array.isArray(val) === false;
-}
-
 function Common() {
     this.playheadPosition = 0;
     this.startupTime = 0;
@@ -269,7 +258,7 @@ var Initialization = {
         isInitialized,
         common
     ) {
-        if (!testMode) {
+        if (!window.mParticle.isTestEnvironment) {
             /* Load your Web SDK here using a variant of your snippet from your readme that your customers would generally put into their <head> tags
                Generally, our integrations create script tags and append them to the <head>. Please follow the following format as a guide:
             */
@@ -571,7 +560,8 @@ function s_pgicq(){var r=window,a=r.s_giq,k,p,n;if(a)for(k=0;k<a.length;k++)p=a[
             PageEvent: 4,
             CrashReport: 5,
             OptOut: 6,
-            Commerce: 16
+            Commerce: 16,
+            Media: 20
         };
         
     var constructor$1 = function () {
@@ -729,17 +719,14 @@ function s_pgicq(){var r=window,a=r.s_giq,k,p,n;if(a)for(k=0;k<a.length;k++)p=a[
                         setMappings(event, true, linkTrackVars);
                         reportEvent = processCommerceTransaction(event, linkTrackVars);
                     }
-                    else if (event.EventCategory === 20) { //TODO: fix this
-                        // setMappings(event, true, linkTrackVars);
-                        debugger;
-
-                        reportEvent = self.adobeMediaSDK.process(event);
+                    else if (event.EventDataType === MessageType$1.Media) {
+                        self.adobeMediaSDK.process(event);
                     }
                     else {
                         return 'event name not mapped, aborting event logging';
                     }
 
-                    if (reportEvent === true && reportingService) {
+                    if (reportEvent === true && reportingService && event.EventDataType !== MessageType$1.Media ) {
                         reportingService(self, event);
                         return 'Successfully sent to ' + name$1;
                     }
@@ -1038,7 +1025,7 @@ function s_pgicq(){var r=window,a=r.s_giq,k,p,n;if(a)for(k=0;k<a.length;k++)p=a[
             window.console.log('You must pass a config object to register the kit ' + name$1);
             return;
         }
-        // server
+
         if (!isObject(config)) {
             window.console.log('\'config\' must be an object. You passed in a ' + typeof config);
             return;
@@ -1055,6 +1042,10 @@ function s_pgicq(){var r=window,a=r.s_giq,k,p,n;if(a)for(k=0;k<a.length;k++)p=a[
             };
         }
         window.console.log('Successfully registered ' + name$1 + ' to your mParticle configuration');
+    }
+
+    function isObject(val) {
+        return val != null && typeof val === 'object' && Array.isArray(val) === false;
     }
 
     var AdobeClientSideKit_esm = {

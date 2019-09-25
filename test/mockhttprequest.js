@@ -470,4 +470,4 @@ MockHttpServer.prototype = {
     }
 };
 
-global.MockHttpServer = MockHttpServer;
+window.MockHttpServer = MockHttpServer;

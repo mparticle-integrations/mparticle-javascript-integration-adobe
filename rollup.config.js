@@ -1,5 +1,3 @@
-import resolve from 'rollup-plugin-node-resolve';
-
 const { BUILD } = process.env;
 
 const input = {
@@ -21,8 +19,7 @@ const builds = {
             name: 'mParticleAdobe',
             file: 'dist/AdobeServerSideKit.iife.js',
             format: 'iife',
-        },
-        plugins: [resolve()]
+        }
     },
     // creates npm module for adobe server side kit
     server_cjs: {
@@ -31,8 +28,7 @@ const builds = {
             name: 'mParticleAdobe',
             file: "dist/AdobeServerSideKit.common.js",
             format: "cjs",
-        },
-        plugins: [resolve()]
+        }
     },
     // for dynamic script tag loading of adobe client side kit
     client_iife: {
@@ -41,8 +37,7 @@ const builds = {
             name: 'mParticleAdobe',
             file: 'dist/AdobeClientSideKit.iife.js',
             format: 'iife',
-        },
-        plugins: [resolve()]
+        }
     },
    // creates npm module for adobe client side kit
     client_cjs: {
@@ -51,8 +46,7 @@ const builds = {
             name: 'mParticleAdobe',
             file: "dist/AdobeClientSideKit.common.js",
             format: "cjs",
-        },
-        plugins: [resolve()]
+        }
     }
 }
 
