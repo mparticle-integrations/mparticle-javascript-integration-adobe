@@ -1,5 +1,4 @@
 import commonjs from 'rollup-plugin-commonjs';
-import resolve from 'rollup-plugin-node-resolve';
 
 var base = {
     input: './src/index.js',
@@ -8,9 +7,6 @@ var base = {
         strict: true
     },
     plugins: [
-        resolve({
-            browser: true
-        }),
         commonjs()
     ]
 };
@@ -22,16 +18,6 @@ const output = {
 };
 const plugins = [...base.plugins];
 
-const iifeBuild = {
-    input,
-    output: {
-        ...output,
-        format: 'iife',
-        file: 'dist/AdobeHBKit.iife.js'
-    },
-    plugins: [...plugins]
-};
-
 const esmBuild = {
     input,
     output: {
@@ -42,4 +28,4 @@ const esmBuild = {
     plugins: [...plugins]
 };
 
-export default [esmBuild, iifeBuild];
+export default [esmBuild];

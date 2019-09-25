@@ -1,4 +1,4 @@
-window.MockHttpServer = require('./mockhttprequest.js');
+window.MockHttpServer = require('../../../test/mockhttprequest.js');
 window.should = require('should');
 require('../../../node_modules/@mparticle/web-sdk/dist/mparticle.common.js');
 mParticle.registerHBK = function(forwarder) {

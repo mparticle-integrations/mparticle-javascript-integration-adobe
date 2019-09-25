@@ -478,7 +478,7 @@ describe('AdobeEventForwarder Forwarder', function () {
     });
 
     // TODO: THIS IS ONLY GOOD FOR WHEN BASE EVENT IS A PUBLIC API
-    test('should call heartbeat tests', function(done) {
+    test('should call heartbeat play', function(done) {
         settings.mediaTrackingServer = 'test';
         configureAdobeForwarderAndReInit('optional', 'True', 'True');
         mParticle.logBaseEvent({ name: 'play event', messageType: 20, eventType: 23 });

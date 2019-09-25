@@ -2,7 +2,9 @@
 
 Adobe Javascript integration for mParticle
 
-#License
+This repo is managed by [Lerna](https://lerna.js.org).
+
+## License
 
 Copyright 2018 mParticle, Inc.
 
