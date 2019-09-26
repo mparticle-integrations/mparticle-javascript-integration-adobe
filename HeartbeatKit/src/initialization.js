@@ -19,6 +19,7 @@ var Initialization = {
         isInitialized,
         common
     ) {
+        var self = this;
         if (!window.mParticle.isTestEnvironment) {
             /* Load your Web SDK here using a variant of your snippet from your readme that your customers would generally put into their <head> tags
                Generally, our integrations create script tags and append them to the <head>. Please follow the following format as a guide:
@@ -26,7 +27,7 @@ var Initialization = {
             var adobeHeartbeatSdk = document.createElement('script');
             adobeHeartbeatSdk.type = 'text/javascript';
             adobeHeartbeatSdk.async = true;
-            adobeHeartbeatSdk.src = ''; // TODO: Get this url from Sam
+            adobeHeartbeatSdk.src = 'https://cdn.jsdelivr.net/gh/Adobe-Marketing-Cloud/media-sdks/sdks/js/libs/MediaSDK.min.js'; // TODO: Get this url from Sam
             (
                 document.getElementsByTagName('head')[0] ||
                 document.getElementsByTagName('body')[0]
@@ -40,7 +41,7 @@ var Initialization = {
                     // now that each queued event is processed, we empty the eventQueue
                     eventQueue = [];
                 }
-                isInitialized = this.initHeartbeat(
+                isInitialized = self.initHeartbeat(
                     settings,
                     common,
                     ADB,
@@ -50,17 +51,17 @@ var Initialization = {
         } else {
             // For testing, you should fill out this section in order to ensure any required initialization calls are made,
             // clientSDKObject.initialize(forwarderSettings.apiKey)
-            isInitialized = this.initHeartbeat(settings, common, ADB, testMode);
+            isInitialized = self.initHeartbeat(settings, common, ADB, testMode);
         }
     },
-    initHeartbeat: function(settings, common, adobeSDK, testMode) {
+    initHeartbeat: function(settings, common, adobeSDK) {
         try {
             // Init App Measurement with Visitor
             var appMeasurement = new AppMeasurement(settings.reportSuiteID);
             appMeasurement.visitor = Visitor.getInstance(
                 settings.organizationID
             );
-            appMeasurement.trackingServer = settings.trackingServerURL;
+            appMeasurement.trackingServer = settings.trackingServer;
             appMeasurement.account = settings.reportSuiteID;
             appMeasurement.pageName = document.title;
             appMeasurement.charSet = 'UTF­8';
@@ -73,7 +74,7 @@ var Initialization = {
             var mediaConfig = new MediaHeartbeatConfig();
             common.MediaHeartbeat = MediaHeartbeat;
 
-            mediaConfig.trackingServer = settings.mediaTrackingServerURL;
+            mediaConfig.trackingServer = settings.mediaTrackingServer;
             mediaConfig.ssl = settings.useSSL;
 
             var mediaDelegate = new MediaHeartbeatDelegate();

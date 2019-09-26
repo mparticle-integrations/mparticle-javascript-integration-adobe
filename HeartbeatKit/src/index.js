@@ -118,7 +118,9 @@ function constructor() {
     this.process = processEvent;
 }
 
-window.mParticle.registerForwarder({constructor: constructor});
+if (window.mParticle && window.mParticle.registerHBK) {
+    window.mParticle.registerHBK({constructor: constructor});
+}
 
 module.exports = {
     AdobeHbkConstructor: constructor
