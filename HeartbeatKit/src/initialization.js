@@ -49,12 +49,12 @@ var Initialization = {
     initHeartbeat: function(settings, common, adobeSDK) {
         try {
             // Init App Measurement with Visitor
-            var appMeasurement = new AppMeasurement(settings.reportSuiteID);
+            var appMeasurement = new AppMeasurement(settings.reportSuiteIDs);
             appMeasurement.visitor = Visitor.getInstance(
                 settings.organizationID
             );
             appMeasurement.trackingServer = settings.trackingServer;
-            appMeasurement.account = settings.reportSuiteID;
+            appMeasurement.account = settings.reportSuiteIDs;
             appMeasurement.pageName = document.title;
             appMeasurement.charSet = 'UTF­8';
 
