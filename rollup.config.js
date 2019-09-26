@@ -1,10 +1,10 @@
 const { BUILD } = process.env;
 
 const input = {
-    server_iife: 'dist/AdobeServerSideKit.esm.js',
-    server_cjs: 'dist/AdobeServerSideKit.esm.js',
-    client_iife: 'dist/AdobeClientSideKit.esm.js',
-    client_cjs: 'dist/AdobeClientSideKit.esm.js'
+    server_iife: 'packages/AdobeServer/dist/AdobeServerSideKit.esm.js',
+    server_cjs: 'packages/AdobeServer/dist/AdobeServerSideKit.esm.js',
+    client_iife: 'packages/AdobeClient/dist/AdobeClientSideKit.esm.js',
+    client_cjs: 'packages/AdobeClient/dist/AdobeClientSideKit.esm.js'
 }
 
 const outputOptions = {
@@ -17,7 +17,7 @@ const builds = {
         output: {
             ...outputOptions,
             name: 'mParticleAdobe',
-            file: 'dist/AdobeServerSideKit.iife.js',
+            file: 'packages/AdobeServer/dist/AdobeServerSideKit.iife.js',
             format: 'iife',
         }
     },
@@ -26,7 +26,7 @@ const builds = {
         output: {
             ...outputOptions,
             name: 'mParticleAdobe',
-            file: "dist/AdobeServerSideKit.common.js",
+            file: "packages/AdobeServer/dist/AdobeServerSideKit.common.js",
             format: "cjs",
         }
     },
@@ -35,7 +35,7 @@ const builds = {
         output: {
             ...outputOptions,
             name: 'mParticleAdobe',
-            file: 'dist/AdobeClientSideKit.iife.js',
+            file: 'packages/AdobeClient/dist/AdobeClientSideKit.iife.js',
             format: 'iife',
         }
     },
@@ -44,7 +44,7 @@ const builds = {
         output: {
             ...outputOptions,
             name: 'mParticleAdobe',
-            file: "dist/AdobeClientSideKit.common.js",
+            file: "packages/AdobeClient/dist/AdobeClientSideKit.common.js",
             format: "cjs",
         }
     }

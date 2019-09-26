@@ -50,7 +50,7 @@ var mParticleAdobe = (function () {
     function EventHandler(common) {
         this.common = common || {};
     }
-    EventHandler.prototype.logEvent = function (event) {
+    EventHandler.prototype.logEvent = function(event) {
         switch (event.EventCategory) {
             case MediaEventType.AdBreakStart:
                 var adBreakObject = this.common.MediaHeartbeat.createAdBreakObject(
@@ -197,7 +197,7 @@ var mParticleAdobe = (function () {
         }
     };
 
-    var getStreamType = function (streamType, contentType, types) {
+    var getStreamType = function(streamType, contentType, types) {
         switch (streamType) {
             case 'Podcast':
             case 'PODCAST':
@@ -220,7 +220,7 @@ var mParticleAdobe = (function () {
         }
     };
 
-    var getContentType = function (contentType) {
+    var getContentType = function(contentType) {
         switch (contentType) {
             case 'Video':
             case 'video':
@@ -249,7 +249,7 @@ var mParticleAdobe = (function () {
         userIdentities example: { 1: 'customerId', 2: 'facebookId', 7: 'emailid@email.com' }
         additional identityTypes can be found at https://github.com/mParticle/mparticle-sdk-javascript/blob/master-v2/src/types.js#L88-L101
     */
-        initForwarder: function (
+        initForwarder: function(
             settings,
             testMode,
             userAttributes,
@@ -271,7 +271,7 @@ var mParticleAdobe = (function () {
                     document.getElementsByTagName('head')[0] ||
                     document.getElementsByTagName('body')[0]
                 ).appendChild(adobeHeartbeatSdk);
-                adobeHeartbeatSdk.onload = function () {
+                adobeHeartbeatSdk.onload = function() {
                     if (ADB && eventQueue.length > 0) {
                         // Process any events that may have been queued up while forwarder was being initialized.
                         for (var i = 0; i < eventQueue.length; i++) {
@@ -293,7 +293,7 @@ var mParticleAdobe = (function () {
                 isInitialized = this.initHeartbeat(settings, common, ADB, testMode);
             }
         },
-        initHeartbeat: function (settings, common, adobeSDK, testMode) {
+        initHeartbeat: function(settings, common, adobeSDK, testMode) {
             try {
                 // Init App Measurement with Visitor
                 var appMeasurement = new AppMeasurement(settings.reportSuiteID);
@@ -318,11 +318,11 @@ var mParticleAdobe = (function () {
 
                 var mediaDelegate = new MediaHeartbeatDelegate();
 
-                mediaDelegate.getCurrentPlaybackTime = function () {
+                mediaDelegate.getCurrentPlaybackTime = function() {
                     return common.playheadPosition;
                 };
 
-                mediaDelegate.getQoSObject = function () {
+                mediaDelegate.getQoSObject = function() {
                     return MediaHeartbeat.createQoSObject(
                         common.bitRate,
                         common.startupTime,
@@ -399,7 +399,7 @@ var mParticleAdobe = (function () {
             userIdentities
         ) {
             if (window.mParticle.isTestEnvironment) {
-                reportingService = function () { };
+                reportingService = function() {};
             } else {
                 reportingService = service;
             }
@@ -564,7 +564,7 @@ var mParticleAdobe = (function () {
                 Commerce: 16,
                 Media: 20
             };
-            
+
         var constructor$1 = function () {
             var self = this,
             //one or more instances of AppMeasurement returned from s_gi()
@@ -583,7 +583,7 @@ var mParticleAdobe = (function () {
             
             self.adobeMediaSDK = new src_1(),
             self.name = name$1;
-            
+
             function initForwarder(forwarderSettings, service, testMode) {
                 settings = forwarderSettings;
                 reportingService = service;
@@ -727,7 +727,7 @@ var mParticleAdobe = (function () {
                             return 'event name not mapped, aborting event logging';
                         }
 
-                        if (reportEvent === true && reportingService && event.EventDataType !== MessageType$1.Media ) {
+                        if (reportEvent === true && reportingService && event.EventDataType) {
                             reportingService(self, event);
                             return 'Successfully sent to ' + name$1;
                         }

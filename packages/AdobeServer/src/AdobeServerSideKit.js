@@ -17,7 +17,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-import { AdobeHbkConstructor } from '../AdobeHeartbeatKit.esm.js';
+import { AdobeHbkConstructor } from '../../../HeartbeatKit/dist/AdobeHBKit.esm.js';
 
     var MessageType = {
         Media: 20
@@ -43,7 +43,6 @@ import { AdobeHbkConstructor } from '../AdobeHeartbeatKit.esm.js';
                 }
 
                 if (forwarderSettings.mediaTrackingServer) {
-
                     self.adobeMediaSDK.init(forwarderSettings, service, testMode);
                 }
                 isInitialized = true;

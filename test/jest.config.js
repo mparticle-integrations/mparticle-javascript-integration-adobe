@@ -1,8 +1,8 @@
 var MODULE = process.env.MODULE;
 
 var files = {
-    client: 'src/AdobeKit-dev.js',
-    server: 'src/AdobeServerSideKit-dev.js'
+    client: 'packages/AdobeClient/src/AdobeClientSideKit.js',
+    server: 'packages/AdobeServer/src/AdobeServerSideKit.js'
 };
 
 module.exports = {

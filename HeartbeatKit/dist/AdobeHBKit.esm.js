@@ -49,7 +49,7 @@ var MediaEventType = {
 function EventHandler(common) {
     this.common = common || {};
 }
-EventHandler.prototype.logEvent = function (event) {
+EventHandler.prototype.logEvent = function(event) {
     switch (event.EventCategory) {
         case MediaEventType.AdBreakStart:
             var adBreakObject = this.common.MediaHeartbeat.createAdBreakObject(
@@ -196,7 +196,7 @@ EventHandler.prototype.logEvent = function (event) {
     }
 };
 
-var getStreamType = function (streamType, contentType, types) {
+var getStreamType = function(streamType, contentType, types) {
     switch (streamType) {
         case 'Podcast':
         case 'PODCAST':
@@ -219,7 +219,7 @@ var getStreamType = function (streamType, contentType, types) {
     }
 };
 
-var getContentType = function (contentType) {
+var getContentType = function(contentType) {
     switch (contentType) {
         case 'Video':
         case 'video':
@@ -248,7 +248,7 @@ var Initialization = {
     userIdentities example: { 1: 'customerId', 2: 'facebookId', 7: 'emailid@email.com' }
     additional identityTypes can be found at https://github.com/mParticle/mparticle-sdk-javascript/blob/master-v2/src/types.js#L88-L101
 */
-    initForwarder: function (
+    initForwarder: function(
         settings,
         testMode,
         userAttributes,
@@ -270,7 +270,7 @@ var Initialization = {
                 document.getElementsByTagName('head')[0] ||
                 document.getElementsByTagName('body')[0]
             ).appendChild(adobeHeartbeatSdk);
-            adobeHeartbeatSdk.onload = function () {
+            adobeHeartbeatSdk.onload = function() {
                 if (ADB && eventQueue.length > 0) {
                     // Process any events that may have been queued up while forwarder was being initialized.
                     for (var i = 0; i < eventQueue.length; i++) {
@@ -292,7 +292,7 @@ var Initialization = {
             isInitialized = this.initHeartbeat(settings, common, ADB, testMode);
         }
     },
-    initHeartbeat: function (settings, common, adobeSDK, testMode) {
+    initHeartbeat: function(settings, common, adobeSDK, testMode) {
         try {
             // Init App Measurement with Visitor
             var appMeasurement = new AppMeasurement(settings.reportSuiteID);
@@ -317,11 +317,11 @@ var Initialization = {
 
             var mediaDelegate = new MediaHeartbeatDelegate();
 
-            mediaDelegate.getCurrentPlaybackTime = function () {
+            mediaDelegate.getCurrentPlaybackTime = function() {
                 return common.playheadPosition;
             };
 
-            mediaDelegate.getQoSObject = function () {
+            mediaDelegate.getQoSObject = function() {
                 return MediaHeartbeat.createQoSObject(
                     common.bitRate,
                     common.startupTime,
@@ -398,7 +398,7 @@ function constructor() {
         userIdentities
     ) {
         if (window.mParticle.isTestEnvironment) {
-            reportingService = function () { };
+            reportingService = function() {};
         } else {
             reportingService = service;
         }
@@ -466,6 +466,8 @@ function constructor() {
     this.init = initForwarder;
     this.process = processEvent;
 }
+
+window.mParticle.registerForwarder({constructor: constructor});
 
 var src = {
     AdobeHbkConstructor: constructor

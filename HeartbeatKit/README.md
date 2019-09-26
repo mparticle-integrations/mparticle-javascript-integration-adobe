@@ -1,12 +1,10 @@
-# integration-adobe
+# Adobe Heartbeat Mapping
 
-Adobe Javascript integration for mParticle
-
-This repo is managed by [Lerna](https://lerna.js.org).
+This Adobe Heartbeat mapping is imported by both the Adobe Client and Adobe Server integrations located in the `packages/` directory. It is not a separate integration, but instead contains code to map an mParticle Media event that is sent to the Client or Server integrations.
 
 ## License
 
-Copyright 2018 mParticle, Inc.
+Copyright 2019 mParticle, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
