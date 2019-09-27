@@ -1,10 +1,13 @@
+import commonjs from 'rollup-plugin-commonjs';
+
 const { BUILD } = process.env;
 
 const input = {
     server_iife: 'packages/AdobeServer/dist/AdobeServerSideKit.esm.js',
     server_cjs: 'packages/AdobeServer/dist/AdobeServerSideKit.esm.js',
     client_iife: 'packages/AdobeClient/dist/AdobeClientSideKit.esm.js',
-    client_cjs: 'packages/AdobeClient/dist/AdobeClientSideKit.esm.js'
+    client_cjs: 'packages/AdobeClient/dist/AdobeClientSideKit.esm.js',
+    heartbeat: 'Heartbeat/src/index.js'
 }
 
 const outputOptions = {
@@ -47,6 +50,18 @@ const builds = {
             file: "packages/AdobeClient/dist/AdobeClientSideKit.common.js",
             format: "cjs",
         }
+    },
+    heartbeat: {
+        output: {
+            ...outputOptions,
+            exports: 'named',
+            name: 'mpAdobeHBKit',
+            file: './HeartbeatKit/dist/AdobeHBKit.esm.js',
+            format: 'esm'
+        },
+        plugins: [
+            commonjs()
+        ]
     }
 }
 
