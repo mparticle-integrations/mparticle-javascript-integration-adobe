@@ -68,6 +68,7 @@ var Initialization = {
 
             mediaConfig.trackingServer = settings.mediaTrackingServer;
             mediaConfig.ssl = settings.useSSL;
+            mediaConfig.playerName = 'mParticle Media SDK';
 
             var mediaDelegate = new MediaHeartbeatDelegate();
 
