@@ -7,7 +7,7 @@ const input = {
     server_cjs: 'packages/AdobeServer/dist/AdobeServerSideKit.esm.js',
     client_iife: 'packages/AdobeClient/dist/AdobeClientSideKit.esm.js',
     client_cjs: 'packages/AdobeClient/dist/AdobeClientSideKit.esm.js',
-    heartbeat: 'Heartbeat/src/index.js'
+    heartbeat: 'HeartbeatKit/src/index.js'
 }
 
 const outputOptions = {
@@ -51,6 +51,7 @@ const builds = {
             format: "cjs",
         }
     },
+    // creates heartbeat esm module kit that is consumed by adobe client and server kits
     heartbeat: {
         output: {
             ...outputOptions,
