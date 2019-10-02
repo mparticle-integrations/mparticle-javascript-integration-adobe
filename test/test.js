@@ -477,7 +477,6 @@ describe('AdobeEventForwarder Forwarder', function () {
         done();
     });
 
-    // TODO: THIS IS ONLY GOOD FOR WHEN BASE EVENT IS A PUBLIC API
     test('should call heartbeat play', function(done) {
         settings.mediaTrackingServer = 'test';
         configureAdobeForwarderAndReInit('optional', 'True', 'True');

@@ -12,14 +12,14 @@ var Initialization = {
         common
     ) {
         var self = this;
-        if (!window.mParticle.isTestEnvironment) {
+        if (!window.mParticle.isTestEnvironment || !window.ADB) {
             /* Load your Web SDK here using a variant of your snippet from your readme that your customers would generally put into their <head> tags
                Generally, our integrations create script tags and append them to the <head>. Please follow the following format as a guide:
             */
             var adobeHeartbeatSdk = document.createElement('script');
             adobeHeartbeatSdk.type = 'text/javascript';
             adobeHeartbeatSdk.async = true;
-            adobeHeartbeatSdk.src = 'https://cdn.jsdelivr.net/gh/Adobe-Marketing-Cloud/media-sdks/sdks/js/libs/MediaSDK.min.js'; // TODO: Get this url from Sam
+            adobeHeartbeatSdk.src = 'https://static.mparticle.com/sdk/web/adobe/MediaSDK.min.js';
             (
                 document.getElementsByTagName('head')[0] ||
                 document.getElementsByTagName('body')[0]

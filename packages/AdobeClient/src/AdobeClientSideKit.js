@@ -71,13 +71,13 @@ import { AdobeHbkConstructor } from '../../../HeartbeatKit/dist/AdobeHBKit.esm.j
         }
 
         function loadMappings() {
-            eVarsMapping = settings.evars ? JSON.parse(settings.evars.replace(/&quot;/g, '\"')) : [];
-            propsMapping = settings.props ? JSON.parse(settings.props.replace(/&quot;/g, '\"')) : [];
-            productIncrementorMapping = settings.productIncrementor ? JSON.parse(settings.productIncrementor.replace(/&quot;/g, '\"')) : [];
-            productMerchandisingMapping = settings.productMerchandising ? JSON.parse(settings.productMerchandising.replace(/&quot;/g, '\"')) : [];
-            hiersMapping = settings.hvars ? JSON.parse(settings.hvars.replace(/&quot;/g, '\"')) : [];
-            eventsMapping = settings.events ? JSON.parse(settings.events.replace(/&quot;/g, '\"')) : [];
-            contextVariableMapping = settings.contextVariables ? JSON.parse(settings.contextVariables.replace(/&quot;/g, '\"')) : [];
+            eVarsMapping = settings.evars ? JSON.parse(settings.evars.replace(/&quot;/g, '"')) : [];
+            propsMapping = settings.props ? JSON.parse(settings.props.replace(/&quot;/g, '"')) : [];
+            productIncrementorMapping = settings.productIncrementor ? JSON.parse(settings.productIncrementor.replace(/&quot;/g, '"')) : [];
+            productMerchandisingMapping = settings.productMerchandising ? JSON.parse(settings.productMerchandising.replace(/&quot;/g, '"')) : [];
+            hiersMapping = settings.hvars ? JSON.parse(settings.hvars.replace(/&quot;/g, '"')) : [];
+            eventsMapping = settings.events ? JSON.parse(settings.events.replace(/&quot;/g, '"')) : [];
+            contextVariableMapping = settings.contextVariables ? JSON.parse(settings.contextVariables.replace(/&quot;/g, '"')) : [];
         }
 
         function finishAdobeInitialization() {

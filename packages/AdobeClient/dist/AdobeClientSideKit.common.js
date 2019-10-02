@@ -236,14 +236,14 @@ var Initialization = {
         common
     ) {
         var self = this;
-        if (!window.mParticle.isTestEnvironment) {
+        if (!window.mParticle.isTestEnvironment || !window.ADB) {
             /* Load your Web SDK here using a variant of your snippet from your readme that your customers would generally put into their <head> tags
                Generally, our integrations create script tags and append them to the <head>. Please follow the following format as a guide:
             */
             var adobeHeartbeatSdk = document.createElement('script');
             adobeHeartbeatSdk.type = 'text/javascript';
             adobeHeartbeatSdk.async = true;
-            adobeHeartbeatSdk.src = 'https://cdn.jsdelivr.net/gh/Adobe-Marketing-Cloud/media-sdks/sdks/js/libs/MediaSDK.min.js'; // TODO: Get this url from Sam
+            adobeHeartbeatSdk.src = 'https://static.mparticle.com/sdk/web/adobe/MediaSDK.min.js';
             (
                 document.getElementsByTagName('head')[0] ||
                 document.getElementsByTagName('body')[0]
@@ -585,13 +585,13 @@ function s_pgicq(){var r=window,a=r.s_giq,k,p,n;if(a)for(k=0;k<a.length;k++)p=a[
         }
 
         function loadMappings() {
-            eVarsMapping = settings.evars ? JSON.parse(settings.evars.replace(/&quot;/g, '\"')) : [];
-            propsMapping = settings.props ? JSON.parse(settings.props.replace(/&quot;/g, '\"')) : [];
-            productIncrementorMapping = settings.productIncrementor ? JSON.parse(settings.productIncrementor.replace(/&quot;/g, '\"')) : [];
-            productMerchandisingMapping = settings.productMerchandising ? JSON.parse(settings.productMerchandising.replace(/&quot;/g, '\"')) : [];
-            hiersMapping = settings.hvars ? JSON.parse(settings.hvars.replace(/&quot;/g, '\"')) : [];
-            eventsMapping = settings.events ? JSON.parse(settings.events.replace(/&quot;/g, '\"')) : [];
-            contextVariableMapping = settings.contextVariables ? JSON.parse(settings.contextVariables.replace(/&quot;/g, '\"')) : [];
+            eVarsMapping = settings.evars ? JSON.parse(settings.evars.replace(/&quot;/g, '"')) : [];
+            propsMapping = settings.props ? JSON.parse(settings.props.replace(/&quot;/g, '"')) : [];
+            productIncrementorMapping = settings.productIncrementor ? JSON.parse(settings.productIncrementor.replace(/&quot;/g, '"')) : [];
+            productMerchandisingMapping = settings.productMerchandising ? JSON.parse(settings.productMerchandising.replace(/&quot;/g, '"')) : [];
+            hiersMapping = settings.hvars ? JSON.parse(settings.hvars.replace(/&quot;/g, '"')) : [];
+            eventsMapping = settings.events ? JSON.parse(settings.events.replace(/&quot;/g, '"')) : [];
+            contextVariableMapping = settings.contextVariables ? JSON.parse(settings.contextVariables.replace(/&quot;/g, '"')) : [];
         }
 
         function finishAdobeInitialization() {
