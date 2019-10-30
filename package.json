@@ -21,7 +21,7 @@
     "test:heartbeat": "node HeartbeatKit/test/boilerplate/test-karma.js",
     "test:client:debug": "MODULE=client node --inspect-brk ./node_modules/jest/bin/jest.js --runInBand --config test/jest.config.js test/test.js",
     "test:server:debug": "MODULE=server node --inspect-brk ./node_modules/jest/bin/jest.js --runInBand --config test/jest.config.js test/server.test.js",
-    "watch:heartbeat": "rollup --config HeartbeatKit/rollup.config.js -w"
+    "watch:heartbeat": "BUILD=heartbeat rollup --config HeartbeatKit/rollup.config.js -w"
   },
   "author": "Robert Ing (ring@mparticle.com)",
   "license": "Apache",

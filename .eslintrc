@@ -10,36 +10,25 @@
         }
     },
     "globals": {
-        "window": true
+        "window": true,
+        "document": true,
+        "Visitor": true,
+        "AppMeasurement": true,
+        "ADB": true
     },
     "extends": "eslint:recommended",
     "rules": {
-        "linebreak-style": [
-            "error",
-            "unix"
-        ],
-        "quotes": [
-            "error",
-            "single"
-        ],
-        "semi": [
-            "error",
-            "always"
-        ],
+        "linebreak-style": ["error", "unix"],
+        "quotes": ["error", "single"],
+        "semi": ["error", "always"],
         "no-unneeded-ternary": [
             "error",
             {
                 "defaultAssignment": false
             }
         ],
-        "comma-dangle": [
-            "error",
-            "never"
-        ],
-        "curly": [
-            "error",
-            "multi-line"
-        ],
+        "comma-dangle": ["error", "never"],
+        "curly": ["error", "multi-line"],
         "comma-spacing": [
             "error",
             {

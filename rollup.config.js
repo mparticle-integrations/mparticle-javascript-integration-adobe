@@ -8,7 +8,7 @@ const input = {
     client_iife: 'packages/AdobeClient/dist/AdobeClientSideKit.esm.js',
     client_cjs: 'packages/AdobeClient/dist/AdobeClientSideKit.esm.js',
     heartbeat: 'HeartbeatKit/src/index.js'
-}
+};
 
 const outputOptions = {
     strict: false
@@ -21,7 +21,7 @@ const builds = {
             ...outputOptions,
             name: 'mParticleAdobe',
             file: 'packages/AdobeServer/dist/AdobeServerSideKit.iife.js',
-            format: 'iife',
+            format: 'iife'
         }
     },
     // creates npm module for adobe server side kit
@@ -29,8 +29,8 @@ const builds = {
         output: {
             ...outputOptions,
             name: 'mParticleAdobe',
-            file: "packages/AdobeServer/dist/AdobeServerSideKit.common.js",
-            format: "cjs",
+            file: 'packages/AdobeServer/dist/AdobeServerSideKit.common.js',
+            format: 'cjs'
         }
     },
     // for dynamic script tag loading of adobe client side kit
@@ -39,16 +39,16 @@ const builds = {
             ...outputOptions,
             name: 'mParticleAdobe',
             file: 'packages/AdobeClient/dist/AdobeClientSideKit.iife.js',
-            format: 'iife',
+            format: 'iife'
         }
     },
-   // creates npm module for adobe client side kit
+    // creates npm module for adobe client side kit
     client_cjs: {
         output: {
             ...outputOptions,
             name: 'mParticleAdobe',
-            file: "packages/AdobeClient/dist/AdobeClientSideKit.common.js",
-            format: "cjs",
+            file: 'packages/AdobeClient/dist/AdobeClientSideKit.common.js',
+            format: 'cjs'
         }
     },
     // creates heartbeat esm module kit that is consumed by adobe client and server kits
@@ -60,11 +60,9 @@ const builds = {
             file: './HeartbeatKit/dist/AdobeHBKit.esm.js',
             format: 'esm'
         },
-        plugins: [
-            commonjs()
-        ]
+        plugins: [commonjs()]
     }
-}
+};
 
 var selectedBuild = {
     input: input[BUILD],
