@@ -21,6 +21,16 @@ var MediaEventType = {
     UpdateQoS: 46
 };
 
+var ContentType = {
+    Audio: 'Audio',
+    Video: 'Video'
+};
+
+var StreamType = {
+    LiveStream: 'LiveStream',
+    OnDemand: 'OnDemand'
+};
+
 function EventHandler(common) {
     this.common = common || {};
 }
@@ -84,10 +94,9 @@ EventHandler.prototype.logEvent = function(event) {
             this.common.mediaHeartbeat.trackComplete();
             break;
         case MediaEventType.SessionStart:
-            var contentType = getContentType(event.ContentType);
             var streamType = getStreamType(
                 event.StreamType,
-                contentType,
+                event.ContentType,
                 this.common.MediaHeartbeat.StreamType
             );
 
@@ -96,7 +105,7 @@ EventHandler.prototype.logEvent = function(event) {
                 event.ContentId,
                 event.Duration,
                 streamType,
-                contentType
+                event.ContentType
             );
 
             this.common.mediaHeartbeat.trackSessionStart(adobeMediaObject);
@@ -173,40 +182,13 @@ EventHandler.prototype.logEvent = function(event) {
 
 var getStreamType = function(streamType, contentType, types) {
     switch (streamType) {
-        case 'Podcast':
-        case 'PODCAST':
-            return types.PODCAST;
-        case 'OnDemand':
-        case 'ONDEMAND':
-        case 1:
-            if (contentType === 'Video') {
-                return types.VOD;
-            } else {
-                return types.AOD;
-            }
-        case 'Live':
-        case 'LIVE':
-        case 0:
+        case StreamType.OnDemand:
+            return contentType === ContentType.Video ? types.VOD : types.AOD;
+        case StreamType.LiveStream:
             return types.LIVE;
         default:
             // If it's an unknown type, just pass it through to Adobe
             return streamType;
-    }
-};
-
-var getContentType = function(contentType) {
-    switch (contentType) {
-        case 'Video':
-        case 'video':
-        case 0:
-            return 'Video';
-        case 'Audio':
-        case 'audio':
-        case 1:
-            return 'Audio';
-        default:
-            // If it's an unknown type, just pass it through to Adobe
-            return contentType;
     }
 };
 

@@ -38,12 +38,12 @@ describe('Adobe Heartbeat Forwarder', function() {
             UpdateQoS: 46
         },
         MediaContentType = {
-            Video: 0,
-            Audio: 1
+            Video: 'Video',
+            Audio: 'Audio'
         },
         MediaStreamType = {
-            LiveStream: 0,
-            OnDemand: 1
+            LiveStream: 'LiveStream',
+            OnDemand: 'OnDemand'
         },
         IdentityType = {
             Other: 0,
