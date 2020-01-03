@@ -46,6 +46,11 @@ var mParticleAdobe = (function () {
         this.common = common || {};
     }
     EventHandler.prototype.logEvent = function(event) {
+        var customAttributes = {};
+        if (event && event.EventAttributes) {
+            customAttributes = event.EventAttributes;
+        }
+
         switch (event.EventCategory) {
             case MediaEventType.AdBreakStart:
                 var adBreakObject = this.common.MediaHeartbeat.createAdBreakObject(
