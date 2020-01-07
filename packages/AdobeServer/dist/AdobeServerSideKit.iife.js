@@ -61,12 +61,15 @@ var mParticleAdobe = (function () {
 
                 this.common.mediaHeartbeat.trackEvent(
                     this.common.MediaHeartbeat.Event.AdBreakStart,
-                    adBreakObject
+                    adBreakObject,
+                    customAttributes
                 );
                 break;
             case MediaEventType.AdBreakEnd:
                 this.common.mediaHeartbeat.trackEvent(
-                    this.common.MediaHeartbeat.Event.AdBreakComplete
+                    this.common.MediaHeartbeat.Event.AdBreakComplete,
+                    {},
+                    customAttributes
                 );
                 break;
             case MediaEventType.AdStart:
@@ -79,17 +82,22 @@ var mParticleAdobe = (function () {
 
                 this.common.mediaHeartbeat.trackEvent(
                     this.common.MediaHeartbeat.Event.AdStart,
-                    adObject
+                    adObject,
+                    customAttributes
                 );
                 break;
             case MediaEventType.AdEnd:
                 this.common.mediaHeartbeat.trackEvent(
-                    this.common.MediaHeartbeat.Event.AdComplete
+                    this.common.MediaHeartbeat.Event.AdComplete,
+                    {},
+                    customAttributes
                 );
                 break;
             case MediaEventType.AdSkip:
                 this.common.mediaHeartbeat.trackEvent(
-                    this.common.MediaHeartbeat.Event.AdSkip
+                    this.common.MediaHeartbeat.Event.AdSkip,
+                    {},
+                    customAttributes
                 );
                 break;
             case MediaEventType.AdClick:
@@ -98,12 +106,16 @@ var mParticleAdobe = (function () {
                 break;
             case MediaEventType.BufferStart:
                 this.common.mediaHeartbeat.trackEvent(
-                    this.common.MediaHeartbeat.Event.BufferStart
+                    this.common.MediaHeartbeat.Event.BufferStart,
+                    {},
+                    customAttributes
                 );
                 break;
             case MediaEventType.BufferEnd:
                 this.common.mediaHeartbeat.trackEvent(
-                    this.common.MediaHeartbeat.Event.BufferComplete
+                    this.common.MediaHeartbeat.Event.BufferComplete,
+                    {},
+                    customAttributes
                 );
                 break;
             case MediaEventType.MediaContentEnd:
@@ -124,7 +136,10 @@ var mParticleAdobe = (function () {
                     event.ContentType
                 );
 
-                this.common.mediaHeartbeat.trackSessionStart(adobeMediaObject);
+                this.common.mediaHeartbeat.trackSessionStart(
+                    adobeMediaObject,
+                    customAttributes
+                );
                 break;
 
             case MediaEventType.SessionEnd:
@@ -141,12 +156,16 @@ var mParticleAdobe = (function () {
                 break;
             case MediaEventType.SeekStart:
                 this.common.mediaHeartbeat.trackEvent(
-                    this.common.MediaHeartbeat.Event.SeekStart
+                    this.common.MediaHeartbeat.Event.SeekStart,
+                    {},
+                    customAttributes
                 );
                 break;
             case MediaEventType.SeekEnd:
                 this.common.mediaHeartbeat.trackEvent(
-                    this.common.MediaHeartbeat.Event.SeekComplete
+                    this.common.MediaHeartbeat.Event.SeekComplete,
+                    {},
+                    customAttributes
                 );
                 break;
             case MediaEventType.SegmentStart:
@@ -159,17 +178,22 @@ var mParticleAdobe = (function () {
 
                 this.common.mediaHeartbeat.trackEvent(
                     this.common.MediaHeartbeat.Event.ChapterStart,
-                    chapterObject
+                    chapterObject,
+                    customAttributes
                 );
                 break;
             case MediaEventType.SegmentEnd:
                 this.common.mediaHeartbeat.trackEvent(
-                    this.common.MediaHeartbeat.Event.ChapterComplete
+                    this.common.MediaHeartbeat.Event.ChapterComplete,
+                    {},
+                    customAttributes
                 );
                 break;
             case MediaEventType.SegmentSkip:
                 this.common.mediaHeartbeat.trackEvent(
-                    this.common.MediaHeartbeat.Event.ChapterSkip
+                    this.common.MediaHeartbeat.Event.ChapterSkip,
+                    {},
+                    customAttributes
                 );
                 break;
             case MediaEventType.UpdateQoS:
@@ -187,7 +211,8 @@ var mParticleAdobe = (function () {
 
                 this.common.mediaHeartbeat.trackEvent(
                     this.common.MediaHeartbeat.Event.BitrateChange,
-                    qosObject
+                    qosObject,
+                    customAttributes
                 );
                 break;
             default:
