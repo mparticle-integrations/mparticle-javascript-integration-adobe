@@ -117,7 +117,7 @@ describe('Adobe Heartbeat Forwarder', function() {
             this.trackCompleteCalled = true;
             return true;
         };
-        this.trackEvent = function(eventName, eventObject) {
+        this.trackEvent = function(eventName, eventObject, customMetaData) {
             this.trackEventCalled = true;
 
             var dataObject;
@@ -132,7 +132,8 @@ describe('Adobe Heartbeat Forwarder', function() {
 
             this.trackEventCalledWith = {
                 eventName: eventName,
-                eventObject: dataObject
+                eventObject: dataObject,
+                customMetaData: customMetaData
             };
         };
         this.trackPlay = function() {
@@ -912,6 +913,44 @@ describe('Adobe Heartbeat Forwarder', function() {
             ).equal(undefined);
 
             done();
+        });
+    });
+    describe('Custom MetaData', () => {
+        it('should pass custom attributes to #trackSessionStart', () => {
+            mParticle.forwarder.process({
+                EventAttributes: {
+                    someCustomData: 'foo'
+                },
+                EventDataType: MessageTypes.Media,
+                EventCategory: MediaEventType.SessionStart
+            });
+            should(
+                window.mParticle.forwarder.common.mediaHeartbeat
+                    .trackSessionStartCalledWith.customVideoMeta
+            ).match({ someCustomData: 'foo' });
+        });
+        it('should pass custom attributes to #trackEvent', () => {
+            mParticle.forwarder.process({
+                AdContent: {
+                    id: '4423210',
+                    advertiser: 'Moms Friendly Robot Company',
+                    title: 'What?! Nobody rips off my kids but me!',
+                    campaign: 'MomCorp Galactic Domination Plot 3201',
+                    duration: 60000,
+                    creative: 'A Fishful of Dollars',
+                    siteid: 'moms',
+                    placement: 2
+                },
+                EventAttributes: {
+                    someCustomData: 'foo'
+                },
+                EventDataType: MessageTypes.Media,
+                EventCategory: MediaEventType.AdSkip
+            });
+            should(
+                window.mParticle.forwarder.common.mediaHeartbeat
+                    .trackEventCalledWith.customMetaData
+            ).match({ someCustomData: 'foo' });
         });
     });
 });
