@@ -65,13 +65,11 @@ function constructor() {
                 userIdentities,
                 processEvent,
                 eventQueue,
-                isHBInit,
                 self.common,
                 initForwarderCallback
             );
             self.eventHandler = new EventHandler(self.common);
         } catch (e) {
-            isHBInit = false;
             console.error('Failed to initialize ' + name, e);
         }
     }

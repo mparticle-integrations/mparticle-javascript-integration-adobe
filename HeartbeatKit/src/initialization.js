@@ -8,7 +8,6 @@ var Initialization = {
         userIdentities,
         processEvent,
         eventQueue,
-        isHBInit,
         common,
         initForwarderCallback
     ) {
@@ -28,7 +27,7 @@ var Initialization = {
             ).appendChild(adobeHeartbeatSdk);
             adobeHeartbeatSdk.onload = function() {
                 if (ADB) {
-                    isHBInit = self.initHeartbeat(
+                    self.initHeartbeat(
                         settings,
                         common,
                         ADB,
@@ -48,7 +47,7 @@ var Initialization = {
         } else {
             // For testing, you should fill out this section in order to ensure any required initialization calls are made,
             // clientSDKObject.initialize(forwarderSettings.apiKey)
-            isHBInit = self.initHeartbeat(
+            self.initHeartbeat(
                 settings,
                 common,
                 ADB,
@@ -110,7 +109,6 @@ var Initialization = {
             common.mediaHeartbeat = mediaHeartbeat;
         } catch (e) {
             console.error(e);
-            return false;
         }
 
         initHeartbeatCallback();
