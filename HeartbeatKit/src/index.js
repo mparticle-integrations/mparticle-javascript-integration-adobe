@@ -31,12 +31,17 @@ var MessageType = {
 
 function constructor() {
     var self = this,
-        isInitialized = false,
+        isAdobeMediaSDKInitialized = false,
         reportingService,
-        eventQueue = [];
+        eventQueue = [],
+        name = 'AdobeHeartbeatKit';
 
     self.moduleId = Initialization.moduleId;
     self.common = new Common();
+
+    var initForwarderCallback = function() {
+        isAdobeMediaSDKInitialized = true;
+    };
 
     function initForwarder(
         settings,
@@ -60,20 +65,18 @@ function constructor() {
                 userIdentities,
                 processEvent,
                 eventQueue,
-                isInitialized,
-                self.common
+                self.common,
+                initForwarderCallback
             );
             self.eventHandler = new EventHandler(self.common);
-
-            isInitialized = true;
         } catch (e) {
-            console.log('Failed to initialize ' + name + ' - ' + e);
+            console.error('Failed to initialize ' + name, e);
         }
     }
 
     function processEvent(event) {
         var reportEvent = false;
-        if (isInitialized) {
+        if (isAdobeMediaSDKInitialized) {
             try {
                 if (event.EventDataType === MessageType.Media) {
                     // Kits should just treat Media Events as generic Events
@@ -117,7 +120,7 @@ function constructor() {
 }
 
 if (window.mParticle && window.mParticle.registerHBK) {
-    window.mParticle.registerHBK({constructor: constructor});
+    window.mParticle.registerHBK({ constructor: constructor });
 }
 
 module.exports = {

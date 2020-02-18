@@ -244,8 +244,8 @@ var Initialization = {
         userIdentities,
         processEvent,
         eventQueue,
-        isInitialized,
-        common
+        common,
+        initForwarderCallback
     ) {
         var self = this;
         if (!window.mParticle.isTestEnvironment || !window.ADB) {
@@ -255,34 +255,50 @@ var Initialization = {
             var adobeHeartbeatSdk = document.createElement('script');
             adobeHeartbeatSdk.type = 'text/javascript';
             adobeHeartbeatSdk.async = true;
-            adobeHeartbeatSdk.src = 'https://static.mparticle.com/sdk/web/adobe/MediaSDK.min.js';
+            adobeHeartbeatSdk.src =
+                'https://static.mparticle.com/sdk/web/adobe/MediaSDK.min.js';
             (
                 document.getElementsByTagName('head')[0] ||
                 document.getElementsByTagName('body')[0]
             ).appendChild(adobeHeartbeatSdk);
             adobeHeartbeatSdk.onload = function() {
-                if (ADB && eventQueue.length > 0) {
-                    // Process any events that may have been queued up while forwarder was being initialized.
-                    for (var i = 0; i < eventQueue.length; i++) {
-                        processEvent(eventQueue[i]);
+                if (ADB) {
+                    self.initHeartbeat(
+                        settings,
+                        common,
+                        ADB,
+                        testMode,
+                        initForwarderCallback
+                    );
+                    if (eventQueue.length > 0) {
+                        // Process any events that may have been queued up while forwarder was being initialized.
+                        for (var i = 0; i < eventQueue.length; i++) {
+                            processEvent(eventQueue[i]);
+                        }
+                        // now that each queued event is processed, we empty the eventQueue
+                        eventQueue = [];
                     }
-                    // now that each queued event is processed, we empty the eventQueue
-                    eventQueue = [];
                 }
-                isInitialized = self.initHeartbeat(
-                    settings,
-                    common,
-                    ADB,
-                    testMode
-                );
             };
         } else {
             // For testing, you should fill out this section in order to ensure any required initialization calls are made,
             // clientSDKObject.initialize(forwarderSettings.apiKey)
-            isInitialized = self.initHeartbeat(settings, common, ADB, testMode);
+            self.initHeartbeat(
+                settings,
+                common,
+                ADB,
+                testMode,
+                initForwarderCallback
+            );
         }
     },
-    initHeartbeat: function(settings, common, adobeSDK) {
+    initHeartbeat: function(
+        settings,
+        common,
+        adobeSDK,
+        testMode,
+        initHeartbeatCallback
+    ) {
         try {
             // Init App Measurement with Visitor
             var appMeasurement = new AppMeasurement(settings.reportSuiteIDs);
@@ -329,10 +345,9 @@ var Initialization = {
             common.mediaHeartbeat = mediaHeartbeat;
         } catch (e) {
             console.error(e);
-            return false;
         }
 
-        return true;
+        initHeartbeatCallback();
     }
 };
 
@@ -371,12 +386,17 @@ var MessageType = {
 
 function constructor() {
     var self = this,
-        isInitialized = false,
+        isAdobeMediaSDKInitialized = false,
         reportingService,
-        eventQueue = [];
+        eventQueue = [],
+        name = 'AdobeHeartbeatKit';
 
     self.moduleId = initialization.moduleId;
     self.common = new common();
+
+    var initForwarderCallback = function() {
+        isAdobeMediaSDKInitialized = true;
+    };
 
     function initForwarder(
         settings,
@@ -400,20 +420,18 @@ function constructor() {
                 userIdentities,
                 processEvent,
                 eventQueue,
-                isInitialized,
-                self.common
+                self.common,
+                initForwarderCallback
             );
             self.eventHandler = new eventHandler(self.common);
-
-            isInitialized = true;
         } catch (e) {
-            console.log('Failed to initialize ' + name + ' - ' + e);
+            console.error('Failed to initialize ' + name, e);
         }
     }
 
     function processEvent(event) {
         var reportEvent = false;
-        if (isInitialized) {
+        if (isAdobeMediaSDKInitialized) {
             try {
                 if (event.EventDataType === MessageType.Media) {
                     // Kits should just treat Media Events as generic Events
@@ -457,7 +475,7 @@ function constructor() {
 }
 
 if (window.mParticle && window.mParticle.registerHBK) {
-    window.mParticle.registerHBK({constructor: constructor});
+    window.mParticle.registerHBK({ constructor: constructor });
 }
 
 var src = {
