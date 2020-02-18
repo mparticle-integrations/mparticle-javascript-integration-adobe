@@ -8,8 +8,9 @@ var Initialization = {
         userIdentities,
         processEvent,
         eventQueue,
-        isInitialized,
-        common
+        isHBInit,
+        common,
+        initForwarderCallback
     ) {
         var self = this;
         if (!window.mParticle.isTestEnvironment || !window.ADB) {
@@ -19,34 +20,50 @@ var Initialization = {
             var adobeHeartbeatSdk = document.createElement('script');
             adobeHeartbeatSdk.type = 'text/javascript';
             adobeHeartbeatSdk.async = true;
-            adobeHeartbeatSdk.src = 'https://static.mparticle.com/sdk/web/adobe/MediaSDK.min.js';
+            adobeHeartbeatSdk.src =
+                'https://static.mparticle.com/sdk/web/adobe/MediaSDK.min.js';
             (
                 document.getElementsByTagName('head')[0] ||
                 document.getElementsByTagName('body')[0]
             ).appendChild(adobeHeartbeatSdk);
             adobeHeartbeatSdk.onload = function() {
-                if (ADB && eventQueue.length > 0) {
-                    // Process any events that may have been queued up while forwarder was being initialized.
-                    for (var i = 0; i < eventQueue.length; i++) {
-                        processEvent(eventQueue[i]);
+                if (ADB) {
+                    isHBInit = self.initHeartbeat(
+                        settings,
+                        common,
+                        ADB,
+                        testMode,
+                        initForwarderCallback
+                    );
+                    if (eventQueue.length > 0) {
+                        // Process any events that may have been queued up while forwarder was being initialized.
+                        for (var i = 0; i < eventQueue.length; i++) {
+                            processEvent(eventQueue[i]);
+                        }
+                        // now that each queued event is processed, we empty the eventQueue
+                        eventQueue = [];
                     }
-                    // now that each queued event is processed, we empty the eventQueue
-                    eventQueue = [];
                 }
-                isInitialized = self.initHeartbeat(
-                    settings,
-                    common,
-                    ADB,
-                    testMode
-                );
             };
         } else {
             // For testing, you should fill out this section in order to ensure any required initialization calls are made,
             // clientSDKObject.initialize(forwarderSettings.apiKey)
-            isInitialized = self.initHeartbeat(settings, common, ADB, testMode);
+            isHBInit = self.initHeartbeat(
+                settings,
+                common,
+                ADB,
+                testMode,
+                initForwarderCallback
+            );
         }
     },
-    initHeartbeat: function(settings, common, adobeSDK) {
+    initHeartbeat: function(
+        settings,
+        common,
+        adobeSDK,
+        testMode,
+        initHeartbeatCallback
+    ) {
         try {
             // Init App Measurement with Visitor
             var appMeasurement = new AppMeasurement(settings.reportSuiteIDs);
@@ -96,7 +113,7 @@ var Initialization = {
             return false;
         }
 
-        return true;
+        initHeartbeatCallback();
     }
 };
 
