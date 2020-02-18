@@ -19,109 +19,121 @@
 
 import { AdobeHbkConstructor } from '../../../HeartbeatKit/dist/AdobeHBKit.esm.js';
 
-    var MessageType = {
-        Media: 20
-    };
-    var name = 'Adobe',
-        MARKETINGCLOUDIDKEY = 'mid',
-        ADOBEMODULENUMBER = 124;
+var MessageType = {
+    Media: 20
+};
+var name = 'Adobe',
+    MARKETINGCLOUDIDKEY = 'mid',
+    ADOBEMODULENUMBER = 124;
 
-    var constructor = function () {
-        var self = this,
-            isAdobeServerKitInitialized;
-        self.name = name;
-        self.adobeMediaSDK = new AdobeHbkConstructor();
+var constructor = function() {
+    var self = this,
+        isAdobeServerKitInitialized;
+    self.name = name;
+    self.adobeMediaSDK = new AdobeHbkConstructor();
 
-        function initForwarder(forwarderSettings, service, testMode) {
-            mParticle._setIntegrationDelay(ADOBEMODULENUMBER, true);
+    function initForwarder(forwarderSettings, service, testMode) {
+        mParticle._setIntegrationDelay(ADOBEMODULENUMBER, true);
+        try {
+            // On first load, adobe will call the callback correctly if no MCID exists
+            // On subsequent loads, it does not, so we need to manually call setMCIDOnIntegrationAttributes
+            var mcID = Visitor.getInstance(
+                forwarderSettings.organizationID
+            ).getMarketingCloudVisitorID(setMarketingCloudId);
+            if (mcID && mcID.length > 0) {
+                setMCIDOnIntegrationAttributes(mcID);
+            }
+
+            if (forwarderSettings.mediaTrackingServer) {
+                self.adobeMediaSDK.init(forwarderSettings, service, testMode);
+            }
+            isAdobeServerKitInitialized = true;
+            return 'Adobe Server Side Integration Ready';
+        } catch (e) {
+            return 'Failed to initialize: ' + e;
+        }
+    }
+
+    function setMarketingCloudId(mcid) {
+        setMCIDOnIntegrationAttributes(mcid);
+    }
+
+    function processEvent(event) {
+        if (isAdobeServerKitInitialized) {
             try {
-                // On first load, adobe will call the callback correctly if no MCID exists
-                // On subsequent loads, it does not, so we need to manually call setMCIDOnIntegrationAttributes
-                var mcID = Visitor.getInstance(forwarderSettings.organizationID).getMarketingCloudVisitorID(setMarketingCloudId);
-                if (mcID && mcID.length > 0) {
-                    setMCIDOnIntegrationAttributes(mcID);
+                if (event.EventDataType === MessageType.Media) {
+                    self.adobeMediaSDK.process(event);
                 }
-
-                if (forwarderSettings.mediaTrackingServer) {
-                    self.adobeMediaSDK.init(forwarderSettings, service, testMode);
-                }
-                isAdobeServerKitInitialized = true;
-                return 'Adobe Server Side Integration Ready';
             } catch (e) {
-                return 'Failed to initialize: ' + e;
+                return 'Failed to send to: ' + name + ' ' + e;
             }
-        }
-
-        function setMarketingCloudId(mcid) {
-            setMCIDOnIntegrationAttributes(mcid);
-        }
-
-        function processEvent(event) {
-            if (isAdobeServerKitInitialized) {
-                try {
-                    if (event.EventDataType === MessageType.Media) {
-                        self.adobeMediaSDK.process(event);
-                    }
-                }
-                catch (e) {
-                    return 'Failed to send to: ' + name + ' ' + e;
-                }
-            } else {
-                return 'Can\'t send to forwarder ' + name + ', not initialized.';
-            }
-        }
-
-        this.init = initForwarder;
-        this.process = processEvent;
-    };
-
-    function setMCIDOnIntegrationAttributes(mcid) {
-        var adobeIntegrationAttributes = {};
-        adobeIntegrationAttributes[MARKETINGCLOUDIDKEY] = mcid;
-        mParticle.setIntegrationAttribute(ADOBEMODULENUMBER, adobeIntegrationAttributes);
-        mParticle._setIntegrationDelay(ADOBEMODULENUMBER, false);
-    }
-
-    function getId() {
-        return moduleId;
-    }
-
-    if (window && window.mParticle && window.mParticle.addForwarder) {
-        window.mParticle.addForwarder({
-            name: name,
-            constructor: constructor,
-            getId: getId
-        });
-    }
-
-    function register(config) {
-        if (!config) {
-            window.console.log('You must pass a config object to register the kit ' + name);
-            return;
-        }
-
-        if (!isObject(config)) {
-            window.console.log('\'config\' must be an object. You passed in a ' + typeof config);
-            return;
-        }
-
-        if (isObject(config.kits)) {
-            config.kits[name] = {
-                constructor: constructor
-            };
         } else {
-            config.kits = {};
-            config.kits[name] = {
-                constructor: constructor
-            };
+            return "Can't send to forwarder " + name + ', not initialized.';
         }
-        window.console.log('Successfully registered ' + name + ' to your mParticle configuration');
     }
 
-    function isObject(val) {
-        return val != null && typeof val === 'object' && Array.isArray(val) === false;
+    this.init = initForwarder;
+    this.process = processEvent;
+};
+
+function setMCIDOnIntegrationAttributes(mcid) {
+    var adobeIntegrationAttributes = {};
+    adobeIntegrationAttributes[MARKETINGCLOUDIDKEY] = mcid;
+    mParticle.setIntegrationAttribute(
+        ADOBEMODULENUMBER,
+        adobeIntegrationAttributes
+    );
+    mParticle._setIntegrationDelay(ADOBEMODULENUMBER, false);
+}
+
+function getId() {
+    return moduleId;
+}
+
+if (window && window.mParticle && window.mParticle.addForwarder) {
+    window.mParticle.addForwarder({
+        name: name,
+        constructor: constructor,
+        getId: getId
+    });
+}
+
+function register(config) {
+    if (!config) {
+        window.console.log(
+            'You must pass a config object to register the kit ' + name
+        );
+        return;
     }
 
-    export default {
-        register: register
-    };
+    if (!isObject(config)) {
+        window.console.log(
+            "'config' must be an object. You passed in a " + typeof config
+        );
+        return;
+    }
+
+    if (isObject(config.kits)) {
+        config.kits[name] = {
+            constructor: constructor
+        };
+    } else {
+        config.kits = {};
+        config.kits[name] = {
+            constructor: constructor
+        };
+    }
+    window.console.log(
+        'Successfully registered ' + name + ' to your mParticle configuration'
+    );
+}
+
+function isObject(val) {
+    return (
+        val != null && typeof val === 'object' && Array.isArray(val) === false
+    );
+}
+
+export default {
+    register: register
+};
