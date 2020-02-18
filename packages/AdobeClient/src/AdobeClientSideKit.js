@@ -39,7 +39,7 @@ import { AdobeHbkConstructor } from '../../../HeartbeatKit/dist/AdobeHBKit.esm.j
             appMeasurement,
             settings,
             timestampOption,
-            isInitialized = false,
+            isClientInitialized = false,
             reportingService,
             contextVariableMapping,
             productIncrementorMapping,
@@ -62,7 +62,7 @@ import { AdobeHbkConstructor } from '../../../HeartbeatKit/dist/AdobeHBKit.esm.j
                 if (settings.mediaTrackingServer) {
                     self.adobeMediaSDK.init(forwarderSettings, service, testMode);
                 }
-                isInitialized = true;
+                isClientInitialized = true;
 
                 return 'ClientSDK successfully loaded';
             } catch (e) {
@@ -170,7 +170,7 @@ import { AdobeHbkConstructor } from '../../../HeartbeatKit/dist/AdobeHBKit.esm.j
             appMeasurement.timestamp = timestampOption ? Math.floor((new Date).getTime()/1000) : null;
             appMeasurement.events = '';
 
-            if (isInitialized) {
+            if (isClientInitialized) {
                 try {
                     // First determine if an eventName is mapped, if so, log it as an event as opposed to a pageview or commerceview
                     // ex. If a pageview is mapped to an event, we logEvent instead of logging it as a pageview
@@ -437,7 +437,7 @@ import { AdobeHbkConstructor } from '../../../HeartbeatKit/dist/AdobeHBKit.esm.j
         }
 
         function onUserIdentified(mpUserObject) {
-            if (isInitialized) {
+            if (isClientInitialized) {
                 var userIdentities = mpUserObject.getUserIdentities().userIdentities;
 
                 var identitiesToSet = {};

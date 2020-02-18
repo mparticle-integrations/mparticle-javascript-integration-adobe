@@ -28,7 +28,7 @@ import { AdobeHbkConstructor } from '../../../HeartbeatKit/dist/AdobeHBKit.esm.j
 
     var constructor = function () {
         var self = this,
-            isInitialized;
+            isServerInitialized;
         self.name = name;
         self.adobeMediaSDK = new AdobeHbkConstructor();
 
@@ -45,7 +45,7 @@ import { AdobeHbkConstructor } from '../../../HeartbeatKit/dist/AdobeHBKit.esm.j
                 if (forwarderSettings.mediaTrackingServer) {
                     self.adobeMediaSDK.init(forwarderSettings, service, testMode);
                 }
-                isInitialized = true;
+                isServerInitialized = true;
                 return 'Adobe Server Side Integration Ready';
             } catch (e) {
                 return 'Failed to initialize: ' + e;
@@ -57,7 +57,7 @@ import { AdobeHbkConstructor } from '../../../HeartbeatKit/dist/AdobeHBKit.esm.j
         }
 
         function processEvent(event) {
-            if (isInitialized) {
+            if (isServerInitialized) {
                 try {
                     if (event.EventDataType === MessageType.Media) {
                         self.adobeMediaSDK.process(event);
