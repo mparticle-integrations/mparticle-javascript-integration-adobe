@@ -39,7 +39,7 @@ import { AdobeHbkConstructor } from '../../../HeartbeatKit/dist/AdobeHBKit.esm.j
             appMeasurement,
             settings,
             timestampOption,
-            isClientInitialized = false,
+            isAdobeClientKitInitialized = false,
             reportingService,
             contextVariableMapping,
             productIncrementorMapping,
@@ -62,7 +62,7 @@ import { AdobeHbkConstructor } from '../../../HeartbeatKit/dist/AdobeHBKit.esm.j
                 if (settings.mediaTrackingServer) {
                     self.adobeMediaSDK.init(forwarderSettings, service, testMode);
                 }
-                isClientInitialized = true;
+                isAdobeClientKitInitialized = true;
 
                 return 'ClientSDK successfully loaded';
             } catch (e) {
@@ -170,7 +170,7 @@ import { AdobeHbkConstructor } from '../../../HeartbeatKit/dist/AdobeHBKit.esm.j
             appMeasurement.timestamp = timestampOption ? Math.floor((new Date).getTime()/1000) : null;
             appMeasurement.events = '';
 
-            if (isClientInitialized) {
+            if (isAdobeClientKitInitialized) {
                 try {
                     // First determine if an eventName is mapped, if so, log it as an event as opposed to a pageview or commerceview
                     // ex. If a pageview is mapped to an event, we logEvent instead of logging it as a pageview
@@ -198,9 +198,6 @@ import { AdobeHbkConstructor } from '../../../HeartbeatKit/dist/AdobeHBKit.esm.j
                     if (reportEvent === true && reportingService && event.EventDataType) {
                         reportingService(self, event);
                         return 'Successfully sent to ' + name;
-                    }
-                    else {
-                        return 'Error logging event or event type not supported - ' + reportEvent.error;
                     }
                 }
                 catch (e) {
@@ -437,7 +434,7 @@ import { AdobeHbkConstructor } from '../../../HeartbeatKit/dist/AdobeHBKit.esm.j
         }
 
         function onUserIdentified(mpUserObject) {
-            if (isClientInitialized) {
+            if (isAdobeClientKitInitialized) {
                 var userIdentities = mpUserObject.getUserIdentities().userIdentities;
 
                 var identitiesToSet = {};

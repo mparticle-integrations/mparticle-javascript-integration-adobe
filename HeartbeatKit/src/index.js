@@ -31,7 +31,7 @@ var MessageType = {
 
 function constructor() {
     var self = this,
-        isHBInit = false,
+        isAdobeMediaSDKInitialized = false,
         reportingService,
         eventQueue = [],
         name = 'AdobeHeartbeatKit';
@@ -40,7 +40,7 @@ function constructor() {
     self.common = new Common();
 
     var initForwarderCallback = function() {
-        isHBInit = true;
+        isAdobeMediaSDKInitialized = true;
     };
 
     function initForwarder(
@@ -76,7 +76,7 @@ function constructor() {
 
     function processEvent(event) {
         var reportEvent = false;
-        if (isHBInit) {
+        if (isAdobeMediaSDKInitialized) {
             try {
                 if (event.EventDataType === MessageType.Media) {
                     // Kits should just treat Media Events as generic Events
