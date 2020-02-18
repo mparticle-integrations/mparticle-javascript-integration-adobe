@@ -244,8 +244,8 @@ var Initialization = {
         userIdentities,
         processEvent,
         eventQueue,
-        isInitialized,
-        common
+        common,
+        initForwarderCallback
     ) {
         var self = this;
         if (!window.mParticle.isTestEnvironment || !window.ADB) {
@@ -255,34 +255,50 @@ var Initialization = {
             var adobeHeartbeatSdk = document.createElement('script');
             adobeHeartbeatSdk.type = 'text/javascript';
             adobeHeartbeatSdk.async = true;
-            adobeHeartbeatSdk.src = 'https://static.mparticle.com/sdk/web/adobe/MediaSDK.min.js';
+            adobeHeartbeatSdk.src =
+                'https://static.mparticle.com/sdk/web/adobe/MediaSDK.min.js';
             (
                 document.getElementsByTagName('head')[0] ||
                 document.getElementsByTagName('body')[0]
             ).appendChild(adobeHeartbeatSdk);
             adobeHeartbeatSdk.onload = function() {
-                if (ADB && eventQueue.length > 0) {
-                    // Process any events that may have been queued up while forwarder was being initialized.
-                    for (var i = 0; i < eventQueue.length; i++) {
-                        processEvent(eventQueue[i]);
+                if (ADB) {
+                    self.initHeartbeat(
+                        settings,
+                        common,
+                        ADB,
+                        testMode,
+                        initForwarderCallback
+                    );
+                    if (eventQueue.length > 0) {
+                        // Process any events that may have been queued up while forwarder was being initialized.
+                        for (var i = 0; i < eventQueue.length; i++) {
+                            processEvent(eventQueue[i]);
+                        }
+                        // now that each queued event is processed, we empty the eventQueue
+                        eventQueue = [];
                     }
-                    // now that each queued event is processed, we empty the eventQueue
-                    eventQueue = [];
                 }
-                isInitialized = self.initHeartbeat(
-                    settings,
-                    common,
-                    ADB,
-                    testMode
-                );
             };
         } else {
             // For testing, you should fill out this section in order to ensure any required initialization calls are made,
             // clientSDKObject.initialize(forwarderSettings.apiKey)
-            isInitialized = self.initHeartbeat(settings, common, ADB, testMode);
+            self.initHeartbeat(
+                settings,
+                common,
+                ADB,
+                testMode,
+                initForwarderCallback
+            );
         }
     },
-    initHeartbeat: function(settings, common, adobeSDK) {
+    initHeartbeat: function(
+        settings,
+        common,
+        adobeSDK,
+        testMode,
+        initHeartbeatCallback
+    ) {
         try {
             // Init App Measurement with Visitor
             var appMeasurement = new AppMeasurement(settings.reportSuiteIDs);
@@ -329,10 +345,9 @@ var Initialization = {
             common.mediaHeartbeat = mediaHeartbeat;
         } catch (e) {
             console.error(e);
-            return false;
         }
 
-        return true;
+        initHeartbeatCallback();
     }
 };
 
@@ -371,12 +386,17 @@ var MessageType = {
 
 function constructor() {
     var self = this,
-        isInitialized = false,
+        isAdobeMediaSDKInitialized = false,
         reportingService,
-        eventQueue = [];
+        eventQueue = [],
+        name = 'AdobeHeartbeatKit';
 
     self.moduleId = initialization.moduleId;
     self.common = new common();
+
+    var initForwarderCallback = function() {
+        isAdobeMediaSDKInitialized = true;
+    };
 
     function initForwarder(
         settings,
@@ -400,20 +420,18 @@ function constructor() {
                 userIdentities,
                 processEvent,
                 eventQueue,
-                isInitialized,
-                self.common
+                self.common,
+                initForwarderCallback
             );
             self.eventHandler = new eventHandler(self.common);
-
-            isInitialized = true;
         } catch (e) {
-            console.log('Failed to initialize ' + name + ' - ' + e);
+            console.error('Failed to initialize ' + name, e);
         }
     }
 
     function processEvent(event) {
         var reportEvent = false;
-        if (isInitialized) {
+        if (isAdobeMediaSDKInitialized) {
             try {
                 if (event.EventDataType === MessageType.Media) {
                     // Kits should just treat Media Events as generic Events
@@ -457,7 +475,7 @@ function constructor() {
 }
 
 if (window.mParticle && window.mParticle.registerHBK) {
-    window.mParticle.registerHBK({constructor: constructor});
+    window.mParticle.registerHBK({ constructor: constructor });
 }
 
 var src = {
@@ -543,506 +561,642 @@ a.d.createEvent||0<=navigator.userAgent.indexOf("Firefox/2")&&k.MouseEvent)&&(a.
 function s_gi(r){var a,k=window.s_c_il,p,n,m=r.split(","),s,u,t=0;if(k)for(p=0;!t&&p<k.length;){a=k[p];if("s_c"==a._c&&(a.account||a.oun))if(a.account&&a.account==r)t=1;else for(n=a.account?a.account:a.oun,n=a.allAccounts?a.allAccounts:n.split(","),s=0;s<m.length;s++)for(u=0;u<n.length;u++)m[s]==n[u]&&(t=1);p++;}t?a.setAccount&&a.setAccount(r):a=new AppMeasurement$1(r);return a}AppMeasurement$1.getInstance=s_gi;window.s_objectID||(window.s_objectID=0);
 function s_pgicq(){var r=window,a=r.s_giq,k,p,n;if(a)for(k=0;k<a.length;k++)p=a[k],n=s_gi(p.oun),n.setAccount(p.un),n.setTagContainer(p.tagContainerName);r.s_giq=0;}s_pgicq();
 
-    var name$1 = 'Adobe',
-        ADOBEMODULENUMBER = 124,
-        MARKETINGCLOUDIDKEY = 'mid',
-        MessageType$1 = {
-            SessionStart: 1,
-            SessionEnd: 2,
-            PageView: 3,
-            PageEvent: 4,
-            CrashReport: 5,
-            OptOut: 6,
-            Commerce: 16,
-            Media: 20
-        };
+var name = 'Adobe',
+    ADOBEMODULENUMBER = 124,
+    MARKETINGCLOUDIDKEY = 'mid',
+    MessageType$1 = {
+        SessionStart: 1,
+        SessionEnd: 2,
+        PageView: 3,
+        PageEvent: 4,
+        CrashReport: 5,
+        OptOut: 6,
+        Commerce: 16,
+        Media: 20
+    };
 
-    var constructor$1 = function () {
-        var self = this,
+var constructor$1 = function() {
+    var self = this,
         //one or more instances of AppMeasurement returned from s_gi()
-            appMeasurement,
-            settings,
-            timestampOption,
-            isInitialized = false,
-            reportingService,
-            contextVariableMapping,
-            productIncrementorMapping,
-            productMerchandisingMapping,
-            propsMapping,
-            eVarsMapping,
-            hiersMapping,
-            eventsMapping;
-        
-        self.adobeMediaSDK = new src_1(),
-        self.name = name$1;
+        appMeasurement,
+        settings,
+        timestampOption,
+        isAdobeClientKitInitialized = false,
+        reportingService,
+        contextVariableMapping,
+        productIncrementorMapping,
+        productMerchandisingMapping,
+        propsMapping,
+        eVarsMapping,
+        hiersMapping,
+        eventsMapping;
 
-        function initForwarder(forwarderSettings, service, testMode) {
-            settings = forwarderSettings;
-            reportingService = service;
-            try {
-                loadMappings();
-                timestampOption = (settings.timestampOption === 'optional' || settings.timestampOption === 'required');
-                finishAdobeInitialization();
-                if (settings.mediaTrackingServer) {
-                    self.adobeMediaSDK.init(forwarderSettings, service, testMode);
-                }
-                isInitialized = true;
+    (self.adobeMediaSDK = new src_1()), (self.name = name);
 
-                return 'ClientSDK successfully loaded';
-            } catch (e) {
-                return 'Failed to initialize: ' + e;
+    function initForwarder(forwarderSettings, service, testMode) {
+        settings = forwarderSettings;
+        reportingService = service;
+        try {
+            loadMappings();
+            timestampOption =
+                settings.timestampOption === 'optional' ||
+                settings.timestampOption === 'required';
+            finishAdobeInitialization();
+            if (settings.mediaTrackingServer) {
+                self.adobeMediaSDK.init(forwarderSettings, service, testMode);
             }
+            isAdobeClientKitInitialized = true;
+
+            return 'ClientSDK successfully loaded';
+        } catch (e) {
+            return 'Failed to initialize: ' + e;
         }
+    }
 
-        function loadMappings() {
-            eVarsMapping = settings.evars ? JSON.parse(settings.evars.replace(/&quot;/g, '"')) : [];
-            propsMapping = settings.props ? JSON.parse(settings.props.replace(/&quot;/g, '"')) : [];
-            productIncrementorMapping = settings.productIncrementor ? JSON.parse(settings.productIncrementor.replace(/&quot;/g, '"')) : [];
-            productMerchandisingMapping = settings.productMerchandising ? JSON.parse(settings.productMerchandising.replace(/&quot;/g, '"')) : [];
-            hiersMapping = settings.hvars ? JSON.parse(settings.hvars.replace(/&quot;/g, '"')) : [];
-            eventsMapping = settings.events ? JSON.parse(settings.events.replace(/&quot;/g, '"')) : [];
-            contextVariableMapping = settings.contextVariables ? JSON.parse(settings.contextVariables.replace(/&quot;/g, '"')) : [];
-        }
+    function loadMappings() {
+        eVarsMapping = settings.evars
+            ? JSON.parse(settings.evars.replace(/&quot;/g, '"'))
+            : [];
+        propsMapping = settings.props
+            ? JSON.parse(settings.props.replace(/&quot;/g, '"'))
+            : [];
+        productIncrementorMapping = settings.productIncrementor
+            ? JSON.parse(settings.productIncrementor.replace(/&quot;/g, '"'))
+            : [];
+        productMerchandisingMapping = settings.productMerchandising
+            ? JSON.parse(settings.productMerchandising.replace(/&quot;/g, '"'))
+            : [];
+        hiersMapping = settings.hvars
+            ? JSON.parse(settings.hvars.replace(/&quot;/g, '"'))
+            : [];
+        eventsMapping = settings.events
+            ? JSON.parse(settings.events.replace(/&quot;/g, '"'))
+            : [];
+        contextVariableMapping = settings.contextVariables
+            ? JSON.parse(settings.contextVariables.replace(/&quot;/g, '"'))
+            : [];
+    }
 
-        function finishAdobeInitialization() {
-            try {
-                appMeasurement=s_gi(settings.reportSuiteIDs);
-                if (settings.setGlobalObject === 'True') {
-                    window.s = appMeasurement;
-                }
-                appMeasurement.visitor = Visitor.getInstance(settings.organizationID);
-
-                appMeasurement.trackingServer = settings.trackingServer;
-                appMeasurement.trackingServerSecure = settings.trackingServerURLSecure;
-                appMeasurement.trackDownloadLinks = true;
-                appMeasurement.trackExternalLinks = settings.trackExternalLinks === 'True';
-                appMeasurement.trackInlineStats = true;
-                appMeasurement.linkDownloadFileTypes = 'exe,zip,wav,mp3,mov,mpg,avi,wmv,pdf,doc,docx,xls,xlsx,ppt,pptx';
-                appMeasurement.linkInternalFilters = 'javascript:';
-                appMeasurement.linkLeaveQueryString = false;
-                appMeasurement.linkTrackVars = 'None';
-                appMeasurement.linkTrackEvents = 'None';
-                appMeasurement.visitorNamespace = '';
-
-                // On first load, adobe will call the callback correctly if no MCID exists
-                // On subsequent loads, it does not, so we need to manually call setMCIDOnIntegrationAttributes
-                var mcID = Visitor.getInstance(settings.organizationID).getMarketingCloudVisitorID(setMarketingCloudId);
-                if (mcID && mcID.length > 0) {
-                    setMCIDOnIntegrationAttributes(mcID);
-                }
-
-                return true;
-            } catch(e) {
-                return 'error initializing adobe: ' + e;
+    function finishAdobeInitialization() {
+        try {
+            appMeasurement = s_gi(settings.reportSuiteIDs);
+            if (settings.setGlobalObject === 'True') {
+                window.s = appMeasurement;
             }
-        }
+            appMeasurement.visitor = Visitor.getInstance(
+                settings.organizationID
+            );
 
-        function setMarketingCloudId(mcid) {
-            setMCIDOnIntegrationAttributes(mcid);
-        }
+            appMeasurement.trackingServer = settings.trackingServer;
+            appMeasurement.trackingServerSecure =
+                settings.trackingServerURLSecure;
+            appMeasurement.trackDownloadLinks = true;
+            appMeasurement.trackExternalLinks =
+                settings.trackExternalLinks === 'True';
+            appMeasurement.trackInlineStats = true;
+            appMeasurement.linkDownloadFileTypes =
+                'exe,zip,wav,mp3,mov,mpg,avi,wmv,pdf,doc,docx,xls,xlsx,ppt,pptx';
+            appMeasurement.linkInternalFilters = 'javascript:';
+            appMeasurement.linkLeaveQueryString = false;
+            appMeasurement.linkTrackVars = 'None';
+            appMeasurement.linkTrackEvents = 'None';
+            appMeasurement.visitorNamespace = '';
 
-        function setMCIDOnIntegrationAttributes(mcid) {
-            var adobeIntegrationAttributes = {};
-            adobeIntegrationAttributes[MARKETINGCLOUDIDKEY] = mcid;
-            mParticle.setIntegrationAttribute(ADOBEMODULENUMBER, adobeIntegrationAttributes);
-            mParticle._setIntegrationDelay(ADOBEMODULENUMBER, false);
-        }
-
-        // Get the mapped value for custom events
-        function getEventMappingValue(event) {
-            var jsHash = calculateJSHash(event.EventDataType, event.EventCategory, event.EventName);
-            return findValueInMapping(jsHash, eventsMapping);
-        }
-
-        function calculateJSHash(eventDataType, eventCategory, name) {
-            var preHash =
-                ('' + eventDataType) +
-                ('' + eventCategory) + '' +
-                (name || '');
-
-            return mParticle.generateHash(preHash);
-        }
-
-        function findValueInMapping(jsHash, mapping) {
-            if (mapping) {
-                var filteredArray = mapping.filter(function(mappingEntry) {
-                    if (mappingEntry.jsmap && mappingEntry.maptype && mappingEntry.value) {
-                        return mappingEntry.jsmap === jsHash.toString();
-                    }
-
-                    return {
-                        result: false
-                    };
-                });
-
-                if (filteredArray && filteredArray.length > 0) {
-                    return {
-                        result: true,
-                        matches: filteredArray
-                    };
-                }
+            // On first load, adobe will call the callback correctly if no MCID exists
+            // On subsequent loads, it does not, so we need to manually call setMCIDOnIntegrationAttributes
+            var mcID = Visitor.getInstance(
+                settings.organizationID
+            ).getMarketingCloudVisitorID(setMarketingCloudId);
+            if (mcID && mcID.length > 0) {
+                setMCIDOnIntegrationAttributes(mcID);
             }
-            return null;
-        }
-
-        // for each type of event, we run setMappings which sets the eVars, props, hvars, and contextData values
-        // after each event is sent to the server (either using t() for pageViews or tl() for non-pageview events), clearVars() is run to wipe out
-        // any eVars, props, and hvars
-        function processEvent(event) {
-            var reportEvent = false;
-            var linkTrackVars = [];
-            appMeasurement.timestamp = timestampOption ? Math.floor((new Date).getTime()/1000) : null;
-            appMeasurement.events = '';
-
-            if (isInitialized) {
-                try {
-                    // First determine if an eventName is mapped, if so, log it as an event as opposed to a pageview or commerceview
-                    // ex. If a pageview is mapped to an event, we logEvent instead of logging it as a pageview
-                    var eventMapping = getEventMappingValue(event);
-
-                    if (eventMapping && eventMapping.result && eventMapping.matches) {
-                        setMappings(event, true, linkTrackVars);
-                        reportEvent = logEvent(event, linkTrackVars, eventMapping.matches);
-                    }
-                    else if (event.EventDataType === MessageType$1.PageView) {
-                        setMappings(event, false);
-                        reportEvent = logPageView(event);
-                    }
-                    else if (event.EventDataType === MessageType$1.Commerce) {
-                        setMappings(event, true, linkTrackVars);
-                        reportEvent = processCommerceTransaction(event, linkTrackVars);
-                    }
-                    else if (event.EventDataType === MessageType$1.Media) {
-                        self.adobeMediaSDK.process(event);
-                    }
-                    else {
-                        return 'event name not mapped, aborting event logging';
-                    }
-
-                    if (reportEvent === true && reportingService && event.EventDataType) {
-                        reportingService(self, event);
-                        return 'Successfully sent to ' + name$1;
-                    }
-                    else {
-                        return 'Error logging event or event type not supported - ' + reportEvent.error;
-                    }
-                }
-                catch (e) {
-                    return 'Failed to send to: ' + name$1 + ' ' + e;
-                }
-            }
-
-            return 'Can\'t send to forwarder ' + name$1 + ', not initialized.';
-        }
-
-        function setMappings(event, includeTrackVars, linkTrackVars) {
-            if (includeTrackVars) {
-                setEvars(event, linkTrackVars);
-                setProps(event, linkTrackVars);
-                setHiers(event, linkTrackVars);
-                setContextData(event, linkTrackVars);
-            } else {
-                setEvars(event);
-                setProps(event);
-                setHiers(event);
-                setContextData(event);
-            }
-        }
-
-        function processCommerceTransaction(event, linkTrackVars) {
-            if (event.EventCategory === mParticle.CommerceEventType.ProductPurchase) {
-                appMeasurement.events='purchase';
-                appMeasurement.purchaseID = event.ProductAction.TransactionId;
-                appMeasurement.transactionID = event.ProductAction.TransactionId;
-                linkTrackVars.push('purchaseID', 'transactionID');
-            } else if (event.EventCategory === mParticle.CommerceEventType.ProductViewDetail) {
-                appMeasurement.events='prodView';
-            } else if (event.EventCategory === mParticle.CommerceEventType.ProductAddToCart) {
-                appMeasurement.events='scAdd';
-            } else if (event.EventCategory === mParticle.CommerceEventType.ProductRemoveFromCart) {
-                appMeasurement.events='scRemove';
-            } else if (event.EventCategory === mParticle.CommerceEventType.ProductCheckout) {
-                appMeasurement.events='scCheckout';
-            }
-            appMeasurement.linkTrackEvents = appMeasurement.events || null;
-            processProductsAndSetEvents(event);
-            appMeasurement.pageName = event.EventName || window.document.title;
-            linkTrackVars.push('products', 'events');
-            setPageName(linkTrackVars);
-            appMeasurement.linkTrackVars = linkTrackVars;
-            appMeasurement.tl(true, 'o', event.EventName);
-
-            appMeasurement.clearVars();
 
             return true;
+        } catch (e) {
+            return 'error initializing adobe: ' + e;
+        }
+    }
+
+    function setMarketingCloudId(mcid) {
+        setMCIDOnIntegrationAttributes(mcid);
+    }
+
+    function setMCIDOnIntegrationAttributes(mcid) {
+        var adobeIntegrationAttributes = {};
+        adobeIntegrationAttributes[MARKETINGCLOUDIDKEY] = mcid;
+        mParticle.setIntegrationAttribute(
+            ADOBEMODULENUMBER,
+            adobeIntegrationAttributes
+        );
+        mParticle._setIntegrationDelay(ADOBEMODULENUMBER, false);
+    }
+
+    // Get the mapped value for custom events
+    function getEventMappingValue(event) {
+        var jsHash = calculateJSHash(
+            event.EventDataType,
+            event.EventCategory,
+            event.EventName
+        );
+        return findValueInMapping(jsHash, eventsMapping);
+    }
+
+    function calculateJSHash(eventDataType, eventCategory, name) {
+        var preHash =
+            '' + eventDataType + ('' + eventCategory) + '' + (name || '');
+
+        return mParticle.generateHash(preHash);
+    }
+
+    function findValueInMapping(jsHash, mapping) {
+        if (mapping) {
+            var filteredArray = mapping.filter(function(mappingEntry) {
+                if (
+                    mappingEntry.jsmap &&
+                    mappingEntry.maptype &&
+                    mappingEntry.value
+                ) {
+                    return mappingEntry.jsmap === jsHash.toString();
+                }
+
+                return {
+                    result: false
+                };
+            });
+
+            if (filteredArray && filteredArray.length > 0) {
+                return {
+                    result: true,
+                    matches: filteredArray
+                };
+            }
+        }
+        return null;
+    }
+
+    // for each type of event, we run setMappings which sets the eVars, props, hvars, and contextData values
+    // after each event is sent to the server (either using t() for pageViews or tl() for non-pageview events), clearVars() is run to wipe out
+    // any eVars, props, and hvars
+    function processEvent(event) {
+        var reportEvent = false;
+        var linkTrackVars = [];
+        appMeasurement.timestamp = timestampOption
+            ? Math.floor(new Date().getTime() / 1000)
+            : null;
+        appMeasurement.events = '';
+
+        if (isAdobeClientKitInitialized) {
+            try {
+                // First determine if an eventName is mapped, if so, log it as an event as opposed to a pageview or commerceview
+                // ex. If a pageview is mapped to an event, we logEvent instead of logging it as a pageview
+                var eventMapping = getEventMappingValue(event);
+
+                if (
+                    eventMapping &&
+                    eventMapping.result &&
+                    eventMapping.matches
+                ) {
+                    setMappings(event, true, linkTrackVars);
+                    reportEvent = logEvent(
+                        event,
+                        linkTrackVars,
+                        eventMapping.matches
+                    );
+                } else if (event.EventDataType === MessageType$1.PageView) {
+                    setMappings(event, false);
+                    reportEvent = logPageView(event);
+                } else if (event.EventDataType === MessageType$1.Commerce) {
+                    setMappings(event, true, linkTrackVars);
+                    reportEvent = processCommerceTransaction(
+                        event,
+                        linkTrackVars
+                    );
+                } else if (event.EventDataType === MessageType$1.Media) {
+                    self.adobeMediaSDK.process(event);
+                } else {
+                    return 'event name not mapped, aborting event logging';
+                }
+
+                if (
+                    reportEvent === true &&
+                    reportingService &&
+                    event.EventDataType
+                ) {
+                    reportingService(self, event);
+                    return 'Successfully sent to ' + name;
+                }
+            } catch (e) {
+                return 'Failed to send to: ' + name + ' ' + e;
+            }
         }
 
-        function processProductsAndSetEvents(event) {
-            try {
-                var productDetails,
-                    incrementor,
-                    merchandising,
-                    productBuilder,
-                    product,
-                    allProducts = [];
+        return "Can't send to forwarder " + name + ', not initialized.';
+    }
 
-                var expandedEvents = mParticle.eCommerce.expandCommerceEvent(event);
-                expandedEvents.forEach(function(expandedEvt) {
-                    productBuilder = [];
-                    productDetails = [];
-                    incrementor = [];
-                    merchandising = [];
+    function setMappings(event, includeTrackVars, linkTrackVars) {
+        if (includeTrackVars) {
+            setEvars(event, linkTrackVars);
+            setProps(event, linkTrackVars);
+            setHiers(event, linkTrackVars);
+            setContextData(event, linkTrackVars);
+        } else {
+            setEvars(event);
+            setProps(event);
+            setHiers(event);
+            setContextData(event);
+        }
+    }
 
-                    if (expandedEvt.EventName === 'eCommerce - purchase - Total') {
-                        for (var eventAttributeKey in expandedEvt.EventAttributes) {
-                            if (expandedEvt.EventAttributes.hasOwnProperty(eventAttributeKey)) {
-                                var jsHash = calculateJSHash(event.EventDataType, event.EventCategory, eventAttributeKey);
-                                var mapping = findValueInMapping(jsHash, eventsMapping);
-                                if (mapping && mapping.result && mapping.matches) {
-                                    mapping.matches.forEach(function(mapping) {
-                                        if (mapping.value) {
-                                            if (appMeasurement.events.indexOf(mapping.value) < 0) {
-                                                appMeasurement.events += ',' + mapping.value + '=' + expandedEvt.EventAttributes[eventAttributeKey];
-                                            }
+    function processCommerceTransaction(event, linkTrackVars) {
+        if (
+            event.EventCategory === mParticle.CommerceEventType.ProductPurchase
+        ) {
+            appMeasurement.events = 'purchase';
+            appMeasurement.purchaseID = event.ProductAction.TransactionId;
+            appMeasurement.transactionID = event.ProductAction.TransactionId;
+            linkTrackVars.push('purchaseID', 'transactionID');
+        } else if (
+            event.EventCategory ===
+            mParticle.CommerceEventType.ProductViewDetail
+        ) {
+            appMeasurement.events = 'prodView';
+        } else if (
+            event.EventCategory === mParticle.CommerceEventType.ProductAddToCart
+        ) {
+            appMeasurement.events = 'scAdd';
+        } else if (
+            event.EventCategory ===
+            mParticle.CommerceEventType.ProductRemoveFromCart
+        ) {
+            appMeasurement.events = 'scRemove';
+        } else if (
+            event.EventCategory === mParticle.CommerceEventType.ProductCheckout
+        ) {
+            appMeasurement.events = 'scCheckout';
+        }
+        appMeasurement.linkTrackEvents = appMeasurement.events || null;
+        processProductsAndSetEvents(event);
+        appMeasurement.pageName = event.EventName || window.document.title;
+        linkTrackVars.push('products', 'events');
+        setPageName(linkTrackVars);
+        appMeasurement.linkTrackVars = linkTrackVars;
+        appMeasurement.tl(true, 'o', event.EventName);
+
+        appMeasurement.clearVars();
+
+        return true;
+    }
+
+    function processProductsAndSetEvents(event) {
+        try {
+            var productDetails,
+                incrementor,
+                merchandising,
+                productBuilder,
+                product,
+                allProducts = [];
+
+            var expandedEvents = mParticle.eCommerce.expandCommerceEvent(event);
+            expandedEvents.forEach(function(expandedEvt) {
+                productBuilder = [];
+                productDetails = [];
+                incrementor = [];
+                merchandising = [];
+
+                if (expandedEvt.EventName === 'eCommerce - purchase - Total') {
+                    for (var eventAttributeKey in expandedEvt.EventAttributes) {
+                        if (
+                            expandedEvt.EventAttributes.hasOwnProperty(
+                                eventAttributeKey
+                            )
+                        ) {
+                            var jsHash = calculateJSHash(
+                                event.EventDataType,
+                                event.EventCategory,
+                                eventAttributeKey
+                            );
+                            var mapping = findValueInMapping(
+                                jsHash,
+                                eventsMapping
+                            );
+                            if (mapping && mapping.result && mapping.matches) {
+                                mapping.matches.forEach(function(mapping) {
+                                    if (mapping.value) {
+                                        if (
+                                            appMeasurement.events.indexOf(
+                                                mapping.value
+                                            ) < 0
+                                        ) {
+                                            appMeasurement.events +=
+                                                ',' +
+                                                mapping.value +
+                                                '=' +
+                                                expandedEvt.EventAttributes[
+                                                    eventAttributeKey
+                                                ];
                                         }
-                                    });
+                                    }
+                                });
+                            }
+                        }
+                    }
+                } else {
+                    var productAttributes = expandedEvt.EventAttributes;
+                    productDetails.push(
+                        productAttributes.Category || '',
+                        productAttributes.Name,
+                        productAttributes.Id,
+                        productAttributes.Quantity || 1,
+                        productAttributes['Item Price'] || 0
+                    );
+                    for (var productAttributeKey in expandedEvt.EventAttributes) {
+                        if (
+                            expandedEvt.EventAttributes.hasOwnProperty(
+                                productAttributeKey
+                            )
+                        ) {
+                            productIncrementorMapping.forEach(function(
+                                productIncrementorMap
+                            ) {
+                                if (
+                                    productIncrementorMap.map ===
+                                    productAttributeKey
+                                ) {
+                                    incrementor.push(
+                                        productIncrementorMap.value +
+                                            '=' +
+                                            productAttributes[
+                                                productAttributeKey
+                                            ]
+                                    );
+                                    if (
+                                        appMeasurement.events.indexOf(
+                                            productIncrementorMap.value
+                                        ) < 0
+                                    ) {
+                                        appMeasurement.events +=
+                                            ',' + productIncrementorMap.value;
+                                    }
                                 }
-                            }
+                            });
+                            productMerchandisingMapping.forEach(function(
+                                productMerchandisingMap
+                            ) {
+                                if (
+                                    productMerchandisingMap.map ===
+                                    productAttributeKey
+                                ) {
+                                    merchandising.push(
+                                        productMerchandisingMap.value +
+                                            '=' +
+                                            productAttributes[
+                                                productAttributeKey
+                                            ]
+                                    );
+                                }
+                            });
                         }
+                    }
+                    productBuilder.push(
+                        productDetails.join(';'),
+                        incrementor.join('|'),
+                        merchandising.join('|')
+                    );
+                    product = productBuilder.join(';');
+                    allProducts.push(product);
+                }
+            });
+
+            appMeasurement.products = allProducts.join(',');
+        } catch (e) {
+            window.console.log(e);
+        }
+    }
+
+    function logPageView(event) {
+        try {
+            appMeasurement.pageName = event.EventName || undefined;
+            appMeasurement.t();
+            appMeasurement.clearVars();
+            return true;
+        } catch (e) {
+            appMeasurement.clearVars();
+            return { error: 'logPageView not called, error ' + e };
+        }
+    }
+
+    function logEvent(event, linkTrackVars, mappingMatches) {
+        try {
+            if (mappingMatches) {
+                mappingMatches.forEach(function(match) {
+                    if (appMeasurement.events.length === 0) {
+                        appMeasurement.events += match.value;
                     } else {
-                        var productAttributes = expandedEvt.EventAttributes;
-                        productDetails.push(productAttributes.Category || '', productAttributes.Name, productAttributes.Id, productAttributes.Quantity || 1, productAttributes['Item Price'] || 0);
-                        for (var productAttributeKey in expandedEvt.EventAttributes) {
-                            if (expandedEvt.EventAttributes.hasOwnProperty(productAttributeKey)) {
-                                productIncrementorMapping.forEach(function(productIncrementorMap) {
-                                    if (productIncrementorMap.map === productAttributeKey) {
-                                        incrementor.push(productIncrementorMap.value + '='+ productAttributes[productAttributeKey]);
-                                        if (appMeasurement.events.indexOf(productIncrementorMap.value) < 0) {
-                                            appMeasurement.events += ',' + productIncrementorMap.value;
-                                        }
-                                    }
-                                });
-                                productMerchandisingMapping.forEach(function(productMerchandisingMap) {
-                                    if (productMerchandisingMap.map === productAttributeKey) {
-                                        merchandising.push(productMerchandisingMap.value + '='+ productAttributes[productAttributeKey]);
-                                    }
-                                });
-                            }
-                        }
-                        productBuilder.push(productDetails.join(';'), incrementor.join('|'), merchandising.join('|'));
-                        product = productBuilder.join(';');
-                        allProducts.push(product);
+                        appMeasurement.events += ',' + match.value;
                     }
                 });
+                appMeasurement.linkTrackEvents = appMeasurement.events;
+                appMeasurement.pageName =
+                    event.EventName || window.document.title;
+                linkTrackVars.push('events');
+                setPageName(linkTrackVars);
 
-                appMeasurement.products = allProducts.join(',');
-            } catch (e) {
-                window.console.log(e);
-            }
-
-        }
-
-        function logPageView(event) {
-            try {
-                appMeasurement.pageName = event.EventName || undefined;
-                appMeasurement.t();
+                appMeasurement.linkTrackVars = linkTrackVars;
+                appMeasurement.tl(true, 'o', event.EventName);
                 appMeasurement.clearVars();
                 return true;
-            }
-            catch (e) {
+            } else {
                 appMeasurement.clearVars();
-                return {error: 'logPageView not called, error ' + e};
+                window.console.log(
+                    'event name not mapped, aborting event logging'
+                );
+            }
+        } catch (e) {
+            appMeasurement.clearVars();
+            return { error: e };
+        }
+    }
+
+    // .map is the attribute passed through, .value is the eVar value
+    function setEvars(event, linkTrackVars) {
+        var eventAttributes = event.EventAttributes;
+        for (var eventAttributeKey in eventAttributes) {
+            if (eventAttributes.hasOwnProperty(eventAttributeKey)) {
+                eVarsMapping.forEach(function(eVarMap) {
+                    if (eVarMap.map === eventAttributeKey) {
+                        appMeasurement[eVarMap.value] =
+                            eventAttributes[eventAttributeKey];
+                        if (linkTrackVars) {
+                            linkTrackVars.push(eVarMap.value);
+                        }
+                    }
+                    if (event.EventName === eVarMap.map) {
+                        appMeasurement[eVarMap.value] = event.EventName;
+                    }
+                });
             }
         }
+    }
 
-        function logEvent(event, linkTrackVars, mappingMatches) {
+    // .map is the attribute passed through, .value is the prop value
+    function setProps(event, linkTrackVars) {
+        var eventAttributes = event.EventAttributes;
+        for (var eventAttributeKey in eventAttributes) {
+            if (eventAttributes.hasOwnProperty(eventAttributeKey)) {
+                propsMapping.forEach(function(propMap) {
+                    if (propMap.map === eventAttributeKey) {
+                        appMeasurement[propMap.value] =
+                            eventAttributes[eventAttributeKey];
+                        if (linkTrackVars) {
+                            linkTrackVars.push(propMap.value);
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    // .map is the attribute passed through, .value is the hier value
+    function setHiers(event, linkTrackVars) {
+        var eventAttributes = event.EventAttributes;
+        for (var eventAttributeKey in eventAttributes) {
+            if (eventAttributes.hasOwnProperty(eventAttributeKey)) {
+                var jsHash = calculateJSHash(
+                    event.EventDataType,
+                    event.EventCategory,
+                    eventAttributeKey
+                );
+                var mapping = findValueInMapping(jsHash, hiersMapping);
+                if (mapping && mapping.result && mapping.matches) {
+                    mapping.matches.forEach(function(mapping) {
+                        if (mapping.value) {
+                            appMeasurement[mapping.value] =
+                                eventAttributes[eventAttributeKey];
+                            if (linkTrackVars) {
+                                linkTrackVars.push(mapping.value);
+                            }
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    // .map is the attribute passed through, .value is the contextData value
+    function setContextData(event, linkTrackVars) {
+        var eventAttributes = event.EventAttributes;
+        for (var eventAttributeKey in eventAttributes) {
+            if (eventAttributes.hasOwnProperty(eventAttributeKey)) {
+                contextVariableMapping.forEach(function(contextVariableMap) {
+                    if (contextVariableMap.map === eventAttributeKey) {
+                        appMeasurement.contextData[contextVariableMap.value] =
+                            eventAttributes[eventAttributeKey];
+                        if (linkTrackVars) {
+                            linkTrackVars.push(
+                                'contextData.' + contextVariableMap.value
+                            );
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    function onUserIdentified(mpUserObject) {
+        if (isAdobeClientKitInitialized) {
+            var userIdentities = mpUserObject.getUserIdentities()
+                .userIdentities;
+
+            var identitiesToSet = {};
+            if (Object.keys(userIdentities).length) {
+                for (var identity in userIdentities) {
+                    identitiesToSet[identity] = {
+                        id: userIdentities[identity]
+                    };
+                }
+            } else {
+                // no user identities means there was a logout, so set all current customer ids to null
+                var currentAdobeCustomerIds = appMeasurement.visitor.getCustomerIDs();
+                for (var currentIdentityKey in currentAdobeCustomerIds) {
+                    identitiesToSet[currentIdentityKey] = null;
+                }
+            }
+
             try {
-                if (mappingMatches) {
-                    mappingMatches.forEach(function(match) {
-                        if (appMeasurement.events.length === 0) {
-                            appMeasurement.events += match.value;
-                        } else {
-                            appMeasurement.events += ',' + match.value;
-                        }
-                    });
-                    appMeasurement.linkTrackEvents = appMeasurement.events;
-                    appMeasurement.pageName = event.EventName || window.document.title;
-                    linkTrackVars.push('events');
-                    setPageName(linkTrackVars);
-
-                    appMeasurement.linkTrackVars = linkTrackVars;
-                    appMeasurement.tl(true, 'o', event.EventName);
-                    appMeasurement.clearVars();
-                    return true;
-                } else {
-                    appMeasurement.clearVars();
-                    window.console.log('event name not mapped, aborting event logging');
-                }
+                appMeasurement.visitor.setCustomerIDs(identitiesToSet);
+            } catch (e) {
+                return 'Error calling setCustomerIDs on adobe';
             }
-            catch (e) {
-                appMeasurement.clearVars();
-                return {error: e};
-            }
-        }
-
-        // .map is the attribute passed through, .value is the eVar value
-        function setEvars(event, linkTrackVars) {
-            var eventAttributes = event.EventAttributes;
-            for (var eventAttributeKey in eventAttributes) {
-                if (eventAttributes.hasOwnProperty(eventAttributeKey)) {
-                    eVarsMapping.forEach(function(eVarMap) {
-                        if (eVarMap.map === eventAttributeKey) {
-                            appMeasurement[eVarMap.value] = eventAttributes[eventAttributeKey];
-                            if (linkTrackVars) {
-                                linkTrackVars.push(eVarMap.value);
-                            }
-                        }
-                        if (event.EventName === eVarMap.map) {
-                            appMeasurement[eVarMap.value] = event.EventName;
-                        }
-                    });
-                }
-            }
-        }
-
-        // .map is the attribute passed through, .value is the prop value
-        function setProps(event, linkTrackVars) {
-            var eventAttributes = event.EventAttributes;
-            for (var eventAttributeKey in eventAttributes) {
-                if (eventAttributes.hasOwnProperty(eventAttributeKey)) {
-                    propsMapping.forEach(function(propMap) {
-                        if (propMap.map === eventAttributeKey) {
-                            appMeasurement[propMap.value] = eventAttributes[eventAttributeKey];
-                            if (linkTrackVars) {
-                                linkTrackVars.push(propMap.value);
-                            }
-                        }
-                    });
-                }
-            }
-        }
-
-        // .map is the attribute passed through, .value is the hier value
-        function setHiers(event, linkTrackVars) {
-            var eventAttributes = event.EventAttributes;
-            for (var eventAttributeKey in eventAttributes) {
-                if (eventAttributes.hasOwnProperty(eventAttributeKey)) {
-                    var jsHash = calculateJSHash(event.EventDataType, event.EventCategory, eventAttributeKey);
-                    var mapping = findValueInMapping(jsHash, hiersMapping);
-                    if (mapping && mapping.result && mapping.matches) {
-                        mapping.matches.forEach(function(mapping) {
-                            if (mapping.value) {
-                                appMeasurement[mapping.value] = eventAttributes[eventAttributeKey];
-                                if (linkTrackVars) {
-                                    linkTrackVars.push(mapping.value);
-                                }
-                            }
-                        });
-                    }
-                }
-            }
-        }
-
-        // .map is the attribute passed through, .value is the contextData value
-        function setContextData(event, linkTrackVars) {
-            var eventAttributes = event.EventAttributes;
-            for (var eventAttributeKey in eventAttributes) {
-                if (eventAttributes.hasOwnProperty(eventAttributeKey)) {
-                    contextVariableMapping.forEach(function(contextVariableMap) {
-                        if (contextVariableMap.map === eventAttributeKey) {
-                            appMeasurement.contextData[contextVariableMap.value] = eventAttributes[eventAttributeKey];
-                            if (linkTrackVars) {
-                                linkTrackVars.push('contextData.' + contextVariableMap.value);
-                            }
-                        }
-                    });
-                }
-            }
-        }
-
-        function onUserIdentified(mpUserObject) {
-            if (isInitialized) {
-                var userIdentities = mpUserObject.getUserIdentities().userIdentities;
-
-                var identitiesToSet = {};
-                if (Object.keys(userIdentities).length) {
-                    for (var identity in userIdentities) {
-                        identitiesToSet[identity] = {
-                            id: userIdentities[identity]
-                        };
-                    }
-                } else {
-                    // no user identities means there was a logout, so set all current customer ids to null
-                    var currentAdobeCustomerIds = appMeasurement.visitor.getCustomerIDs();
-                    for (var currentIdentityKey in currentAdobeCustomerIds) {
-                        identitiesToSet[currentIdentityKey] = null;
-                    }
-                }
-
-                try {
-                    appMeasurement.visitor.setCustomerIDs(identitiesToSet);
-                } catch (e) {
-                    return 'Error calling setCustomerIDs on adobe';
-                }
-            }
-            else {
-                return 'Can\'t call setUserIdentity on forwarder ' + name$1 + ', not initialized';
-            }
-        }
-
-        function setPageName(linkTrackVars) {
-            if (settings.enablePageName === 'True') {
-                linkTrackVars.push('pageName');
-            }
-        }
-
-        this.init = initForwarder;
-        this.onUserIdentified = onUserIdentified;
-        this.process = processEvent;
-    };
-
-    function getId() {
-        return moduleId;
-    }
-
-    if (window && window.mParticle && window.mParticle.addForwarder) {
-        window.mParticle.addForwarder({
-            name: name$1,
-            constructor: constructor$1,
-            getId: getId
-        });
-    }
-
-    function register(config) {
-        if (!config) {
-            window.console.log('You must pass a config object to register the kit ' + name$1);
-            return;
-        }
-
-        if (!isObject(config)) {
-            window.console.log('\'config\' must be an object. You passed in a ' + typeof config);
-            return;
-        }
-
-        if (isObject(config.kits)) {
-            config.kits[name$1] = {
-                constructor: constructor$1
-            };
         } else {
-            config.kits = {};
-            config.kits[name$1] = {
-                constructor: constructor$1
-            };
+            return (
+                "Can't call setUserIdentity on forwarder " +
+                name +
+                ', not initialized'
+            );
         }
-        window.console.log('Successfully registered ' + name$1 + ' to your mParticle configuration');
     }
 
-    function isObject(val) {
-        return val != null && typeof val === 'object' && Array.isArray(val) === false;
+    function setPageName(linkTrackVars) {
+        if (settings.enablePageName === 'True') {
+            linkTrackVars.push('pageName');
+        }
     }
 
-    var AdobeClientSideKit_esm = {
-        register: register
-    };
+    this.init = initForwarder;
+    this.onUserIdentified = onUserIdentified;
+    this.process = processEvent;
+};
+
+function getId() {
+    return moduleId;
+}
+
+if (window && window.mParticle && window.mParticle.addForwarder) {
+    window.mParticle.addForwarder({
+        name: name,
+        constructor: constructor$1,
+        getId: getId
+    });
+}
+
+function register(config) {
+    if (!config) {
+        window.console.log(
+            'You must pass a config object to register the kit ' + name
+        );
+        return;
+    }
+
+    if (!isObject(config)) {
+        window.console.log(
+            "'config' must be an object. You passed in a " + typeof config
+        );
+        return;
+    }
+
+    if (isObject(config.kits)) {
+        config.kits[name] = {
+            constructor: constructor$1
+        };
+    } else {
+        config.kits = {};
+        config.kits[name] = {
+            constructor: constructor$1
+        };
+    }
+    window.console.log(
+        'Successfully registered ' + name + ' to your mParticle configuration'
+    );
+}
+
+function isObject(val) {
+    return (
+        val != null && typeof val === 'object' && Array.isArray(val) === false
+    );
+}
+
+var AdobeClientSideKit_esm = {
+    register: register
+};
 
 module.exports = AdobeClientSideKit_esm;

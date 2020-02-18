@@ -245,8 +245,8 @@ var mParticleAdobe = (function () {
             userIdentities,
             processEvent,
             eventQueue,
-            isInitialized,
-            common
+            common,
+            initForwarderCallback
         ) {
             var self = this;
             if (!window.mParticle.isTestEnvironment || !window.ADB) {
@@ -256,34 +256,50 @@ var mParticleAdobe = (function () {
                 var adobeHeartbeatSdk = document.createElement('script');
                 adobeHeartbeatSdk.type = 'text/javascript';
                 adobeHeartbeatSdk.async = true;
-                adobeHeartbeatSdk.src = 'https://static.mparticle.com/sdk/web/adobe/MediaSDK.min.js';
+                adobeHeartbeatSdk.src =
+                    'https://static.mparticle.com/sdk/web/adobe/MediaSDK.min.js';
                 (
                     document.getElementsByTagName('head')[0] ||
                     document.getElementsByTagName('body')[0]
                 ).appendChild(adobeHeartbeatSdk);
                 adobeHeartbeatSdk.onload = function() {
-                    if (ADB && eventQueue.length > 0) {
-                        // Process any events that may have been queued up while forwarder was being initialized.
-                        for (var i = 0; i < eventQueue.length; i++) {
-                            processEvent(eventQueue[i]);
+                    if (ADB) {
+                        self.initHeartbeat(
+                            settings,
+                            common,
+                            ADB,
+                            testMode,
+                            initForwarderCallback
+                        );
+                        if (eventQueue.length > 0) {
+                            // Process any events that may have been queued up while forwarder was being initialized.
+                            for (var i = 0; i < eventQueue.length; i++) {
+                                processEvent(eventQueue[i]);
+                            }
+                            // now that each queued event is processed, we empty the eventQueue
+                            eventQueue = [];
                         }
-                        // now that each queued event is processed, we empty the eventQueue
-                        eventQueue = [];
                     }
-                    isInitialized = self.initHeartbeat(
-                        settings,
-                        common,
-                        ADB,
-                        testMode
-                    );
                 };
             } else {
                 // For testing, you should fill out this section in order to ensure any required initialization calls are made,
                 // clientSDKObject.initialize(forwarderSettings.apiKey)
-                isInitialized = self.initHeartbeat(settings, common, ADB, testMode);
+                self.initHeartbeat(
+                    settings,
+                    common,
+                    ADB,
+                    testMode,
+                    initForwarderCallback
+                );
             }
         },
-        initHeartbeat: function(settings, common, adobeSDK) {
+        initHeartbeat: function(
+            settings,
+            common,
+            adobeSDK,
+            testMode,
+            initHeartbeatCallback
+        ) {
             try {
                 // Init App Measurement with Visitor
                 var appMeasurement = new AppMeasurement(settings.reportSuiteIDs);
@@ -330,10 +346,9 @@ var mParticleAdobe = (function () {
                 common.mediaHeartbeat = mediaHeartbeat;
             } catch (e) {
                 console.error(e);
-                return false;
             }
 
-            return true;
+            initHeartbeatCallback();
         }
     };
 
@@ -372,12 +387,17 @@ var mParticleAdobe = (function () {
 
     function constructor() {
         var self = this,
-            isInitialized = false,
+            isAdobeMediaSDKInitialized = false,
             reportingService,
-            eventQueue = [];
+            eventQueue = [],
+            name = 'AdobeHeartbeatKit';
 
         self.moduleId = initialization.moduleId;
         self.common = new common();
+
+        var initForwarderCallback = function() {
+            isAdobeMediaSDKInitialized = true;
+        };
 
         function initForwarder(
             settings,
@@ -401,20 +421,18 @@ var mParticleAdobe = (function () {
                     userIdentities,
                     processEvent,
                     eventQueue,
-                    isInitialized,
-                    self.common
+                    self.common,
+                    initForwarderCallback
                 );
                 self.eventHandler = new eventHandler(self.common);
-
-                isInitialized = true;
             } catch (e) {
-                console.log('Failed to initialize ' + name + ' - ' + e);
+                console.error('Failed to initialize ' + name, e);
             }
         }
 
         function processEvent(event) {
             var reportEvent = false;
-            if (isInitialized) {
+            if (isAdobeMediaSDKInitialized) {
                 try {
                     if (event.EventDataType === MessageType.Media) {
                         // Kits should just treat Media Events as generic Events
@@ -458,7 +476,7 @@ var mParticleAdobe = (function () {
     }
 
     if (window.mParticle && window.mParticle.registerHBK) {
-        window.mParticle.registerHBK({constructor: constructor});
+        window.mParticle.registerHBK({ constructor: constructor });
     }
 
     var src = {
@@ -544,112 +562,124 @@ var mParticleAdobe = (function () {
     function s_gi(r){var a,k=window.s_c_il,p,n,m=r.split(","),s,u,t=0;if(k)for(p=0;!t&&p<k.length;){a=k[p];if("s_c"==a._c&&(a.account||a.oun))if(a.account&&a.account==r)t=1;else for(n=a.account?a.account:a.oun,n=a.allAccounts?a.allAccounts:n.split(","),s=0;s<m.length;s++)for(u=0;u<n.length;u++)m[s]==n[u]&&(t=1);p++;}t?a.setAccount&&a.setAccount(r):a=new AppMeasurement$1(r);return a}AppMeasurement$1.getInstance=s_gi;window.s_objectID||(window.s_objectID=0);
     function s_pgicq(){var r=window,a=r.s_giq,k,p,n;if(a)for(k=0;k<a.length;k++)p=a[k],n=s_gi(p.oun),n.setAccount(p.un),n.setTagContainer(p.tagContainerName);r.s_giq=0;}s_pgicq();
 
-        var MessageType$1 = {
-            Media: 20
-        };
-        var name$1 = 'Adobe',
-            MARKETINGCLOUDIDKEY = 'mid',
-            ADOBEMODULENUMBER = 124;
+    var MessageType$1 = {
+        Media: 20
+    };
+    var name = 'Adobe',
+        MARKETINGCLOUDIDKEY = 'mid',
+        ADOBEMODULENUMBER = 124;
 
-        var constructor$1 = function () {
-            var self = this,
-                isInitialized;
-            self.name = name$1;
-            self.adobeMediaSDK = new src_1();
+    var constructor$1 = function() {
+        var self = this,
+            isAdobeServerKitInitialized;
+        self.name = name;
+        self.adobeMediaSDK = new src_1();
 
-            function initForwarder(forwarderSettings, service, testMode) {
-                mParticle._setIntegrationDelay(ADOBEMODULENUMBER, true);
+        function initForwarder(forwarderSettings, service, testMode) {
+            mParticle._setIntegrationDelay(ADOBEMODULENUMBER, true);
+            try {
+                // On first load, adobe will call the callback correctly if no MCID exists
+                // On subsequent loads, it does not, so we need to manually call setMCIDOnIntegrationAttributes
+                var mcID = Visitor.getInstance(
+                    forwarderSettings.organizationID
+                ).getMarketingCloudVisitorID(setMarketingCloudId);
+                if (mcID && mcID.length > 0) {
+                    setMCIDOnIntegrationAttributes(mcID);
+                }
+
+                if (forwarderSettings.mediaTrackingServer) {
+                    self.adobeMediaSDK.init(forwarderSettings, service, testMode);
+                }
+                isAdobeServerKitInitialized = true;
+                return 'Adobe Server Side Integration Ready';
+            } catch (e) {
+                return 'Failed to initialize: ' + e;
+            }
+        }
+
+        function setMarketingCloudId(mcid) {
+            setMCIDOnIntegrationAttributes(mcid);
+        }
+
+        function processEvent(event) {
+            if (isAdobeServerKitInitialized) {
                 try {
-                    // On first load, adobe will call the callback correctly if no MCID exists
-                    // On subsequent loads, it does not, so we need to manually call setMCIDOnIntegrationAttributes
-                    var mcID = Visitor.getInstance(forwarderSettings.organizationID).getMarketingCloudVisitorID(setMarketingCloudId);
-                    if (mcID && mcID.length > 0) {
-                        setMCIDOnIntegrationAttributes(mcID);
+                    if (event.EventDataType === MessageType$1.Media) {
+                        self.adobeMediaSDK.process(event);
                     }
-
-                    if (forwarderSettings.mediaTrackingServer) {
-                        self.adobeMediaSDK.init(forwarderSettings, service, testMode);
-                    }
-                    isInitialized = true;
-                    return 'Adobe Server Side Integration Ready';
                 } catch (e) {
-                    return 'Failed to initialize: ' + e;
+                    return 'Failed to send to: ' + name + ' ' + e;
                 }
-            }
-
-            function setMarketingCloudId(mcid) {
-                setMCIDOnIntegrationAttributes(mcid);
-            }
-
-            function processEvent(event) {
-                if (isInitialized) {
-                    try {
-                        if (event.EventDataType === MessageType$1.Media) {
-                            self.adobeMediaSDK.process(event);
-                        }
-                    }
-                    catch (e) {
-                        return 'Failed to send to: ' + name$1 + ' ' + e;
-                    }
-                } else {
-                    return 'Can\'t send to forwarder ' + name$1 + ', not initialized.';
-                }
-            }
-
-            this.init = initForwarder;
-            this.process = processEvent;
-        };
-
-        function setMCIDOnIntegrationAttributes(mcid) {
-            var adobeIntegrationAttributes = {};
-            adobeIntegrationAttributes[MARKETINGCLOUDIDKEY] = mcid;
-            mParticle.setIntegrationAttribute(ADOBEMODULENUMBER, adobeIntegrationAttributes);
-            mParticle._setIntegrationDelay(ADOBEMODULENUMBER, false);
-        }
-
-        function getId() {
-            return moduleId;
-        }
-
-        if (window && window.mParticle && window.mParticle.addForwarder) {
-            window.mParticle.addForwarder({
-                name: name$1,
-                constructor: constructor$1,
-                getId: getId
-            });
-        }
-
-        function register(config) {
-            if (!config) {
-                window.console.log('You must pass a config object to register the kit ' + name$1);
-                return;
-            }
-
-            if (!isObject(config)) {
-                window.console.log('\'config\' must be an object. You passed in a ' + typeof config);
-                return;
-            }
-
-            if (isObject(config.kits)) {
-                config.kits[name$1] = {
-                    constructor: constructor$1
-                };
             } else {
-                config.kits = {};
-                config.kits[name$1] = {
-                    constructor: constructor$1
-                };
+                return "Can't send to forwarder " + name + ', not initialized.';
             }
-            window.console.log('Successfully registered ' + name$1 + ' to your mParticle configuration');
         }
 
-        function isObject(val) {
-            return val != null && typeof val === 'object' && Array.isArray(val) === false;
+        this.init = initForwarder;
+        this.process = processEvent;
+    };
+
+    function setMCIDOnIntegrationAttributes(mcid) {
+        var adobeIntegrationAttributes = {};
+        adobeIntegrationAttributes[MARKETINGCLOUDIDKEY] = mcid;
+        mParticle.setIntegrationAttribute(
+            ADOBEMODULENUMBER,
+            adobeIntegrationAttributes
+        );
+        mParticle._setIntegrationDelay(ADOBEMODULENUMBER, false);
+    }
+
+    function getId() {
+        return moduleId;
+    }
+
+    if (window && window.mParticle && window.mParticle.addForwarder) {
+        window.mParticle.addForwarder({
+            name: name,
+            constructor: constructor$1,
+            getId: getId
+        });
+    }
+
+    function register(config) {
+        if (!config) {
+            window.console.log(
+                'You must pass a config object to register the kit ' + name
+            );
+            return;
         }
 
-        var AdobeServerSideKit_esm = {
-            register: register
-        };
+        if (!isObject(config)) {
+            window.console.log(
+                "'config' must be an object. You passed in a " + typeof config
+            );
+            return;
+        }
+
+        if (isObject(config.kits)) {
+            config.kits[name] = {
+                constructor: constructor$1
+            };
+        } else {
+            config.kits = {};
+            config.kits[name] = {
+                constructor: constructor$1
+            };
+        }
+        window.console.log(
+            'Successfully registered ' + name + ' to your mParticle configuration'
+        );
+    }
+
+    function isObject(val) {
+        return (
+            val != null && typeof val === 'object' && Array.isArray(val) === false
+        );
+    }
+
+    var AdobeServerSideKit_esm = {
+        register: register
+    };
 
     return AdobeServerSideKit_esm;
 
