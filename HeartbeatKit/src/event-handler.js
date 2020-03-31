@@ -259,7 +259,7 @@ var getAdobeMetadataKeys = function(attributes, Heartbeat) {
     var adobeMetadataKeys = {};
     for (var attribute in attributes) {
         var key = attribute;
-        if (attribute in AdobeMetadataLookupTable) {
+        if (AdobeMetadataLookupTable[attribute]) {
             key = AdobeMetadataLookupTable[attribute];
         }
         adobeMetadataKeys[key] = attributes[attribute];
