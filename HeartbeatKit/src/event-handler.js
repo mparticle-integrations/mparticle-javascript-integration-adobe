@@ -246,10 +246,7 @@ var getAdobeMetadataKeys = function(attributes, Heartbeat) {
         content_originator: Heartbeat.VideoMetadataKeys.ORIGINATOR,
         content_network: Heartbeat.VideoMetadataKeys.NETWORK,
         content_show_type: Heartbeat.VideoMetadataKeys.SHOW_TYPE,
-
-        // TODO: This key is not represented in our docs
-        // ad_load: Heartbeat.VideoMetadataKeys.AD_LOAD,
-
+        content_ad_load: Heartbeat.VideoMetadataKeys.AD_LOAD,
         content_mvpd: Heartbeat.VideoMetadataKeys.MVPD,
         content_authorized: Heartbeat.VideoMetadataKeys.AUTHORIZED,
         content_daypart: Heartbeat.VideoMetadataKeys.DAY_PART,
