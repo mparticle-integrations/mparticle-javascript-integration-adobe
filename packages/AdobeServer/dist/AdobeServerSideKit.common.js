@@ -135,9 +135,14 @@ EventHandler.prototype.logEvent = function(event) {
                 event.ContentType
             );
 
+            var combinedAttributes = getAdobeMetadataKeys(
+                customAttributes,
+                this.common.MediaHeartbeat
+            );
+
             this.common.mediaHeartbeat.trackSessionStart(
                 adobeMediaObject,
-                customAttributes
+                combinedAttributes
             );
             break;
 
@@ -218,6 +223,56 @@ EventHandler.prototype.logEvent = function(event) {
             console.error('Unknown Event Type', event);
             return false;
     }
+};
+
+var getAdobeMetadataKeys = function(attributes, Heartbeat) {
+    var AdobeMetadataLookupTable = {
+        // Ad Meta Data
+        ad_content_advertiser: Heartbeat.AdMetadataKeys.ADVERTISER,
+        ad_content_campaign: Heartbeat.AdMetadataKeys.CAMPAIGN_ID,
+        ad_content_creative: Heartbeat.AdMetadataKeys.CREATIVE_ID,
+        ad_content_placement: Heartbeat.AdMetadataKeys.PLACEMENT_ID,
+        ad_content_site_id: Heartbeat.AdMetadataKeys.SITE_ID,
+        ad_content_creative_url: Heartbeat.AdMetadataKeys.CREATIVE_URL,
+
+        // Audio Meta
+        content_artist: Heartbeat.AudioMetadataKeys.ARTIST,
+        content_album: Heartbeat.AudioMetadataKeys.ALBUM,
+        content_label: Heartbeat.AudioMetadataKeys.LABEL,
+        content_author: Heartbeat.AudioMetadataKeys.AUTHOR,
+        content_station: Heartbeat.AudioMetadataKeys.STATION,
+        content_publisher: Heartbeat.AudioMetadataKeys.PUBLISHER,
+
+        // Video Meta
+        content_show: Heartbeat.VideoMetadataKeys.SHOW,
+        stream_format: Heartbeat.VideoMetadataKeys.STREAM_FORMAT,
+        content_season: Heartbeat.VideoMetadataKeys.SEASON,
+        content_episode: Heartbeat.VideoMetadataKeys.EPISODE,
+        content_asset_id: Heartbeat.VideoMetadataKeys.ASSET_ID,
+        content_genre: Heartbeat.VideoMetadataKeys.GENRE,
+        content_first_air_date: Heartbeat.VideoMetadataKeys.FIRST_AIR_DATE,
+        content_digital_date: Heartbeat.VideoMetadataKeys.FIRST_DIGITAL_DATE,
+        content_rating: Heartbeat.VideoMetadataKeys.RATING,
+        content_originator: Heartbeat.VideoMetadataKeys.ORIGINATOR,
+        content_network: Heartbeat.VideoMetadataKeys.NETWORK,
+        content_show_type: Heartbeat.VideoMetadataKeys.SHOW_TYPE,
+        content_ad_load: Heartbeat.VideoMetadataKeys.AD_LOAD,
+        content_mvpd: Heartbeat.VideoMetadataKeys.MVPD,
+        content_authorized: Heartbeat.VideoMetadataKeys.AUTHORIZED,
+        content_daypart: Heartbeat.VideoMetadataKeys.DAY_PART,
+        content_feed: Heartbeat.VideoMetadataKeys.FEED
+    };
+
+    var adobeMetadataKeys = {};
+    for (var attribute in attributes) {
+        var key = attribute;
+        if (AdobeMetadataLookupTable[attribute]) {
+            key = AdobeMetadataLookupTable[attribute];
+        }
+        adobeMetadataKeys[key] = attributes[attribute];
+    }
+
+    return adobeMetadataKeys;
 };
 
 var getStreamType = function(streamType, contentType, types) {
