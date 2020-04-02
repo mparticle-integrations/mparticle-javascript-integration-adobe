@@ -953,7 +953,7 @@ describe('Adobe Heartbeat Forwarder', function() {
             ).match({ someCustomData: 'foo' });
         });
 
-        it.only('should map to Adobe Standard Metadata', done => {
+        it('should map to Adobe Standard Metadata', done => {
             mParticle.forwarder.process({
                 ContentId: '5551212',
                 ContentTitle: 'Dancing Baby',
