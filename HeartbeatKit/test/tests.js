@@ -190,6 +190,41 @@ describe('Adobe Heartbeat Forwarder', function() {
         TimedMetadataUpdate: 'timedMetadataUpdate',
         AdBreakStart: 'adBreakStart'
     };
+    MockMediaHeartbeat.AdMetadataKeys = {
+        ADVERTISER: 'a.media.ad.advertiser',
+        CAMPAIGN_ID: 'a.media.ad.campaign',
+        CREATIVE_ID: 'a.media.ad.creative',
+        PLACEMENT_ID: 'a.media.ad.placement',
+        SITE_ID: 'a.media.ad.site',
+        CREATIVE_URL: 'a.media.ad.creativeURL'
+    };
+    MockMediaHeartbeat.VideoMetadataKeys = {
+        SHOW: 'a.media.show',
+        SEASON: 'a.media.season',
+        EPISODE: 'a.media.episode',
+        ASSET_ID: 'a.media.asset',
+        GENRE: 'a.media.genre',
+        FIRST_AIR_DATE: 'a.media.airDate',
+        FIRST_DIGITAL_DATE: 'a.media.digitalDate',
+        RATING: 'a.media.rating',
+        ORIGINATOR: 'a.media.originator',
+        NETWORK: 'a.media.network',
+        SHOW_TYPE: 'a.media.type',
+        AD_LOAD: 'a.media.adLoad',
+        MVPD: 'a.media.pass.mvpd',
+        AUTHORIZED: 'a.media.pass.auth',
+        DAY_PART: 'a.media.dayPart',
+        FEED: 'a.media.feed',
+        STREAM_FORMAT: 'a.media.format'
+    };
+    MockMediaHeartbeat.AudioMetadataKeys = {
+        ARTIST: 'a.media.artist',
+        ALBUM: 'a.media.album',
+        LABEL: 'a.media.label',
+        AUTHOR: 'a.media.author',
+        STATION: 'a.media.station',
+        PUBLISHER: 'a.media.publisher'
+    };
     MockMediaHeartbeat.createAdBreakObject = function(
         name,
         position,
@@ -951,6 +986,88 @@ describe('Adobe Heartbeat Forwarder', function() {
                 window.mParticle.forwarder.common.mediaHeartbeat
                     .trackEventCalledWith.customMetaData
             ).match({ someCustomData: 'foo' });
+        });
+
+        it('should map to Adobe Standard Metadata', done => {
+            mParticle.forwarder.process({
+                ContentId: '5551212',
+                ContentTitle: 'Dancing Baby',
+                Duration: 120000,
+                EventDataType: MessageTypes.Media,
+                EventCategory: MediaEventType.SessionStart,
+                ContentType: MediaContentType.Video,
+                StreamType: MediaStreamType.LiveStream,
+                EventAttributes: {
+                    myCustomAttributes: 'cookie',
+                    content_show: 'Modern Family',
+                    stream_format: 'VOD',
+                    content_season: '2',
+                    content_episode: '36',
+                    content_asset_id: '89745363',
+                    content_genre: 'Comedy',
+                    content_first_air_date: '2016-01-25',
+                    content_digital_date: '2016-01-26',
+                    content_rating: 'TVPG',
+                    content_originator: 'Disney',
+                    content_network: 'ABC',
+                    content_show_type: '2',
+                    content_ad_load: 'My Ads',
+                    content_mvpd: 'Comcast',
+                    content_authorized: 'TRUE',
+                    content_daypart: 'Fighter of the Nightnan',
+                    content_feed: 'East-HD',
+                    content_artist: 'RTJ',
+                    content_album: 'Meow the Jewels',
+                    content_label: 'Mass Appeal',
+                    content_author: 'El-P',
+                    content_station: 'KTU',
+                    content_publisher: 'Mass Appeal Records',
+                    ad_content_advertiser: 'Fancy Feast',
+                    ad_content_campaign: 'Meow Mix the Jewels',
+                    ad_content_creative: 'Meow Meow Meow',
+                    ad_content_creative_url: '/path/to/ad',
+                    ad_content_placement: 'upper',
+                    ad_content_site_id: '12345'
+                }
+            });
+
+            should(
+                window.mParticle.forwarder.common.mediaHeartbeat
+                    .trackSessionStartCalledWith.customVideoMeta
+            ).eql({
+                myCustomAttributes: 'cookie',
+                'a.media.show': 'Modern Family',
+                'a.media.format': 'VOD',
+                'a.media.season': '2',
+                'a.media.episode': '36',
+                'a.media.asset': '89745363',
+                'a.media.genre': 'Comedy',
+                'a.media.airDate': '2016-01-25',
+                'a.media.digitalDate': '2016-01-26',
+                'a.media.rating': 'TVPG',
+                'a.media.originator': 'Disney',
+                'a.media.network': 'ABC',
+                'a.media.type': '2',
+                'a.media.adLoad': 'My Ads',
+                'a.media.pass.mvpd': 'Comcast',
+                'a.media.pass.auth': 'TRUE',
+                'a.media.dayPart': 'Fighter of the Nightnan',
+                'a.media.feed': 'East-HD',
+                'a.media.artist': 'RTJ',
+                'a.media.album': 'Meow the Jewels',
+                'a.media.label': 'Mass Appeal',
+                'a.media.author': 'El-P',
+                'a.media.station': 'KTU',
+                'a.media.publisher': 'Mass Appeal Records',
+                'a.media.ad.advertiser': 'Fancy Feast',
+                'a.media.ad.campaign': 'Meow Mix the Jewels',
+                'a.media.ad.creative': 'Meow Meow Meow',
+                'a.media.ad.creativeURL': '/path/to/ad',
+                'a.media.ad.placement': 'upper',
+                'a.media.ad.site': '12345'
+            });
+
+            done();
         });
     });
 });
