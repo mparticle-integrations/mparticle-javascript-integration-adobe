@@ -190,6 +190,41 @@ describe('Adobe Heartbeat Forwarder', function() {
         TimedMetadataUpdate: 'timedMetadataUpdate',
         AdBreakStart: 'adBreakStart'
     };
+    MockMediaHeartbeat.AdMetadataKeys = {
+        ADVERTISER: 'a.media.ad.advertiser',
+        CAMPAIGN_ID: 'a.media.ad.campaign',
+        CREATIVE_ID: 'a.media.ad.creative',
+        PLACEMENT_ID: 'a.media.ad.placement',
+        SITE_ID: 'a.media.ad.site',
+        CREATIVE_URL: 'a.media.ad.creativeURL'
+    };
+    MockMediaHeartbeat.VideoMetadataKeys = {
+        SHOW: 'a.media.show',
+        SEASON: 'a.media.season',
+        EPISODE: 'a.media.episode',
+        ASSET_ID: 'a.media.asset',
+        GENRE: 'a.media.genre',
+        FIRST_AIR_DATE: 'a.media.airDate',
+        FIRST_DIGITAL_DATE: 'a.media.digitalDate',
+        RATING: 'a.media.rating',
+        ORIGINATOR: 'a.media.originator',
+        NETWORK: 'a.media.network',
+        SHOW_TYPE: 'a.media.type',
+        AD_LOAD: 'a.media.adLoad',
+        MVPD: 'a.media.pass.mvpd',
+        AUTHORIZED: 'a.media.pass.auth',
+        DAY_PART: 'a.media.dayPart',
+        FEED: 'a.media.feed',
+        STREAM_FORMAT: 'a.media.format'
+    };
+    MockMediaHeartbeat.AudioMetadataKeys = {
+        ARTIST: 'a.media.artist',
+        ALBUM: 'a.media.album',
+        LABEL: 'a.media.label',
+        AUTHOR: 'a.media.author',
+        STATION: 'a.media.station',
+        PUBLISHER: 'a.media.publisher'
+    };
     MockMediaHeartbeat.createAdBreakObject = function(
         name,
         position,
