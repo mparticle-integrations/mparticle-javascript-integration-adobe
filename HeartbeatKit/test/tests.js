@@ -996,12 +996,6 @@ describe('Adobe Heartbeat Forwarder', function() {
                 }
             });
 
-            console.log(
-                'foo',
-                window.mParticle.forwarder.common.mediaHeartbeat
-                    .trackSessionStartCalledWith.customVideoMeta
-            );
-
             should(
                 window.mParticle.forwarder.common.mediaHeartbeat
                     .trackSessionStartCalledWith.customVideoMeta
