@@ -374,6 +374,89 @@ describe('Adobe Heartbeat Forwarder', function() {
         done();
     });
 
+    it('should send time as seconds', function(done) {
+        mParticle.forwarder.process({
+            ContentId: '5551212',
+            ContentTitle: 'Dancing Baby',
+            Duration: 120000,
+            EventDataType: MessageTypes.Media,
+            EventCategory: MediaEventType.SessionStart,
+            ContentType: MediaContentType.Video,
+            StreamType: MediaStreamType.LiveStream
+        });
+
+        window.mParticle.forwarder.common.mediaHeartbeat.trackSessionStartCalledWith.mediaObject.should.eql(
+            {
+                name: 'Dancing Baby',
+                mediaid: '5551212',
+                length: 120,
+                streamType: 'live',
+                mediaType: 'Video'
+            }
+        );
+
+        mParticle.forwarder.common.playheadPosition = 320000;
+        mParticle.forwarder.process({
+            AdBreak: {
+                id: '8675309',
+                title: 'mid-roll',
+                duration: 10000
+            },
+            EventDataType: MessageTypes.Media,
+            EventCategory: MediaEventType.AdBreakStart
+        });
+
+        window.mParticle.forwarder.common.mediaHeartbeat.trackEventCalledWith.eventObject.should.eql(
+            {
+                name: 'mid-roll',
+                position: 0,
+                startTime: 320
+            }
+        );
+
+        mParticle.forwarder.common.playheadPosition = 245000;
+        mParticle.forwarder.process({
+            Segment: {
+                title: 'The Gang Write Some Code',
+                index: 4,
+                duration: 36000
+            },
+            EventDataType: MessageTypes.Media,
+            EventCategory: MediaEventType.SegmentStart
+        });
+
+        window.mParticle.forwarder.common.mediaHeartbeat.trackEventCalledWith.eventObject.should.eql(
+            {
+                name: 'The Gang Write Some Code',
+                position: 4,
+                length: 36,
+                startTime: 245
+            }
+        );
+
+        mParticle.forwarder.process({
+            QoS: {
+                bitRate: 4,
+                startupTime: 123000,
+                fps: 32,
+                droppedFrames: 321
+            },
+            EventDataType: MessageTypes.Media,
+            EventCategory: MediaEventType.UpdateQoS
+        });
+
+        window.mParticle.forwarder.common.mediaHeartbeat.trackEventCalledWith.eventObject.should.eql(
+            {
+                bitrate: 4,
+                startupTime: 123,
+                fps: 32,
+                droppedFrames: 321
+            }
+        );
+
+        done();
+    });
+
     describe('Media Content ', function() {
         it('should have a valid payload', function(done) {
             mParticle.forwarder.process({
@@ -394,7 +477,7 @@ describe('Adobe Heartbeat Forwarder', function() {
                 {
                     name: 'Dancing Baby',
                     mediaid: '5551212',
-                    length: 120000,
+                    length: 120,
                     streamType: 'live',
                     mediaType: 'Video'
                 }
@@ -417,7 +500,7 @@ describe('Adobe Heartbeat Forwarder', function() {
                 {
                     name: 'Dancing Baby',
                     mediaid: '5551212',
-                    length: 120000,
+                    length: 120,
                     streamType: 'vod',
                     mediaType: 'Video'
                 }
@@ -441,7 +524,7 @@ describe('Adobe Heartbeat Forwarder', function() {
                 {
                     name: 'Dancing Baby',
                     mediaid: '5551212',
-                    length: 120000,
+                    length: 120,
                     streamType: 'aod',
                     mediaType: 'Audio'
                 }
@@ -465,7 +548,7 @@ describe('Adobe Heartbeat Forwarder', function() {
                 {
                     name: 'Dancing Baby',
                     mediaid: '5551212',
-                    length: 120000,
+                    length: 120,
                     streamType: 'live',
                     mediaType: 'Video'
                 }
@@ -489,7 +572,7 @@ describe('Adobe Heartbeat Forwarder', function() {
                 {
                     name: 'Dancing Baby',
                     mediaid: '5551212',
-                    length: 120000,
+                    length: 120,
                     streamType: 'live',
                     mediaType: 'postcard'
                 }
@@ -513,7 +596,7 @@ describe('Adobe Heartbeat Forwarder', function() {
                 {
                     name: 'Dancing Baby',
                     mediaid: '5551212',
-                    length: 120000,
+                    length: 120,
                     streamType: 'brook',
                     mediaType: 'Video'
                 }
@@ -694,7 +777,7 @@ describe('Adobe Heartbeat Forwarder', function() {
         });
 
         it('should handle Segment Start', function(done) {
-            mParticle.forwarder.common.playheadPosition = 245;
+            mParticle.forwarder.common.playheadPosition = 245000;
             mParticle.forwarder.process({
                 Segment: {
                     title: 'The Gang Write Some Code',
@@ -717,7 +800,7 @@ describe('Adobe Heartbeat Forwarder', function() {
                 {
                     name: 'The Gang Write Some Code',
                     position: 4,
-                    length: 36000,
+                    length: 36,
                     startTime: 245
                 }
             );
@@ -763,7 +846,7 @@ describe('Adobe Heartbeat Forwarder', function() {
             mParticle.forwarder.process({
                 QoS: {
                     bitRate: 4,
-                    startupTime: 123,
+                    startupTime: 123000,
                     fps: 32,
                     droppedFrames: 321
                 },
@@ -794,7 +877,7 @@ describe('Adobe Heartbeat Forwarder', function() {
 
     describe('Advertising', function() {
         it('should handle Ad Break Start with a valid payload', function(done) {
-            mParticle.forwarder.common.playheadPosition = 42;
+            mParticle.forwarder.common.playheadPosition = 42000;
             mParticle.forwarder.process({
                 AdBreak: {
                     id: '8675309',
@@ -880,7 +963,7 @@ describe('Adobe Heartbeat Forwarder', function() {
                     name: 'What?! Nobody rips off my kids but me!',
                     adId: '4423210',
                     position: 2,
-                    length: 60000
+                    length: 60
                 }
             );
 
