@@ -444,17 +444,10 @@ describe('AdobeEventForwarder Forwarder', function () {
     });
 
     test('should log a product checkout', function(done) {
-        var product1 = mParticle.eCommerce.createProduct('nokia', '1234', 123, 1, null, null, null, null, null, {PI1: 'bob', PI2: 'tim', PM1: 'sneakers', PM2: 'shirt'});
-        var product2 = mParticle.eCommerce.createProduct('apple', '2345', 234, 2, null, null, null, null, null, {PI1: 'Jones', PM2: 'abc', availability: true});
-        mParticle.eCommerce.Cart.add([product1, product2]);
-
         mParticle.eCommerce.logCheckout(1, {}, {gender: 'male', color: 'blue'});
 
         var appMeasurementInstance = s_gi('testReportSuiteId');
-        expect(appMeasurementInstance.products).toBe(
-            ';nokia;1234;1;123;event2=bob|event6=tim;eVar2=sneakers|eVar3=shirt,;apple;2345;2;234;event2=Jones;eVar3=abc'
-        );
-        expect(appMeasurementInstance.events).toBe('scCheckout,event2,event6');
+        expect(appMeasurementInstance.events).toBe('scCheckout');
         expect(appMeasurementInstance.prop2).toBe('male');
         expect(appMeasurementInstance.prop3).toBe('blue');
         expect(appMeasurementInstance.eVar1).toBe('blue');
