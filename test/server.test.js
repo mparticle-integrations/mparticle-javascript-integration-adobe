@@ -1,14 +1,12 @@
 /* eslint-disable no-undef*/
-describe('AdobeServerSide Forwarder', function () {
+describe('AdobeServerSide Forwarder', function() {
     window.mParticle.isTestEnvironment = true;
 
     var server = new MockHttpServer(),
-        MockVisitorInstance = function() {
-        },
-
+        MockVisitorInstance = function() {},
         Visitor = {
             getInstance: function(orgId) {
-                var instance = new MockVisitorInstance;
+                var instance = new MockVisitorInstance();
                 instance.orgId = orgId;
                 instance.getInstanceCalled = true;
                 instance.getMarketingCloudVisitorID = function(cb) {
@@ -18,25 +16,26 @@ describe('AdobeServerSide Forwarder', function () {
             }
         };
 
-    var MockAppMeasurement = function (reportSuiteID) {
+    var MockAppMeasurement = function(reportSuiteID) {
         this.reportSuiteID = reportSuiteID;
         this.visitor = {};
     };
-    var MockMediaHeartbeat = function () {
-        this.trackPlay = function () {
+    var MockMediaHeartbeat = function() {
+        this.trackPlay = function() {
             window.trackPlayCalled = true;
             return true;
         };
     };
-    
-    var MockMediaHeartbeatConfig = function () { };
-    var MockMediaHeartbeatDelegate = function () { };
+
+    var MockMediaHeartbeatConfig = function() {};
+    var MockMediaHeartbeatDelegate = function() {};
     var settings = require('./settings.json');
 
-    beforeAll(function () {
+    beforeAll(function() {
         server.start();
+        server.requests = [];
     });
-    
+
     beforeEach(function() {
         window.AppMeasurement = MockAppMeasurement;
         window.Visitor = Visitor;
@@ -86,9 +85,24 @@ describe('AdobeServerSide Forwarder', function () {
 
     test('should log play event', function(done) {
         settings.mediaTrackingServer = 'test';
+        server.handle = function(request) {
+            request.setResponseHeader('Content-Type', 'application/json');
+            request.receive(
+                200,
+                JSON.stringify({
+                    Store: {},
+                    mpid: 'testMPID'
+                })
+            );
+        };
+
         mParticle.init('apiKey', mParticle.config);
 
-        mParticle.logBaseEvent({ name: 'play event', messageType: 20, eventType: 23 });
+        mParticle.logBaseEvent({
+            name: 'play event',
+            messageType: 20,
+            eventType: 23
+        });
         expect(window.trackPlayCalled).toBe(true);
         done();
     });
