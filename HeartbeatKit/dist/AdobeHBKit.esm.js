@@ -55,7 +55,7 @@ EventHandler.prototype.logEvent = function(event) {
             var adBreakObject = this.common.MediaHeartbeat.createAdBreakObject(
                 event.AdBreak.title,
                 event.AdBreak.placement || 0, // TODO: Ad Break Object doesn't support placement yet
-                this.common.playheadPosition
+                this.common.playheadPosition / 1000
             );
 
             this.common.mediaHeartbeat.trackEvent(
@@ -76,7 +76,7 @@ EventHandler.prototype.logEvent = function(event) {
                 event.AdContent.title,
                 event.AdContent.id,
                 event.AdContent.placement,
-                event.AdContent.duration
+                event.AdContent.duration / 1000
             );
 
             this.common.mediaHeartbeat.trackEvent(
@@ -130,7 +130,7 @@ EventHandler.prototype.logEvent = function(event) {
             var adobeMediaObject = this.common.MediaHeartbeat.createMediaObject(
                 event.ContentTitle,
                 event.ContentId,
-                event.Duration,
+                event.Duration / 1000,
                 streamType,
                 event.ContentType
             );
@@ -176,8 +176,8 @@ EventHandler.prototype.logEvent = function(event) {
             var chapterObject = this.common.MediaHeartbeat.createChapterObject(
                 event.Segment.title,
                 event.Segment.index,
-                event.Segment.duration,
-                this.common.playheadPosition
+                event.Segment.duration / 1000,
+                this.common.playheadPosition / 1000
             );
 
             this.common.mediaHeartbeat.trackEvent(
@@ -208,7 +208,7 @@ EventHandler.prototype.logEvent = function(event) {
 
             var qosObject = this.common.MediaHeartbeat.createQoSObject(
                 this.common.bitRate,
-                this.common.startupTime,
+                this.common.startupTime / 1000,
                 this.common.fps,
                 this.common.droppedFrames
             );
