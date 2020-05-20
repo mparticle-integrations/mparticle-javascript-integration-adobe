@@ -1,6 +1,6 @@
 {
   "name": "@mparticle/web-adobe-server-kit",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "mParticle integration sdk for Adobe (server side)",
   "main": "dist/AdobeServerSideKit.common.js",
   "scripts": {
