@@ -83,7 +83,7 @@ var Initialization = {
             common.MediaHeartbeat = MediaHeartbeat;
 
             mediaConfig.trackingServer = settings.mediaTrackingServer;
-            mediaConfig.ssl = settings.useSSL === 'true';
+            mediaConfig.ssl = settings.useSSL === 'True';
             mediaConfig.playerName = 'mParticle Media SDK';
 
             var mediaDelegate = new MediaHeartbeatDelegate();
