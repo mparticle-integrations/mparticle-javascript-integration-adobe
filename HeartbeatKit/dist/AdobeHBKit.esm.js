@@ -75,7 +75,7 @@ EventHandler.prototype.logEvent = function(event) {
             var adObject = this.common.MediaHeartbeat.createAdObject(
                 event.AdContent.title,
                 event.AdContent.id,
-                event.AdContent.placement,
+                event.AdContent.position,
                 event.AdContent.duration / 1000
             );
 
