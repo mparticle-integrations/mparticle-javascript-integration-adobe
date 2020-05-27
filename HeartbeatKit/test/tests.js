@@ -944,7 +944,8 @@ describe('Adobe Heartbeat Forwarder', function() {
                     duration: 60000,
                     creative: 'A Fishful of Dollars',
                     siteid: 'moms',
-                    placement: 2
+                    placement: 'second',
+                    position: 2
                 },
                 EventDataType: MessageTypes.Media,
                 EventCategory: MediaEventType.AdStart
@@ -980,7 +981,8 @@ describe('Adobe Heartbeat Forwarder', function() {
                     duration: 60000,
                     creative: 'A Fishful of Dollars',
                     siteid: 'moms',
-                    placement: 2
+                    placement: 'second',
+                    position: 2
                 },
                 EventDataType: MessageTypes.Media,
                 EventCategory: MediaEventType.AdEnd
@@ -1011,7 +1013,8 @@ describe('Adobe Heartbeat Forwarder', function() {
                     duration: 60000,
                     creative: 'A Fishful of Dollars',
                     siteid: 'moms',
-                    placement: 2
+                    placement: 'second',
+                    position: 2
                 },
                 EventDataType: MessageTypes.Media,
                 EventCategory: MediaEventType.AdSkip
@@ -1057,7 +1060,8 @@ describe('Adobe Heartbeat Forwarder', function() {
                     duration: 60000,
                     creative: 'A Fishful of Dollars',
                     siteid: 'moms',
-                    placement: 2
+                    placement: 'second',
+                    position: 2
                 },
                 EventAttributes: {
                     someCustomData: 'foo'
