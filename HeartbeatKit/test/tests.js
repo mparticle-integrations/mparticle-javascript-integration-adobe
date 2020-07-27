@@ -395,7 +395,6 @@ describe('Adobe Heartbeat Forwarder', function() {
             }
         );
 
-        mParticle.forwarder.common.playheadPosition = 320000;
         mParticle.forwarder.process({
             AdBreak: {
                 id: '8675309',
@@ -403,7 +402,8 @@ describe('Adobe Heartbeat Forwarder', function() {
                 duration: 10000
             },
             EventDataType: MessageTypes.Media,
-            EventCategory: MediaEventType.AdBreakStart
+            EventCategory: MediaEventType.AdBreakStart,
+            PlayheadPosition: 320000
         });
 
         window.mParticle.forwarder.common.mediaHeartbeat.trackEventCalledWith.eventObject.should.eql(
@@ -414,7 +414,6 @@ describe('Adobe Heartbeat Forwarder', function() {
             }
         );
 
-        mParticle.forwarder.common.playheadPosition = 245000;
         mParticle.forwarder.process({
             Segment: {
                 title: 'The Gang Write Some Code',
@@ -422,7 +421,8 @@ describe('Adobe Heartbeat Forwarder', function() {
                 duration: 36000
             },
             EventDataType: MessageTypes.Media,
-            EventCategory: MediaEventType.SegmentStart
+            EventCategory: MediaEventType.SegmentStart,
+            PlayheadPosition: 245000
         });
 
         window.mParticle.forwarder.common.mediaHeartbeat.trackEventCalledWith.eventObject.should.eql(
@@ -777,7 +777,6 @@ describe('Adobe Heartbeat Forwarder', function() {
         });
 
         it('should handle Segment Start', function(done) {
-            mParticle.forwarder.common.playheadPosition = 245000;
             mParticle.forwarder.process({
                 Segment: {
                     title: 'The Gang Write Some Code',
@@ -785,7 +784,8 @@ describe('Adobe Heartbeat Forwarder', function() {
                     duration: 36000
                 },
                 EventDataType: MessageTypes.Media,
-                EventCategory: MediaEventType.SegmentStart
+                EventCategory: MediaEventType.SegmentStart,
+                PlayheadPosition: 245000
             });
 
             window.mParticle.forwarder.common.mediaHeartbeat.trackEventCalled.should.equal(
@@ -877,7 +877,6 @@ describe('Adobe Heartbeat Forwarder', function() {
 
     describe('Advertising', function() {
         it('should handle Ad Break Start with a valid payload', function(done) {
-            mParticle.forwarder.common.playheadPosition = 42000;
             mParticle.forwarder.process({
                 AdBreak: {
                     id: '8675309',
@@ -885,7 +884,8 @@ describe('Adobe Heartbeat Forwarder', function() {
                     duration: 10000
                 },
                 EventDataType: MessageTypes.Media,
-                EventCategory: MediaEventType.AdBreakStart
+                EventCategory: MediaEventType.AdBreakStart,
+                PlayheadPosition: 42000
             });
 
             window.mParticle.forwarder.common.mediaHeartbeat.trackEventCalled.should.equal(
@@ -907,7 +907,6 @@ describe('Adobe Heartbeat Forwarder', function() {
         });
 
         it('should handle Ad Break End', function(done) {
-            mParticle.forwarder.common.playheadPosition = 42;
             mParticle.forwarder.process({
                 AdBreak: {
                     id: '8675309',
@@ -915,7 +914,8 @@ describe('Adobe Heartbeat Forwarder', function() {
                     duration: 10000
                 },
                 EventDataType: MessageTypes.Media,
-                EventCategory: MediaEventType.AdBreakEnd
+                EventCategory: MediaEventType.AdBreakEnd,
+                PlayheadPosition: 42000
             });
 
             window.mParticle.forwarder.common.mediaHeartbeat.trackEventCalled.should.equal(
