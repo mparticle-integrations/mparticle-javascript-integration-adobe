@@ -50,12 +50,16 @@ EventHandler.prototype.logEvent = function(event) {
         customAttributes = event.EventAttributes;
     }
 
+    if (event && event.PlayheadPosition) {
+        this.common.playheadPosition = event.PlayheadPosition / 1000;
+    }
+
     switch (event.EventCategory) {
         case MediaEventType.AdBreakStart:
             var adBreakObject = this.common.MediaHeartbeat.createAdBreakObject(
                 event.AdBreak.title,
                 event.AdBreak.placement || 0, // TODO: Ad Break Object doesn't support placement yet
-                this.common.playheadPosition / 1000
+                this.common.playheadPosition
             );
 
             this.common.mediaHeartbeat.trackEvent(
@@ -156,7 +160,9 @@ EventHandler.prototype.logEvent = function(event) {
             this.common.mediaHeartbeat.trackPause();
             break;
         case MediaEventType.UpdatePlayheadPosition:
-            this.common.playheadPosition = event.PlayheadPosition;
+            // This is commented out because we're updating playhead position
+            // for all events and Adobe does not have a relevant playhead
+            // update position function
             break;
         case MediaEventType.SeekStart:
             this.common.mediaHeartbeat.trackEvent(
@@ -177,7 +183,7 @@ EventHandler.prototype.logEvent = function(event) {
                 event.Segment.title,
                 event.Segment.index,
                 event.Segment.duration / 1000,
-                this.common.playheadPosition / 1000
+                this.common.playheadPosition
             );
 
             this.common.mediaHeartbeat.trackEvent(
@@ -201,14 +207,14 @@ EventHandler.prototype.logEvent = function(event) {
             );
             break;
         case MediaEventType.UpdateQoS:
-            this.common.startupTime = event.QoS.startupTime;
+            this.common.startupTime = event.QoS.startupTime / 1000;
             this.common.droppedFrames = event.QoS.droppedFrames;
             this.common.bitRate = event.QoS.bitRate;
             this.common.fps = event.QoS.fps;
 
             var qosObject = this.common.MediaHeartbeat.createQoSObject(
                 this.common.bitRate,
-                this.common.startupTime / 1000,
+                this.common.startupTime,
                 this.common.fps,
                 this.common.droppedFrames
             );
