@@ -43,7 +43,10 @@ describe('Adobe Heartbeat Forwarder', function() {
         },
         MediaStreamType = {
             LiveStream: 'LiveStream',
-            OnDemand: 'OnDemand'
+            OnDemand: 'OnDemand',
+            Linear: 'Linear',
+            Podcast: 'Podcast',
+            Audiobook: 'Audiobook'
         },
         IdentityType = {
             Other: 0,
@@ -551,6 +554,76 @@ describe('Adobe Heartbeat Forwarder', function() {
                     length: 120,
                     streamType: 'live',
                     mediaType: 'Video'
+                }
+            );
+
+            done();
+        });
+
+        it('should support Linear', function(done) {
+            mParticle.forwarder.process({
+                ContentId: '5551212',
+                ContentTitle: 'Dancing Baby',
+                Duration: 120000,
+                EventDataType: MessageTypes.Media,
+                EventCategory: MediaEventType.SessionStart,
+                ContentType: MediaContentType.Video,
+                StreamType: MediaStreamType.Linear
+            });
+
+            window.mParticle.forwarder.common.mediaHeartbeat.trackSessionStartCalledWith.mediaObject.should.eql(
+                {
+                    name: 'Dancing Baby',
+                    mediaid: '5551212',
+                    length: 120,
+                    streamType: 'linear',
+                    mediaType: 'Video'
+                }
+            );
+
+            done();
+        });
+        it('should support Audiobooks', function(done) {
+            mParticle.forwarder.process({
+                ContentId: '5551212',
+                ContentTitle: 'Dancing Baby',
+                Duration: 120000,
+                EventDataType: MessageTypes.Media,
+                EventCategory: MediaEventType.SessionStart,
+                ContentType: MediaContentType.Audio,
+                StreamType: MediaStreamType.Audiobook
+            });
+
+            window.mParticle.forwarder.common.mediaHeartbeat.trackSessionStartCalledWith.mediaObject.should.eql(
+                {
+                    name: 'Dancing Baby',
+                    mediaid: '5551212',
+                    length: 120,
+                    streamType: 'Audiobook',
+                    mediaType: 'Audio'
+                }
+            );
+
+            done();
+        });
+        it('should support Podcasts', function(done) {
+            mParticle.forwarder.process({
+                ContentId: '5551212',
+                ContentTitle: 'Dancing Baby',
+                Duration: 120000,
+                EventDataType: MessageTypes.Media,
+                EventCategory: MediaEventType.SessionStart,
+                ContentType: MediaContentType.Audio,
+                StreamType: MediaStreamType.Podcast
+            });
+
+            window.mParticle.forwarder.common.mediaHeartbeat.trackSessionStartCalledWith.mediaObject.should.eql(
+                {
+                    name: 'Dancing Baby',
+                    mediaid: '5551212',
+                    length: 120,
+                    streamType: 'podcast',
+                    mediaType: 'Audio'
                 }
             );
 
