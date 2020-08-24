@@ -39,7 +39,10 @@ var mParticleAdobe = (function () {
 
     var StreamType = {
         LiveStream: 'LiveStream',
-        OnDemand: 'OnDemand'
+        OnDemand: 'OnDemand',
+        Linear: 'Linear',
+        Podcast: 'Podcast',
+        Audiobook: 'Audiobook'
     };
 
     function EventHandler(common) {
@@ -288,6 +291,12 @@ var mParticleAdobe = (function () {
                 return contentType === ContentType.Video ? types.VOD : types.AOD;
             case StreamType.LiveStream:
                 return types.LIVE;
+            case StreamType.Linear:
+                return types.LINEAR;
+            case StreamType.Podcast:
+                return types.PODCAST;
+            case StreamType.Audiobook:
+                return types.AUDIOBOOK;
             default:
                 // If it's an unknown type, just pass it through to Adobe
                 return streamType;
