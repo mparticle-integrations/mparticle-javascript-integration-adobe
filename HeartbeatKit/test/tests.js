@@ -599,7 +599,7 @@ describe('Adobe Heartbeat Forwarder', function() {
                     name: 'Dancing Baby',
                     mediaid: '5551212',
                     length: 120,
-                    streamType: 'Audiobook',
+                    streamType: 'audiobook',
                     mediaType: 'Audio'
                 }
             );
