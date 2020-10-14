@@ -12,7 +12,7 @@ var mParticleAdobe = (function () {
     var MediaEventType = {
         Play: 23,
         Pause: 24,
-        MediaContentEnd: 25,
+        ContentEnd: 25,
         SessionStart: 30,
         SessionEnd: 31,
         SeekStart: 32,
@@ -125,7 +125,7 @@ var mParticleAdobe = (function () {
                     customAttributes
                 );
                 break;
-            case MediaEventType.MediaContentEnd:
+            case MediaEventType.ContentEnd:
                 this.common.mediaHeartbeat.trackComplete();
                 break;
             case MediaEventType.SessionStart:
