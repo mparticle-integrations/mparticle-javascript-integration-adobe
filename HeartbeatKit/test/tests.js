@@ -18,7 +18,7 @@ describe('Adobe Heartbeat Forwarder', function() {
         MediaEventType = {
             Play: 23,
             Pause: 24,
-            MediaContentEnd: 25,
+            ContentEnd: 25,
             SessionStart: 30,
             SessionEnd: 31,
             SeekStart: 32,
@@ -599,7 +599,7 @@ describe('Adobe Heartbeat Forwarder', function() {
                     name: 'Dancing Baby',
                     mediaid: '5551212',
                     length: 120,
-                    streamType: 'Audiobook',
+                    streamType: 'audiobook',
                     mediaType: 'Audio'
                 }
             );
@@ -733,7 +733,7 @@ describe('Adobe Heartbeat Forwarder', function() {
         it('should handle Media Content End', function(done) {
             mParticle.forwarder.process({
                 EventDataType: MessageTypes.Media,
-                EventCategory: MediaEventType.MediaContentEnd
+                EventCategory: MediaEventType.ContentEnd
             });
 
             window.mParticle.forwarder.common.mediaHeartbeat.trackCompleteCalled.should.equal(
