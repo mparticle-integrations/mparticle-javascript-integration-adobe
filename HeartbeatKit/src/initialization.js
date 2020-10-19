@@ -1,6 +1,6 @@
 var Initialization = {
     name: 'AdobeHeartbeat',
-    moduleId: 128,
+    moduleId: 124,
     initForwarder: function(
         settings,
         testMode,
