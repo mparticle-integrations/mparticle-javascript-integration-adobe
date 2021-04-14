@@ -438,7 +438,7 @@ MockHttpRequest.prototype = {
  *
  * 5. Profit!
  */
-function MockHttpServer (handler) {
+export function MockHttpServer (handler) {
     if (handler) {
         this.handle = handler;
     }
