@@ -206,7 +206,7 @@ var constructor = function() {
             ? Math.floor(new Date().getTime() / 1000)
             : null;
         appMeasurement.events = '';
-        if (event.CustomFlags) {
+        if (event.CustomFlags && event.CustomFlags.hasOwnProperty(LINK_NAME)) {
             linkName = event.CustomFlags[LINK_NAME];
         }
 
