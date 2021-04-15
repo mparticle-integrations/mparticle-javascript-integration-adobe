@@ -98,18 +98,23 @@ var constructor = function() {
     }
 
     function finishAdobeInitialization() {
+        var visitorOptions = {};
+        if (settings.audienceManagerServer) {
+            visitorOptions.audienceManagerServer =
+                settings.audienceManagerServer;
+        }
         try {
             appMeasurement = s_gi(settings.reportSuiteIDs);
             if (settings.setGlobalObject === 'True') {
                 window.s = appMeasurement;
             }
             appMeasurement.visitor = Visitor.getInstance(
-                settings.organizationID
+                settings.organizationID,
+                visitorOptions
             );
 
             appMeasurement.trackingServer = settings.trackingServer;
-            appMeasurement.trackingServerSecure =
-                settings.trackingServerURLSecure;
+
             appMeasurement.trackDownloadLinks = true;
             appMeasurement.trackExternalLinks =
                 settings.trackExternalLinks === 'True';
@@ -125,7 +130,8 @@ var constructor = function() {
             // On first load, adobe will call the callback correctly if no MCID exists
             // On subsequent loads, it does not, so we need to manually call setMCIDOnIntegrationAttributes
             var mcID = Visitor.getInstance(
-                settings.organizationID
+                settings.organizationID,
+                visitorOptions
             ).getMarketingCloudVisitorID(setMarketingCloudId);
             if (mcID && mcID.length > 0) {
                 setMCIDOnIntegrationAttributes(mcID);

@@ -5,9 +5,10 @@ describe('AdobeServerSide Forwarder', function() {
     var server = new MockHttpServer(),
         MockVisitorInstance = function() {},
         Visitor = {
-            getInstance: function(orgId) {
+            getInstance: function(orgId, options) {
                 var instance = new MockVisitorInstance();
                 instance.orgId = orgId;
+                this.options = options;
                 instance.getInstanceCalled = true;
                 instance.getMarketingCloudVisitorID = function(cb) {
                     cb('MCID test');
@@ -79,6 +80,16 @@ describe('AdobeServerSide Forwarder', function() {
     test('should call setIntegrationAttribute properly', function(done) {
         expect(mParticle.getIntegrationAttributes(124).mid).toBe('MCID test');
         expect(mParticle._getIntegrationDelays()[124]).toBe(false);
+
+        done();
+    });
+
+    test('should initialize with a custom audience manager server if provided', function(done) {
+        var customDemDex = 'custom.demdex.net';
+
+        settings.audienceManagerServer = customDemDex;
+        mParticle.init('apikey', mParticle.config);
+        expect(Visitor.options.audienceManagerServer).toBe(customDemDex);
 
         done();
     });

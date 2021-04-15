@@ -47,9 +47,10 @@ describe('AdobeEventForwarder Forwarder', function () {
         },
 
         Visitor = {
-            getInstance: function(orgId) {
+            getInstance: function(orgId, options) {
                 var instance = new MockVisitorInstance;
                 instance.orgId = orgId;
+                this.options = options;
                 instance.getInstanceCalled = true;
                 instance.getMarketingCloudVisitorID = function(cb) {
                     cb('MCID test');
@@ -110,10 +111,11 @@ describe('AdobeEventForwarder Forwarder', function () {
 
     var settings;
 
-    function configureAdobeForwarderAndReInit(timestampOption, setGlobalObject, enablePageNamedBoolean) {
+    function configureAdobeForwarderAndReInit(timestampOption, setGlobalObject, enablePageNamedBoolean, audienceManagerServer) {
         settings.setGlobalObject = setGlobalObject;
         settings.timestampOption = timestampOption;
         settings.enablePageName = enablePageNamedBoolean || false;
+        settings.audienceManagerServer = audienceManagerServer;
 
         mParticle.config = {
             requestConfig: false,
@@ -509,6 +511,19 @@ describe('AdobeEventForwarder Forwarder', function () {
         configureAdobeForwarderAndReInit('optional', 'True', 'True');
         mParticle.logBaseEvent({ name: 'play event', messageType: 20, eventType: 23 });
         expect(window.trackPlayCalled).toBe(true);
+
+        done();
+    });
+
+    test('should initialize with a custom audience manager server if', function(done) {
+        var customDemDex = 'custom.demdex.net';
+        configureAdobeForwarderAndReInit(
+            'optional',
+            'True',
+            'True',
+            customDemDex
+        );
+        expect(Visitor.options.audienceManagerServer).toBe(customDemDex);
 
         done();
     });
