@@ -31,7 +31,9 @@ var name = 'Adobe',
         OptOut: 6,
         Commerce: 16,
         Media: 20
-    };
+    },
+    //Custom Flag Names
+    LINK_NAME = 'Adobe.LinkName';
 
 var constructor = function() {
     var self = this,
@@ -196,12 +198,17 @@ var constructor = function() {
     // after each event is sent to the server (either using t() for pageViews or tl() for non-pageview events), clearVars() is run to wipe out
     // any eVars, props, and hvars
     function processEvent(event) {
-        var reportEvent = false;
-        var linkTrackVars = [];
+        var linkName = null,
+            reportEvent = false,
+            linkTrackVars = [];
+
         appMeasurement.timestamp = timestampOption
             ? Math.floor(new Date().getTime() / 1000)
             : null;
         appMeasurement.events = '';
+        if (event.CustomFlags && event.CustomFlags.hasOwnProperty(LINK_NAME)) {
+            linkName = event.CustomFlags[LINK_NAME];
+        }
 
         if (isAdobeClientKitInitialized) {
             try {
@@ -218,7 +225,8 @@ var constructor = function() {
                     reportEvent = logEvent(
                         event,
                         linkTrackVars,
-                        eventMapping.matches
+                        eventMapping.matches,
+                        linkName
                     );
                 } else if (event.EventDataType === MessageType.PageView) {
                     setMappings(event, false);
@@ -227,7 +235,8 @@ var constructor = function() {
                     setMappings(event, true, linkTrackVars);
                     reportEvent = processCommerceTransaction(
                         event,
-                        linkTrackVars
+                        linkTrackVars,
+                        linkName
                     );
                 } else if (event.EventDataType === MessageType.Media) {
                     self.adobeMediaSDK.process(event);
@@ -248,7 +257,7 @@ var constructor = function() {
             }
         }
 
-        return "Can't send to forwarder " + name + ', not initialized.';
+        return 'Cannot send to forwarder ' + name + ', not initialized.';
     }
 
     function setMappings(event, includeTrackVars, linkTrackVars) {
@@ -265,7 +274,7 @@ var constructor = function() {
         }
     }
 
-    function processCommerceTransaction(event, linkTrackVars) {
+    function processCommerceTransaction(event, linkTrackVars, linkName) {
         if (
             event.EventCategory === mParticle.CommerceEventType.ProductPurchase
         ) {
@@ -298,7 +307,7 @@ var constructor = function() {
         linkTrackVars.push('products', 'events');
         setPageName(linkTrackVars);
         appMeasurement.linkTrackVars = linkTrackVars;
-        appMeasurement.tl(true, 'o', event.EventName);
+        appMeasurement.tl(true, 'o', linkName);
 
         appMeasurement.clearVars();
 
@@ -443,7 +452,7 @@ var constructor = function() {
         }
     }
 
-    function logEvent(event, linkTrackVars, mappingMatches) {
+    function logEvent(event, linkTrackVars, mappingMatches, linkName) {
         try {
             if (mappingMatches) {
                 mappingMatches.forEach(function(match) {
@@ -460,7 +469,8 @@ var constructor = function() {
                 setPageName(linkTrackVars);
 
                 appMeasurement.linkTrackVars = linkTrackVars;
-                appMeasurement.tl(true, 'o', event.EventName);
+
+                appMeasurement.tl(true, 'o', linkName);
                 appMeasurement.clearVars();
                 return true;
             } else {
@@ -587,7 +597,7 @@ var constructor = function() {
             }
         } else {
             return (
-                "Can't call setUserIdentity on forwarder " +
+                'Cannot call setUserIdentity on forwarder ' +
                 name +
                 ', not initialized'
             );
@@ -627,7 +637,7 @@ function register(config) {
 
     if (!isObject(config)) {
         window.console.log(
-            "'config' must be an object. You passed in a " + typeof config
+            '`config` must be an object. You passed in a ' + typeof config
         );
         return;
     }

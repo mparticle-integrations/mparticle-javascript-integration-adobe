@@ -74,13 +74,19 @@ describe('AdobeEventForwarder Forwarder', function () {
             this.trackCustomEventCalled = false;
             this.logPurchaseEventCalled = false;
             this.initializeCalled = false;
+            self.exitLinkBoolean = null;
+            self.linkType = null;
+            self.linkName = null;
 
             this.t = function() {
                 self.tCalled = true;
             };
 
-            this.tl = function() {
+            this.tl = function(exitLinkBoolean, linkType, linkName) {
                 self.tlCalled = true;
+                self.exitLinkBoolean = exitLinkBoolean;
+                self.linkType = linkType;
+                self.linkName = linkName;
             };
 
             this.clearVarsCalled = false;
@@ -338,6 +344,18 @@ describe('AdobeEventForwarder Forwarder', function () {
         done();
     });
 
+    test('should properly log linkName when custom flag is provided', function(done) {
+        var customFlags = {'Adobe.LinkName': 'testLinkName'};
+        mParticle.logEvent('Button 1', EventType.Navigation, {}, customFlags);
+
+        var appMeasurementInstance = s_gi('testReportSuiteId');
+        expect(appMeasurementInstance.tlCalled).toBe(true);
+
+        expect(appMeasurementInstance.linkName).toBe(customFlags['Adobe.LinkName']);
+
+        done();
+    });
+
     test('should log a product purchase with proper events, product merchandising events, and produdt incrementor events', function(done) {
         var product1 = mParticle.eCommerce.createProduct('nokia', '1234', 123, 1, null, null, null, null, null, {PI1: 'bob', PI2: 'tim', PM1: 'sneakers', PM2: 'shirt'});
         var product2 = mParticle.eCommerce.createProduct('apple', '2345', 234, 2, null, null, null, null, null, {PI1: 'Jones', PM2: 'abc', availability: true});
@@ -379,6 +397,22 @@ describe('AdobeEventForwarder Forwarder', function () {
 
         var appMeasurementInstance = s_gi('testReportSuiteId');
         expect(appMeasurementInstance.linkTrackVars.indexOf('pageName') >= 0).toBe(true);
+
+        done();
+    });
+
+    test('should log a commerce event with LinkName when custom flag is provided', function(done) {
+        var customFlags = { 'Adobe.LinkName': 'testLinkName' };
+        configureAdobeForwarderAndReInit('optional', 'True', 'True');
+
+        var product1 = mParticle.eCommerce.createProduct('nokia', '1234', 123, 1, null, null, null, null, null, {PI1: 'bob', PI2: 'tim', PM1: 'sneakers', PM2: 'shirt'});
+        var product2 = mParticle.eCommerce.createProduct('apple', '2345', 234, 2, null, null, null, null, null, {PI1: 'Jones', PM2: 'abc', availability: true});
+        var ta = mParticle.eCommerce.createTransactionAttributes('tID123', 'aff1', 'coupon', 456, 10, 5);
+
+        mParticle.eCommerce.logPurchase(ta, [product1, product2], true, {gender: 'male', color: 'blue', discount: 20}, customFlags);
+
+        var appMeasurementInstance = s_gi('testReportSuiteId');
+        expect(appMeasurementInstance.linkName).toBe(customFlags['Adobe.LinkName']);
 
         done();
     });
