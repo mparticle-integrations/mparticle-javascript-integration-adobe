@@ -33,7 +33,8 @@ var name = 'Adobe',
         Media: 20
     },
     //Custom Flag Names
-    LINK_NAME = 'Adobe.LinkName';
+    LINK_NAME = 'Adobe.LinkName',
+    PAGE_NAME = 'Adobe.PageName';
 
 var constructor = function() {
     var self = this,
@@ -198,7 +199,8 @@ var constructor = function() {
     // after each event is sent to the server (either using t() for pageViews or tl() for non-pageview events), clearVars() is run to wipe out
     // any eVars, props, and hvars
     function processEvent(event) {
-        var linkName = null,
+        var linkName,
+            pageName,
             reportEvent = false,
             linkTrackVars = [];
 
@@ -208,6 +210,9 @@ var constructor = function() {
         appMeasurement.events = '';
         if (event.CustomFlags && event.CustomFlags.hasOwnProperty(LINK_NAME)) {
             linkName = event.CustomFlags[LINK_NAME];
+        }
+        if (event.CustomFlags && event.CustomFlags.hasOwnProperty(PAGE_NAME)) {
+            pageName = event.CustomFlags[PAGE_NAME];
         }
 
         if (isAdobeClientKitInitialized) {
@@ -226,17 +231,19 @@ var constructor = function() {
                         event,
                         linkTrackVars,
                         eventMapping.matches,
-                        linkName
+                        linkName,
+                        pageName
                     );
                 } else if (event.EventDataType === MessageType.PageView) {
                     setMappings(event, false);
-                    reportEvent = logPageView(event);
+                    reportEvent = logPageView(event, pageName);
                 } else if (event.EventDataType === MessageType.Commerce) {
                     setMappings(event, true, linkTrackVars);
                     reportEvent = processCommerceTransaction(
                         event,
                         linkTrackVars,
-                        linkName
+                        linkName,
+                        pageName
                     );
                 } else if (event.EventDataType === MessageType.Media) {
                     self.adobeMediaSDK.process(event);
@@ -274,7 +281,12 @@ var constructor = function() {
         }
     }
 
-    function processCommerceTransaction(event, linkTrackVars, linkName) {
+    function processCommerceTransaction(
+        event,
+        linkTrackVars,
+        linkName,
+        pageName
+    ) {
         if (
             event.EventCategory === mParticle.CommerceEventType.ProductPurchase
         ) {
@@ -303,7 +315,7 @@ var constructor = function() {
         }
         appMeasurement.linkTrackEvents = appMeasurement.events || null;
         processProductsAndSetEvents(event, linkTrackVars);
-        appMeasurement.pageName = event.EventName || window.document.title;
+        appMeasurement.pageName = pageName || window.document.title;
         linkTrackVars.push('products', 'events');
         setPageName(linkTrackVars);
         appMeasurement.linkTrackVars = linkTrackVars;
@@ -440,9 +452,10 @@ var constructor = function() {
         }
     }
 
-    function logPageView(event) {
+    function logPageView(event, pageName) {
         try {
-            appMeasurement.pageName = event.EventName || undefined;
+            appMeasurement.pageName =
+                pageName || event.EventName || window.document.title;
             appMeasurement.t();
             appMeasurement.clearVars();
             return true;
@@ -452,7 +465,13 @@ var constructor = function() {
         }
     }
 
-    function logEvent(event, linkTrackVars, mappingMatches, linkName) {
+    function logEvent(
+        event,
+        linkTrackVars,
+        mappingMatches,
+        linkName,
+        pageName
+    ) {
         try {
             if (mappingMatches) {
                 mappingMatches.forEach(function(match) {
@@ -463,8 +482,7 @@ var constructor = function() {
                     }
                 });
                 appMeasurement.linkTrackEvents = appMeasurement.events;
-                appMeasurement.pageName =
-                    event.EventName || window.document.title;
+                appMeasurement.pageName = pageName || window.document.title;
                 linkTrackVars.push('events');
                 setPageName(linkTrackVars);
 

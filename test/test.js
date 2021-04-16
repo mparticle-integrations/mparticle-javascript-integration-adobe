@@ -288,11 +288,23 @@ describe('AdobeEventForwarder Forwarder', function () {
         done();
     });
 
+    test('should log page view with page name of custom flag if custom flag is passed in', function(done) {
+        var customFlags = { 'Adobe.PageName': 'test page name' };
+
+        mParticle.logPageView('log page view test', {}, customFlags);
+
+        var appMeasurementInstance = s_gi('testReportSuiteId');
+        expect(appMeasurementInstance.pageName).toBe('test page name');
+
+        done();
+    });
+
     test('should log an event when trying to log a mapped page view value', function(done) {
+        window.document.title = 'test';
         mParticle.logPageView('Find Ticket', {color: 'green', gender: 'female', c1: 'c1testValue', linkName: 'test'});
 
         var appMeasurementInstance = s_gi('testReportSuiteId');
-        expect(appMeasurementInstance.pageName).toBe('Find Ticket');
+        expect(appMeasurementInstance.pageName).toBe(window.document.title);
         expect(appMeasurementInstance.events).toBe('event1');
         expect(appMeasurementInstance.eVar1).toBe('green');
         expect(appMeasurementInstance.prop2).toBe('female');
@@ -321,6 +333,19 @@ describe('AdobeEventForwarder Forwarder', function () {
         var appMeasurementInstance = s_gi('testReportSuiteId');
 
         expect(appMeasurementInstance.linkTrackVars.indexOf('pageName') >= 0).toBe(true);
+
+        done();
+    });
+
+    test('should log an event with a page name of custom flag if custom flag is provided', function(done) {
+        var customFlags = { 'Adobe.PageName': 'test page name' };
+
+        configureAdobeForwarderAndReInit('optional', 'False', 'True');
+        mParticle.logPageView('Find Ticket', {color: 'green', gender: 'female', c1: 'c1testValue', linkName: 'test'}, customFlags);
+
+        var appMeasurementInstance = s_gi('testReportSuiteId');
+
+        expect(appMeasurementInstance.pageName).toBe('test page name');
 
         done();
     });
@@ -413,6 +438,40 @@ describe('AdobeEventForwarder Forwarder', function () {
 
         var appMeasurementInstance = s_gi('testReportSuiteId');
         expect(appMeasurementInstance.linkName).toBe(customFlags['Adobe.LinkName']);
+
+        done();
+    });
+
+    test('should log a commerce event with a specified PageName is custom flag is provided', function(done) {
+        var customFlags = { 'Adobe.PageName': 'test page name' };
+        configureAdobeForwarderAndReInit('optional', 'True', 'True');
+
+        var product1 = mParticle.eCommerce.createProduct('nokia', '1234', 123, 1, null, null, null, null, null, {PI1: 'bob', PI2: 'tim', PM1: 'sneakers', PM2: 'shirt'});
+        var product2 = mParticle.eCommerce.createProduct('apple', '2345', 234, 2, null, null, null, null, null, {PI1: 'Jones', PM2: 'abc', availability: true});
+        var ta = mParticle.eCommerce.createTransactionAttributes('tID123', 'aff1', 'coupon', 456, 10, 5);
+
+        mParticle.eCommerce.logPurchase(ta, [product1, product2], true, {gender: 'male', color: 'blue', discount: 20}, customFlags);
+
+        var appMeasurementInstance = s_gi('testReportSuiteId');
+        expect(appMeasurementInstance.pageName).toBe(customFlags['Adobe.PageName']);
+
+        done();
+    });
+
+    test('should log a commerce event the curent page name if no custom flag is provided', function(done) {
+        configureAdobeForwarderAndReInit('optional', 'True', 'True');
+
+        var product1 = mParticle.eCommerce.createProduct('nokia', '1234', 123, 1, null, null, null, null, null, {PI1: 'bob', PI2: 'tim', PM1: 'sneakers', PM2: 'shirt'});
+        var product2 = mParticle.eCommerce.createProduct('apple', '2345', 234, 2, null, null, null, null, null, {PI1: 'Jones', PM2: 'abc', availability: true});
+        var ta = mParticle.eCommerce.createTransactionAttributes('tID123', 'aff1', 'coupon', 456, 10, 5);
+
+        // in a jest testing environment, there is not title, so we will set one
+        window.document.title = 'test'
+        mParticle.eCommerce.logPurchase(ta, [product1, product2], true, {gender: 'male', color: 'blue', discount: 20});
+
+        var appMeasurementInstance = s_gi('testReportSuiteId');
+
+        expect(appMeasurementInstance.pageName).toBe(window.document.title);
 
         done();
     });
