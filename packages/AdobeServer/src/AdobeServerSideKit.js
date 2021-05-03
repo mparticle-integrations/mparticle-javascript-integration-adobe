@@ -37,8 +37,15 @@ var constructor = function() {
         try {
             // On first load, adobe will call the callback correctly if no MCID exists
             // On subsequent loads, it does not, so we need to manually call setMCIDOnIntegrationAttributes
+            var visitorOptions = {};
+            if (forwarderSettings.audienceManagerServer) {
+                visitorOptions.audienceManagerServer =
+                    forwarderSettings.audienceManagerServer;
+            }
+
             var mcID = Visitor.getInstance(
-                forwarderSettings.organizationID
+                forwarderSettings.organizationID,
+                visitorOptions
             ).getMarketingCloudVisitorID(setMarketingCloudId);
             if (mcID && mcID.length > 0) {
                 setMCIDOnIntegrationAttributes(mcID);

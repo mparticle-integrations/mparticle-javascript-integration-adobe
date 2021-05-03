@@ -7,7 +7,8 @@ const input = {
     server_cjs: 'packages/AdobeServer/dist/AdobeServerSideKit.esm.js',
     client_iife: 'packages/AdobeClient/dist/AdobeClientSideKit.esm.js',
     client_cjs: 'packages/AdobeClient/dist/AdobeClientSideKit.esm.js',
-    heartbeat: 'HeartbeatKit/src/index.js'
+    heartbeat_esm: 'HeartbeatKit/src/index.js',
+    heartbeat_iife: 'HeartbeatKit/src/index.js'
 };
 
 const outputOptions = {
@@ -52,13 +53,22 @@ const builds = {
         }
     },
     // creates heartbeat esm module kit that is consumed by adobe client and server kits
-    heartbeat: {
+    heartbeat_esm: {
         output: {
             ...outputOptions,
             exports: 'named',
             name: 'mpAdobeHBKit',
             file: './HeartbeatKit/dist/AdobeHBKit.esm.js',
             format: 'esm'
+        },
+        plugins: [commonjs()]
+    },
+    heartbeat_iife: {
+        output: {
+            ...outputOptions,
+            name: 'mpAdobeHBKit',
+            file: './HeartbeatKit/dist/AdobeHBKit.iife.js',
+            format: 'iife'
         },
         plugins: [commonjs()]
     }

@@ -99,7 +99,8 @@ describe('Adobe Heartbeat Forwarder', function() {
         this.visitor = {};
     };
     var MockVisitor = {
-        getInstance: function(organizationID) {
+        getInstance: function(organizationID, options) {
+            this.options = options;
             return { organizationID: organizationID };
         }
     };
@@ -327,7 +328,8 @@ describe('Adobe Heartbeat Forwarder', function() {
         var sdkSettings = {
             clientKey: '123456',
             appId: 'abcde',
-            userIdField: 'customerId'
+            userIdField: 'customerId',
+            audienceManagerServer: 'test.demdex.com'
         };
         // You may require userAttributes or userIdentities to be passed into initialization
         var userAttributes = {
@@ -355,6 +357,14 @@ describe('Adobe Heartbeat Forwarder', function() {
             userAttributes,
             userIdentities
         );
+    });
+
+    it('should register visitor instance with options', function(done) {
+        MockVisitor.options.audienceManagerServer.should.equal(
+            'test.demdex.com'
+        );
+
+        done();
     });
 
     it('should log a media event', function(done) {
