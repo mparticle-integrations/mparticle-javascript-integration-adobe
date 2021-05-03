@@ -372,8 +372,15 @@ var Initialization = {
         try {
             // Init App Measurement with Visitor
             var appMeasurement = new AppMeasurement(settings.reportSuiteIDs);
+            var visitorOptions = {};
+            if (settings.audienceManagerServer) {
+                visitorOptions.audienceManagerServer =
+                    settings.audienceManagerServer;
+            }
+
             appMeasurement.visitor = Visitor.getInstance(
-                settings.organizationID
+                settings.organizationID,
+                visitorOptions
             );
             appMeasurement.trackingServer = settings.trackingServer;
             appMeasurement.account = settings.reportSuiteIDs;
@@ -653,8 +660,15 @@ var constructor$1 = function() {
         try {
             // On first load, adobe will call the callback correctly if no MCID exists
             // On subsequent loads, it does not, so we need to manually call setMCIDOnIntegrationAttributes
+            var visitorOptions = {};
+            if (forwarderSettings.audienceManagerServer) {
+                visitorOptions.audienceManagerServer =
+                    forwarderSettings.audienceManagerServer;
+            }
+
             var mcID = Visitor.getInstance(
-                forwarderSettings.organizationID
+                forwarderSettings.organizationID,
+                visitorOptions
             ).getMarketingCloudVisitorID(setMarketingCloudId);
             if (mcID && mcID.length > 0) {
                 setMCIDOnIntegrationAttributes(mcID);
