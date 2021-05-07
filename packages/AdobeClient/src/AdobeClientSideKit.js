@@ -55,6 +55,7 @@ var constructor = function() {
     (self.adobeMediaSDK = new AdobeHbkConstructor()), (self.name = name);
 
     function initForwarder(forwarderSettings, service, testMode) {
+        // debugger;
         settings = forwarderSettings;
         reportingService = service;
         try {
@@ -323,7 +324,7 @@ var constructor = function() {
         processProductsAndSetEvents(event, linkTrackVars);
 
         linkTrackVars.push('products', 'events');
-        setPageName(linkTrackVars, appMeasurement);
+        setPageName(linkTrackVars, appMeasurement, pageName);
         appMeasurement.linkTrackVars = linkTrackVars;
         appMeasurement.tl(true, 'o', linkName);
 
@@ -488,9 +489,9 @@ var constructor = function() {
                     }
                 });
                 appMeasurement.linkTrackEvents = appMeasurement.events;
-                
+
                 linkTrackVars.push('events');
-                setPageName(linkTrackVars, appMeasurement);
+                setPageName(linkTrackVars, appMeasurement, pageName);
 
                 appMeasurement.linkTrackVars = linkTrackVars;
 
@@ -628,7 +629,7 @@ var constructor = function() {
         }
     }
 
-    function setPageName(linkTrackVars, appMeasurement) {
+    function setPageName(linkTrackVars, appMeasurement, pageName) {
         if (settings.enablePageName === 'True') {
             appMeasurement.pageName = pageName || window.document.title;
             linkTrackVars.push('pageName');
