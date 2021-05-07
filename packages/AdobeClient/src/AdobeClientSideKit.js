@@ -321,9 +321,9 @@ var constructor = function() {
         }
         appMeasurement.linkTrackEvents = appMeasurement.events || null;
         processProductsAndSetEvents(event, linkTrackVars);
-        appMeasurement.pageName = pageName || window.document.title;
+
         linkTrackVars.push('products', 'events');
-        setPageName(linkTrackVars);
+        setPageName(linkTrackVars, appMeasurement);
         appMeasurement.linkTrackVars = linkTrackVars;
         appMeasurement.tl(true, 'o', linkName);
 
@@ -488,9 +488,9 @@ var constructor = function() {
                     }
                 });
                 appMeasurement.linkTrackEvents = appMeasurement.events;
-                appMeasurement.pageName = pageName || window.document.title;
+                
                 linkTrackVars.push('events');
-                setPageName(linkTrackVars);
+                setPageName(linkTrackVars, appMeasurement);
 
                 appMeasurement.linkTrackVars = linkTrackVars;
 
@@ -628,8 +628,9 @@ var constructor = function() {
         }
     }
 
-    function setPageName(linkTrackVars) {
+    function setPageName(linkTrackVars, appMeasurement) {
         if (settings.enablePageName === 'True') {
+            appMeasurement.pageName = pageName || window.document.title;
             linkTrackVars.push('pageName');
         }
     }
