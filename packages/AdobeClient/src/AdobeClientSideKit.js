@@ -55,7 +55,6 @@ var constructor = function() {
     (self.adobeMediaSDK = new AdobeHbkConstructor()), (self.name = name);
 
     function initForwarder(forwarderSettings, service, testMode) {
-        // debugger;
         settings = forwarderSettings;
         reportingService = service;
         try {
