@@ -372,8 +372,15 @@ var Initialization = {
         try {
             // Init App Measurement with Visitor
             var appMeasurement = new AppMeasurement(settings.reportSuiteIDs);
+            var visitorOptions = {};
+            if (settings.audienceManagerServer) {
+                visitorOptions.audienceManagerServer =
+                    settings.audienceManagerServer;
+            }
+
             appMeasurement.visitor = Visitor.getInstance(
-                settings.organizationID
+                settings.organizationID,
+                visitorOptions
             );
             appMeasurement.trackingServer = settings.trackingServer;
             appMeasurement.account = settings.reportSuiteIDs;
