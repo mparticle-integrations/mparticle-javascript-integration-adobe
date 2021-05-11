@@ -302,6 +302,7 @@ describe('AdobeEventForwarder Forwarder', function () {
     });
 
     test('should log an event when trying to log a mapped page view value', function(done) {
+        configureAdobeForwarderAndReInit('notallowed', 'True', 'True');
         window.document.title = 'test';
         mParticle.logPageView('Find Ticket', {color: 'green', gender: 'female', c1: 'c1testValue', linkName: 'test'});
 
@@ -383,6 +384,36 @@ describe('AdobeEventForwarder Forwarder', function () {
         done();
     });
 
+    test('should log pageName if custom flag is provided and enablePageName boolean is "True"', function(done) {
+        configureAdobeForwarderAndReInit('optional', 'False', 'True');
+
+        var customFlags = { 'Adobe.PageName': 'test page name' };
+        mParticle.logEvent('Button 1', EventType.Navigation, {}, customFlags);
+
+        var appMeasurementInstance = s_gi('testReportSuiteId');
+        expect(appMeasurementInstance.tlCalled).toBe(true);
+
+        expect(appMeasurementInstance.pageName).toBe(
+            customFlags['Adobe.PageName']
+        );
+
+        done();
+    });
+
+    test('should not log pageName if custom flag is provided and enablePageName boolean is "False"', function(done) {
+        configureAdobeForwarderAndReInit('optional', 'False', 'False');
+
+        var customFlags = { 'Adobe.PageName': 'test page name' };
+        mParticle.logEvent('Button 1', EventType.Navigation, {}, customFlags);
+
+        var appMeasurementInstance = s_gi('testReportSuiteId');
+        expect(appMeasurementInstance.tlCalled).toBe(true);
+
+        expect(appMeasurementInstance.pageName).toBe(undefined);
+
+        done();
+    });
+
     test('should log a product purchase with proper events, product merchandising events, and produdt incrementor events', function(done) {
         var product1 = mParticle.eCommerce.createProduct('nokia', '1234', 123, 1, null, null, null, null, null, {PI1: 'bob', PI2: 'tim', PM1: 'sneakers', PM2: 'shirt'});
         var product2 = mParticle.eCommerce.createProduct('apple', '2345', 234, 2, null, null, null, null, null, {PI1: 'Jones', PM2: 'abc', availability: true});
@@ -428,6 +459,23 @@ describe('AdobeEventForwarder Forwarder', function () {
         done();
     });
 
+    test('should not log a product purchase wih pageName if there is a pageName but enabledPageName is false', function(done) {
+        var customFlags = { 'Adobe.PageName': 'test page name' };
+
+        configureAdobeForwarderAndReInit('optional', 'True', 'False');
+
+        var product1 = mParticle.eCommerce.createProduct('nokia', '1234', 123, 1, null, null, null, null, null, {PI1: 'bob', PI2: 'tim', PM1: 'sneakers', PM2: 'shirt'});
+        var product2 = mParticle.eCommerce.createProduct('apple', '2345', 234, 2, null, null, null, null, null, {PI1: 'Jones', PM2: 'abc', availability: true});
+        var ta = mParticle.eCommerce.createTransactionAttributes('tID123', 'aff1', 'coupon', 456, 10, 5);
+
+        mParticle.eCommerce.logPurchase(ta, [product1, product2], true, {gender: 'male', color: 'blue', discount: 20}, customFlags);
+
+        var appMeasurementInstance = s_gi('testReportSuiteId');
+        expect(appMeasurementInstance.pageName).toBe(undefined);
+
+        done();
+    });
+
     test('should log a commerce event with LinkName when custom flag is provided', function(done) {
         var customFlags = { 'Adobe.LinkName': 'testLinkName' };
         configureAdobeForwarderAndReInit('optional', 'True', 'True');
@@ -456,6 +504,22 @@ describe('AdobeEventForwarder Forwarder', function () {
 
         var appMeasurementInstance = s_gi('testReportSuiteId');
         expect(appMeasurementInstance.pageName).toBe(customFlags['Adobe.PageName']);
+
+        done();
+    });
+
+    test('should not log a commerce event with a specified PageName is custom flag is provided but enablePageName is false', function(done) {
+        var customFlags = { 'Adobe.PageName': 'test page name' };
+        configureAdobeForwarderAndReInit('optional', 'True', 'False');
+
+        var product1 = mParticle.eCommerce.createProduct('nokia', '1234', 123, 1, null, null, null, null, null, {PI1: 'bob', PI2: 'tim', PM1: 'sneakers', PM2: 'shirt'});
+        var product2 = mParticle.eCommerce.createProduct('apple', '2345', 234, 2, null, null, null, null, null, {PI1: 'Jones', PM2: 'abc', availability: true});
+        var ta = mParticle.eCommerce.createTransactionAttributes('tID123', 'aff1', 'coupon', 456, 10, 5);
+
+        mParticle.eCommerce.logPurchase(ta, [product1, product2], true, {gender: 'male', color: 'blue', discount: 20}, customFlags);
+
+        var appMeasurementInstance = s_gi('testReportSuiteId');
+        expect(appMeasurementInstance.pageName).toBe(undefined);
 
         done();
     });
