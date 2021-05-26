@@ -130,6 +130,7 @@ var constructor = function() {
 
             // On first load, adobe will call the callback correctly if no MCID exists
             // On subsequent loads, it does not, so we need to manually call setMCIDOnIntegrationAttributes
+            debugger;
             var mcID = Visitor.getInstance(
                 settings.organizationID,
                 visitorOptions
@@ -201,8 +202,11 @@ var constructor = function() {
         return null;
     }
 
-    // for each type of event, we run setMappings which sets the eVars, props, hvars, and contextData values
     // after each event is sent to the server (either using t() for pageViews or tl() for non-pageview events), clearVars() is run to wipe out
+    function resetVariables() {
+        appMeasurement.clearVars();
+        appMeasurement.contextData = {};
+    }
     // any eVars, props, and hvars
     function processEvent(event) {
         var linkName,
@@ -327,7 +331,7 @@ var constructor = function() {
         appMeasurement.linkTrackVars = linkTrackVars;
         appMeasurement.tl(true, 'o', linkName);
 
-        appMeasurement.clearVars();
+        resetVariables();
 
         return true;
     }
@@ -463,10 +467,10 @@ var constructor = function() {
             appMeasurement.pageName =
                 pageName || event.EventName || window.document.title;
             appMeasurement.t();
-            appMeasurement.clearVars();
+            resetVariables();
             return true;
         } catch (e) {
-            appMeasurement.clearVars();
+            resetVariables();
             return { error: 'logPageView not called, error ' + e };
         }
     }
@@ -495,16 +499,17 @@ var constructor = function() {
                 appMeasurement.linkTrackVars = linkTrackVars;
 
                 appMeasurement.tl(true, 'o', linkName);
-                appMeasurement.clearVars();
+                resetVariables();
                 return true;
             } else {
-                appMeasurement.clearVars();
+                resetVariables();
                 window.console.log(
                     'event name not mapped, aborting event logging'
                 );
+                return false;
             }
         } catch (e) {
-            appMeasurement.clearVars();
+            resetVariables();
             return { error: e };
         }
     }
