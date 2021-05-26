@@ -276,7 +276,6 @@ describe('AdobeEventForwarder Forwarder', function () {
 
     test('should log page view', function(done) {
         var appMeasurementInstance = s_gi('testReportSuiteId');
-
         var contextDataMock = {};
         // have to add a setter because appMeasurement.contextData is set to {} after each event is logged now, which removes it from appMeasurement
         Object.defineProperty(
