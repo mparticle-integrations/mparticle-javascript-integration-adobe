@@ -275,14 +275,26 @@ describe('AdobeEventForwarder Forwarder', function () {
     });
 
     test('should log page view', function(done) {
+        var appMeasurementInstance = s_gi('testReportSuiteId');
+        var contextDataMock = {};
+        // have to add a setter because appMeasurement.contextData is set to {} after each event is logged now, which removes it from appMeasurement
+        Object.defineProperty(
+            appMeasurementInstance.contextData,
+            'contextTestValue',
+            {
+                set: function(name) {
+                    contextDataMock['contextTestValue'] = name;
+                }
+            }
+        );
         mParticle.logPageView('log page view test', {color: 'green', gender: 'female', c1: 'c1testValue', linkName: 'test'});
 
-        var appMeasurementInstance = s_gi('testReportSuiteId');
         expect(appMeasurementInstance.pageName).toBe('log page view test');
         expect(appMeasurementInstance.eVar1).toBe('green');
         expect(appMeasurementInstance.prop2).toBe('female');
         expect(appMeasurementInstance.hier1).toBe('test');
-        expect(appMeasurementInstance.contextData.contextTestValue).toBe('c1testValue');
+        expect(contextDataMock.contextTestValue).toBe('c1testValue');
+        expect(appMeasurementInstance.contextData).toStrictEqual({});
         expect(appMeasurementInstance.tCalled).toBe(true);
         expect(appMeasurementInstance.tlCalled).toBe(false);
         expect(appMeasurementInstance.clearVarsCalled).toBe(true);
@@ -302,17 +314,25 @@ describe('AdobeEventForwarder Forwarder', function () {
     });
 
     test('should log an event when trying to log a mapped page view value', function(done) {
+        var appMeasurementInstance = s_gi('testReportSuiteId');
+        var contextDataMock = {};
+        // have to add a setter because appMeasurement.contextData is set to {} after each event is logged now, which removes it from appMeasurement
+        Object.defineProperty(appMeasurementInstance.contextData, 'contextTestValue', {
+            set: function(name) {
+                contextDataMock['contextTestValue'] = name;
+            }
+        });
+
         configureAdobeForwarderAndReInit('notallowed', 'True', 'True');
         window.document.title = 'test';
         mParticle.logPageView('Find Ticket', {color: 'green', gender: 'female', c1: 'c1testValue', linkName: 'test'});
-
-        var appMeasurementInstance = s_gi('testReportSuiteId');
         expect(appMeasurementInstance.pageName).toBe(window.document.title);
         expect(appMeasurementInstance.events).toBe('event1');
         expect(appMeasurementInstance.eVar1).toBe('green');
         expect(appMeasurementInstance.prop2).toBe('female');
         expect(appMeasurementInstance.hier1).toBe('test');
-        expect(appMeasurementInstance.contextData.contextTestValue).toBe('c1testValue');
+        expect(contextDataMock.contextTestValue).toBe('c1testValue');
+        expect(appMeasurementInstance.contextData).toStrictEqual({});
         expect(appMeasurementInstance.tlCalled).toBe(true);
         expect(appMeasurementInstance.tCalled).toBe(false);
         expect(appMeasurementInstance.clearVarsCalled).toBe(true);
@@ -532,7 +552,7 @@ describe('AdobeEventForwarder Forwarder', function () {
         var ta = mParticle.eCommerce.createTransactionAttributes('tID123', 'aff1', 'coupon', 456, 10, 5);
 
         // in a jest testing environment, there is not title, so we will set one
-        window.document.title = 'test'
+        window.document.title = 'test';
         mParticle.eCommerce.logPurchase(ta, [product1, product2], true, {gender: 'male', color: 'blue', discount: 20});
 
         var appMeasurementInstance = s_gi('testReportSuiteId');
