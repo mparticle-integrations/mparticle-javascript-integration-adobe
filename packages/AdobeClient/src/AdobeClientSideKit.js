@@ -201,6 +201,7 @@ var constructor = function() {
         return null;
     }
 
+    // for each type of event, we run setMappings which sets the eVars, props, hvars, and contextData values
     // after each event is sent to the server (either using t() for pageViews or tl() for non-pageview events), clearVars() is run to wipe out
     function resetVariables() {
         appMeasurement.clearVars();
