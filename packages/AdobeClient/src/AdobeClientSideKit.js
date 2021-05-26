@@ -130,7 +130,6 @@ var constructor = function() {
 
             // On first load, adobe will call the callback correctly if no MCID exists
             // On subsequent loads, it does not, so we need to manually call setMCIDOnIntegrationAttributes
-            debugger;
             var mcID = Visitor.getInstance(
                 settings.organizationID,
                 visitorOptions
