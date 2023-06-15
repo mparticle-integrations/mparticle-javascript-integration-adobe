@@ -1,4 +1,16 @@
 /* eslint-disable no-undef*/
+
+// If we are testing this in a node environemnt, we load the common.js Braze kit
+
+var AdobeServerSideInstance;
+if (typeof require !== 'undefined') {
+    AdobeServerSideInstance = require('../packages/AdobeServer/dist/AdobeServerSideKit.common');
+} else {
+    // we don't currently have an index.html file, but if we ever had one, this would pass
+    AdobeServerSideInstance = window.mParticleAdobe;
+}
+
+
 describe('AdobeServerSide Forwarder', function() {
     window.mParticle.isTestEnvironment = true;
 
@@ -39,6 +51,7 @@ describe('AdobeServerSide Forwarder', function() {
 
     beforeEach(function() {
         window.AppMeasurement = MockAppMeasurement;
+        window.mock = new MockVisitorInstance();
         window.Visitor = Visitor;
         window.ADB = {
             va: {
@@ -82,6 +95,24 @@ describe('AdobeServerSide Forwarder', function() {
         expect(mParticle._getIntegrationDelays()[124]).toBe(false);
 
         done();
+    });
+
+    it('should have a property of suffix', function() {
+        expect(window.mParticle.forwarder).toHaveProperty('suffix', 'Server');
+    });
+
+    it('should register a forwarder with version number onto a config', function() {
+        var config = {};
+        AdobeServerSideInstance.register(config);
+        expect(config).toHaveProperty('kits');
+        expect(config.kits).toHaveProperty('Adobe-Server');
+    });
+
+    it('should register a forwarder with version number onto a config with a kits key', function() {
+        var config = {kits: {}};
+        AdobeServerSideInstance.register(config);
+        expect(config).toHaveProperty('kits');
+        expect(config.kits).toHaveProperty('Adobe-Server');
     });
 
     test('should initialize with a custom audience manager server if provided', function(done) {
