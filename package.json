@@ -30,7 +30,7 @@
     "devDependencies": {
         "@babel/core": "^7.5.5",
         "@babel/preset-env": "^7.5.5",
-        "@mparticle/web-sdk": "^2.12.8",
+        "@mparticle/web-sdk": "^2.23.0",
         "babel-jest": "^24.9.0",
         "jest": "^24.9.0",
         "lerna": "^3.16.4",
