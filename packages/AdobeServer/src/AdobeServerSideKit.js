@@ -24,12 +24,14 @@ var MessageType = {
 };
 var name = 'Adobe',
     MARKETINGCLOUDIDKEY = 'mid',
-    ADOBEMODULENUMBER = 124;
+    ADOBEMODULENUMBER = 124,
+    suffix = 'Server';
 
 var constructor = function() {
     var self = this,
         isAdobeServerKitInitialized;
     self.name = name;
+    self.suffix = suffix;
     self.adobeMediaSDK = new AdobeHbkConstructor();
 
     function initForwarder(forwarderSettings, service, testMode) {
@@ -100,15 +102,18 @@ function getId() {
 if (window && window.mParticle && window.mParticle.addForwarder) {
     window.mParticle.addForwarder({
         name: name,
+        suffix: suffix,
         constructor: constructor,
         getId: getId
     });
 }
 
 function register(config) {
+    var forwarderNameWithSuffix = [name, suffix].join('-');
     if (!config) {
         window.console.log(
-            'You must pass a config object to register the kit ' + name
+            'You must pass a config object to register the kit ' +
+                forwarderNameWithSuffix
         );
         return;
     }
@@ -121,17 +126,19 @@ function register(config) {
     }
 
     if (isObject(config.kits)) {
-        config.kits[name] = {
+        config.kits[forwarderNameWithSuffix] = {
             constructor: constructor
         };
     } else {
         config.kits = {};
-        config.kits[name] = {
+        config.kits[forwarderNameWithSuffix] = {
             constructor: constructor
         };
     }
     window.console.log(
-        'Successfully registered ' + name + ' to your mParticle configuration'
+        'Successfully registered ' +
+            forwarderNameWithSuffix +
+            ' to your mParticle configuration'
     );
 }
 

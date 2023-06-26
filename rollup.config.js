@@ -20,7 +20,7 @@ const builds = {
     server_iife: {
         output: {
             ...outputOptions,
-            name: 'mParticleAdobe',
+            name: 'mParticleAdobeServer',
             file: 'packages/AdobeServer/dist/AdobeServerSideKit.iife.js',
             format: 'iife'
         }
@@ -29,7 +29,7 @@ const builds = {
     server_cjs: {
         output: {
             ...outputOptions,
-            name: 'mParticleAdobe',
+            name: 'mParticleAdobeServer',
             file: 'packages/AdobeServer/dist/AdobeServerSideKit.common.js',
             format: 'cjs'
         }
@@ -38,7 +38,7 @@ const builds = {
     client_iife: {
         output: {
             ...outputOptions,
-            name: 'mParticleAdobe',
+            name: 'mParticleAdobeClient',
             file: 'packages/AdobeClient/dist/AdobeClientSideKit.iife.js',
             format: 'iife'
         }
@@ -47,7 +47,7 @@ const builds = {
     client_cjs: {
         output: {
             ...outputOptions,
-            name: 'mParticleAdobe',
+            name: 'mParticleAdobeClient',
             file: 'packages/AdobeClient/dist/AdobeClientSideKit.common.js',
             format: 'cjs'
         }
